@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Clases personalizadas para el admin */
+@layer components {
+  .card {
+    @apply block bg-white border border-gray-200 rounded-2xl p-6 no-underline transition-all duration-200 ease-in-out hover:border-blue-500 hover:shadow-lg hover:-translate-y-1;
+  }
+
+  .card-title {
+    @apply flex items-center gap-3 mb-3;
+  }
+
+  .icon-badge {
+    @apply w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center;
+  }
+
+  .icon {
+    @apply w-6 h-6;
+  }
+
+  .big {
+    @apply text-xl font-semibold text-gray-900;
+  }
+
+  .muted {
+    @apply text-gray-600;
+  }
+
+  .sidebar-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all duration-200 text-gray-700 no-underline hover:bg-gray-100 hover:text-gray-900;
+  }
+
+  .sidebar-item.active {
+    @apply bg-blue-100 text-blue-700 font-semibold;
+  }
+
+  .autofit-220 {
+    @apply grid gap-6;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+/* Estilos para details/summary */
+details {
+  @apply transition-all duration-200;
+}
+
+details[open] {
+  @apply border-blue-500 shadow-sm;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary {
+  @apply list-none cursor-pointer;
+}
+
+/* Selección de texto */
+::selection {
+  @apply bg-blue-200;
+}
