@@ -1,6 +1,8 @@
-// app/protected/page.js
-import DashboardClient from "./DashboardClient";
+import { redirect } from "next/navigation";
 
-export default function DashboardPage() {
-    return <DashboardClient />;
+export const dynamic = "force-dynamic";
+
+export default function ProtectedIndex() {
+    redirect("/dashboard");
+    return null;
 }
