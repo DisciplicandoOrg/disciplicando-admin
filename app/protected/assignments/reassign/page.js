@@ -1,4 +1,4 @@
-// app/(protected)/assignments/reassign/page.js
+// app/protected/assignments/reassign/page.js
 import ReassignClient from "./ReassignClient";
 
 export default function ReassignPage() {

@@ -1,4 +1,4 @@
-// app/(protected)/layout.js
+// app/protected/layout.js
 import AdminLayoutClient from "../AdminLayoutClient";
 
 export default function ProtectedLayout({ children }) {
