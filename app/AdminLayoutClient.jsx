@@ -69,11 +69,11 @@ const Sidebar = ({ isOpen, onToggle, currentPath, onLogout }) => (
                     </SidebarItem>
 
                     <SidebarItem href="/users" icon={Users} active={currentPath === "/users"}>
-                        Usuarios
+                        Admin de Usuarios
                     </SidebarItem>
 
                     <SidebarItem href="/user-management" icon={UserPlus} active={currentPath === "/user-management"}>
-                        Gestión Usuarios
+                        Gestión de Usuarios
                     </SidebarItem>
 
                     <SidebarItem href="/assignments/reassign" icon={Shuffle} active={currentPath === "/assignments/reassign"}>
