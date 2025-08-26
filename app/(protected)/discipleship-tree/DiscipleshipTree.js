@@ -13,8 +13,11 @@ import {
 } from 'lucide-react';
 import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
 
+import { useLang } from "@/app/i18n";
+
 export default function DiscipleshipTree() {
     const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+    const { t } = useLang();
     const [users, setUsers] = useState([]);
     const [progress, setProgress] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -136,11 +139,9 @@ export default function DiscipleshipTree() {
 
         const getRoleLabel = (role) => {
             switch (role) {
-                case 'admin': return 'Admin';
-                case 'discipulador':
-                case 'disciplicador':
-                    return 'Disciplicador';
-                default: return 'Discípulo';
+                case 'admin': return t("admin");
+                case 'discipulador': return t("discipler");
+                default: return t("disciple");
             }
         };
 
@@ -178,14 +179,15 @@ export default function DiscipleshipTree() {
                     <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                             <span className="font-medium truncate">
-                                {user.name || 'Sin nombre'}
+                                {user.name || t("noName")}
                             </span>
                             <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
                                 {getRoleLabel(user.role)}
                             </span>
                             {hasChildren && (
                                 <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
-                                    {children.length} discípulo{children.length !== 1 ? 's' : ''}
+                                    {children.length} {children.length === 1 ? t("disciple_singular") : t("disciples_plural")}
+
                                 </span>
                             )}
                         </div>
@@ -238,7 +240,7 @@ export default function DiscipleshipTree() {
             <div className="flex items-center justify-center p-8">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-2 text-gray-600">Cargando árbol de discipulado...</p>
+                    <p className="mt-2 text-gray-600">{t("loadingTree")}...</p>
                 </div>
             </div>
         );
@@ -251,30 +253,32 @@ export default function DiscipleshipTree() {
                 <div className="flex items-center gap-3 mb-4">
                     <TreePine className="w-8 h-8 text-green-600" />
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Árbol de Discipulado</h1>
-                        <p className="text-gray-600">Vista jerárquica con progreso de lecciones</p>
+
+                        <h1 className="text-2xl font-bold text-gray-900">{t("discipleshipTreeTitle")}</h1>
+                        <p className="text-gray-600">{t("discipleshipTreeSubtitle")}</p>
+
                     </div>
                 </div>
 
                 {/* Leyenda MOVIDA ARRIBA */}
                 <div className="mb-4 p-4 bg-gray-50 rounded-lg border">
-                    <h3 className="text-sm font-medium text-gray-900 mb-2">Leyenda de Progreso:</h3>
+                    <h3 className="text-sm font-medium text-gray-900 mb-2">{t("progressLegend")}:</h3>
                     <div className="flex flex-wrap gap-4 text-xs">
                         <div className="flex items-center gap-2">
                             <div className="w-4 h-2 bg-green-500 rounded"></div>
-                            <span>80-100% Excelente</span>
+                            <span>80-100% {t("excellent")}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="w-4 h-2 bg-yellow-500 rounded"></div>
-                            <span>50-79% Bueno</span>
+                            <span>50-79% {t("good")}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="w-4 h-2 bg-orange-500 rounded"></div>
-                            <span>20-49% Regular</span>
+                            <span>20-49% {t("regular")}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="w-4 h-2 bg-red-500 rounded"></div>
-                            <span>0-19% Necesita Atención</span>
+                            <span>0-19% {t("needsAttention")}</span>
                         </div>
                     </div>
                 </div>
@@ -286,19 +290,19 @@ export default function DiscipleshipTree() {
                             onClick={expandAll}
                             className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
                         >
-                            Expandir Todo
+                            {t("expandAll")}"
                         </button>
                         <button
                             onClick={collapseAll}
                             className="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
                         >
-                            Colapsar Todo
+                            {t("collapsAll")}"
                         </button>
                     </div>
 
                     {/* Control de zoom */}
                     <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600">Zoom:</span>
+                        <span className="text-sm text-gray-600">{t("zoom")}:</span>
                         <input
                             type="range"
                             min="50"
@@ -314,15 +318,15 @@ export default function DiscipleshipTree() {
                     <div className="flex gap-4 text-sm">
                         <div className="flex items-center gap-1">
                             <Crown className="w-4 h-4 text-red-500" />
-                            <span>Admin</span>
+                            <span>{t("admin")}</span>
                         </div>
                         <div className="flex items-center gap-1">
                             <GraduationCap className="w-4 h-4 text-blue-500" />
-                            <span>Disciplicador</span>
+                            <span>{t("discipler")}</span>
                         </div>
                         <div className="flex items-center gap-1">
                             <User className="w-4 h-4 text-green-500" />
-                            <span>Discípulo</span>
+                            <span>{t("disciple")}</span>
                         </div>
                     </div>
                 </div>
@@ -360,7 +364,7 @@ export default function DiscipleshipTree() {
                         ) : (
                             <div className="text-center py-8 text-gray-500">
                                 <TreePine className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                                <p>No se encontraron discipuladores</p>
+                                <p>{t("noDisciplersFound")}</p>
                             </div>
                         )}
                     </div>

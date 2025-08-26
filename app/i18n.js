@@ -15,14 +15,14 @@ const M = {
         panel: "Panel de administración",
         home: "Inicio",
         dashboard: "Dashboard",
-        users: "Usuarios",
+        users: "Admin Usuarios",
         reassign: "Reasignar discípulo",
         series: "Series",
         reports: "Reportes",
         settings: "Configuración",
         discipleshipTree: "Árbol de Discipulado",
         userManagement: "Gestión de Usuarios",
-        logout: "Cerrar Sesión",
+        logout: "Salir",
 
         // Dashboard
         dashboardTitle: "Dashboard Dinámico",
@@ -73,6 +73,9 @@ const M = {
         noDisciplersFound: "No se encontraron disciplicadores",
         loading: "Cargando",
         loadingTree: "Cargando árbol de discipulado...",
+        // Adicionales para Árbol de Discipulado
+        discipler: "Disciplicador",
+        disciple: "Discípulo",
 
         // Usuarios
         users_title: "Gestión de Usuarios",
@@ -186,7 +189,7 @@ const M = {
         panel: "Admin Panel",
         home: "Home",
         dashboard: "Dashboard",
-        users: "Users",
+        users: "Admin Users",
         reassign: "Reassign disciple",
         series: "Series",
         reports: "Reports",
@@ -244,6 +247,9 @@ const M = {
         noDisciplersFound: "No disciplers found",
         loading: "Loading",
         loadingTree: "Loading discipleship tree...",
+        // Additional for Discipleship Tree
+        discipler: "Disciplyer",
+        disciple: "Disciple",
 
         // Users
         users_title: "User Management",

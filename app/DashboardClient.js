@@ -154,7 +154,7 @@ export default function DashboardClient() {
                             </div>
                             <div>
                                 <h1 className="text-3xl font-bold text-gray-900">{t("dashboardTitle")}</h1>
-                                <p className="text-gray-600">{t("dashboardSubtitle")}</p>
+                                <p className="text-gray-600">{t("panel")}</p>
                             </div>
                         </div>
 
@@ -193,9 +193,11 @@ export default function DashboardClient() {
                                 >
                                     <LogOut className={`w-4 h-4 ${loggingOut ? 'animate-pulse' : ''}`} />
                                     <span className="hidden sm:inline">
-                                        {loggingOut ? t("loggingOut") : t("exit")}
+                                        {loggingOut ? t("loading") : t("logout")}
                                     </span>
+
                                 </button>
+
                             </div>
                         </div>
                     </div>
@@ -203,6 +205,7 @@ export default function DashboardClient() {
 
                 {/* Métricas principales */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
                     <MetricCard
                         title={t("totalUsers")}
                         value={stats.totalUsers}
@@ -238,6 +241,7 @@ export default function DashboardClient() {
                         color="emerald"
                         loading={loading}
                     />
+
                 </div>
 
                 {/* Estado actual */}

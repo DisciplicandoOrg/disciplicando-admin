@@ -74,8 +74,8 @@ const Sidebar = ({ isOpen, onToggle, currentPath, onLogout, t }) => (
                     </SidebarItem>
 
                     <SidebarItem href="/user-management" icon={UserPlus} active={currentPath === "/user-management"}>
-                        {t("userManagement")}
                     </SidebarItem>
+                    {t("userManagement")}
 
                     <SidebarItem href="/assignments/reassign" icon={Shuffle} active={currentPath === "/assignments/reassign"}>
                         {t("reassign")}
