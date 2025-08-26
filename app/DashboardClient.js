@@ -4,19 +4,11 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
 import {
-    Users,
-    Shuffle,
-    BookOpenText,
-    BarChart3,
-    CheckCircle,
-    Star,
-    UserCheck,
-    RefreshCw,
-    LogOut,
-    Settings,
-    User,
-    TreePine,
-    UserPlus
+    Users, Search, ChevronRight, UserCheck, UserX,
+    ArrowRight, Check, X, AlertCircle, Loader2,
+    User, Mail, Phone, Calendar, Shield,
+    TreePine, UserPlus, BarChart3, BookOpenText,
+    RefreshCw, LogOut, CheckCircle, Star, Clock, Shuffle
 } from "lucide-react";
 
 const MetricCard = ({ title, value, subtitle, icon: Icon, color = "blue", loading = false }) => (
@@ -74,7 +66,7 @@ export default function DashboardClient() {
     const fetchData = async () => {
         try {
             setLoading(true);
-            console.log("🔄 NUEVO DASHBOARD - Cargando datos...");
+            console.log("🔄 DASHBOARD - Cargando datos...");
 
             // Obtener info del usuario actual
             const { data: { user: currentUser } } = await supabase.auth.getUser();
@@ -93,10 +85,31 @@ export default function DashboardClient() {
             console.log("✅ Datos obtenidos:", usersData);
 
             if (usersData) {
+                // Análisis de roles para debugging
+                const roleAnalysis = usersData.reduce((acc, user) => {
+                    const roleValue = user.role || 'null/undefined';
+                    acc[roleValue] = (acc[roleValue] || 0) + 1;
+                    return acc;
+                }, {});
+                console.log("📊 Análisis de roles:", roleAnalysis);
+
                 const newStats = {
                     totalUsers: usersData.length,
-                    discipuladores: usersData.filter(u => u.role === 'discipulador').length,
-                    discipulos: usersData.filter(u => u.role === 'discipulo').length,
+                    // CORREGIDO: Buscar "disciplicador" en español
+                    discipuladores: usersData.filter(u =>
+                        u.role === 'disciplicador' ||
+                        u.role === 'disciplicadora' ||
+                        u.role === 'discipulador' || // Por si hay typos
+                        u.role === 'discipuladora' || // Por si hay typos
+                        u.role === 'discipler' || // Por si hay algunos en inglés
+                        u.role === 'disciplyer'      // Por si hay algunos en inglés
+                    ).length,
+                    // CORREGIDO: Buscar "discipulo" en español
+                    discipulos: usersData.filter(u =>
+                        u.role === 'discipulo' ||
+                        u.role === 'disciple' ||
+                        !u.role  // Los que no tienen rol también son discípulos
+                    ).length,
                     admins: usersData.filter(u => u.role === 'admin').length,
                     approved: usersData.filter(u => u.approved === true).length,
                     pending: usersData.filter(u => u.approved !== true).length
