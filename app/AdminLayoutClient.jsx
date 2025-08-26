@@ -27,8 +27,9 @@ const SidebarItem = ({ href, icon: Icon, children, active = false }) => (
             : 'text-slate-700 hover:bg-slate-100'
             }`}
     >
-        <Icon className="w-5 h-5" />
-        <span>{children}</span>
+        <Icon className="w-5 h-5 flex-shrink-0" />
+        <span className="block truncate">{children}</span>
+
     </a>
 );
 
@@ -43,6 +44,7 @@ const Sidebar = ({ isOpen, onToggle, currentPath, onLogout, t }) => (
         )}
 
         {/* Sidebar */}
+
         <aside className={`
             fixed top-0 left-0 h-full w-64 bg-white border-r border-slate-200 z-50 transform transition-transform duration-300 ease-in-out
             ${isOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -74,8 +76,8 @@ const Sidebar = ({ isOpen, onToggle, currentPath, onLogout, t }) => (
                     </SidebarItem>
 
                     <SidebarItem href="/user-management" icon={UserPlus} active={currentPath === "/user-management"}>
+                        {t("userManagement")}
                     </SidebarItem>
-                    {t("userManagement")}
 
                     <SidebarItem href="/assignments/reassign" icon={Shuffle} active={currentPath === "/assignments/reassign"}>
                         {t("reassign")}
@@ -89,20 +91,22 @@ const Sidebar = ({ isOpen, onToggle, currentPath, onLogout, t }) => (
                         {t("reports")}
                     </SidebarItem>
 
-                    <div className="border-t border-slate-200 my-4"></div>
-
                     <SidebarItem href="/settings" icon={Settings} active={currentPath === "/settings"}>
                         {t("settings")}
                     </SidebarItem>
+
+                    <div className="border-t border-slate-200 my-4"></div>
 
                     <button
                         onClick={onLogout}
                         className="flex items-center gap-3 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 w-full text-left transition-colors"
                     >
-                        <LogOut className="w-5 h-5" />
-                        <span>{t("logout")}</span>
+                        <LogOut className="w-5 h-5 flex-shrink-0" />
+                        <span className="whitespace-nowrap">{t("logout")}</span>
                     </button>
                 </nav>
+
+
             </div>
         </aside>
     </>

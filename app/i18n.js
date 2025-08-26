@@ -21,7 +21,7 @@ const M = {
         reports: "Reportes",
         settings: "Configuración",
         discipleshipTree: "Árbol de Discipulado",
-        userManagement: "Gestión de Usuarios",
+        userManagement: "Gestión Usuarios",
         logout: "Salir",
 
         // Dashboard
@@ -195,7 +195,7 @@ const M = {
         reports: "Reports",
         settings: "Settings",
         discipleshipTree: "Discipleship Tree",
-        userManagement: "User Management",
+        userManagement: "Manage Users",
         logout: "Logout",
 
         // Dashboard
