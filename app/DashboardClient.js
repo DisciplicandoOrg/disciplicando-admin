@@ -15,7 +15,8 @@ import {
     LogOut,
     Settings,
     User,
-    TreePine
+    TreePine,
+    UserPlus
 } from "lucide-react";
 
 const MetricCard = ({ title, value, subtitle, icon: Icon, color = "blue", loading = false }) => (
@@ -207,7 +208,7 @@ export default function DashboardClient() {
                     />
 
                     <MetricCard
-                        title="Discipuladores"
+                        title="Disciplicadores"
                         value={stats.discipuladores}
                         subtitle="Líderes activos"
                         icon={UserCheck}
@@ -292,9 +293,9 @@ export default function DashboardClient() {
 
                         <a
                             href="/discipleship-tree"
-                            className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50"
+                            className="flex items-center gap-4 p-6 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50"
                         >
-                            <TreePine className="w-8 h-8 text-green-600" />
+                            <TreePine className="w-11 h-11 text-green-600" />
                             <div>
                                 <p className="font-medium">Árbol de Discipulado</p>
                                 <p className="text-sm text-gray-600">Vista jerárquica con progreso</p>
@@ -303,6 +304,17 @@ export default function DashboardClient() {
 
                         <a
                             href="/users"
+                            className="flex items-center gap-4 p-6 border-2 border-gray-200 rounded-lg hover:border-green-700 hover:bg-green-50"
+                        >
+                            <UserPlus className="w-8 h-8 text-green-800" />
+                            <div>
+                                <p className="font-medium">Usuarios</p>
+                                <p className="text-sm text-gray-600">Administrar Usuarios</p>
+                            </div>
+                        </a>
+
+                        <a
+                            href="/user-management"
                             className="group flex items-center gap-4 p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 hover:shadow-md"
                         >
                             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
