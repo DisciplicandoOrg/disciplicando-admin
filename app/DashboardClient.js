@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { useLang } from "@/app/i18n"; // Importar useLang
 import {
     Users, Search, ChevronRight, UserCheck, UserX,
     ArrowRight, Check, X, AlertCircle, Loader2,
@@ -50,6 +51,8 @@ const MetricCard = ({ title, value, subtitle, icon: Icon, color = "blue", loadin
 export default function DashboardClient() {
     const router = useRouter();
     const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+    const { t } = useLang(); // Obtener función de traducción
+
     const [stats, setStats] = useState({
         totalUsers: 0,
         discipuladores: 0,
@@ -85,30 +88,20 @@ export default function DashboardClient() {
             console.log("✅ Datos obtenidos:", usersData);
 
             if (usersData) {
-                // Análisis de roles para debugging
-                const roleAnalysis = usersData.reduce((acc, user) => {
-                    const roleValue = user.role || 'null/undefined';
-                    acc[roleValue] = (acc[roleValue] || 0) + 1;
-                    return acc;
-                }, {});
-                console.log("📊 Análisis de roles:", roleAnalysis);
-
                 const newStats = {
                     totalUsers: usersData.length,
-                    // CORREGIDO: Buscar "disciplicador" en español
                     discipuladores: usersData.filter(u =>
                         u.role === 'disciplicador' ||
                         u.role === 'disciplicadora' ||
-                        u.role === 'discipulador' || // Por si hay typos
-                        u.role === 'discipuladora' || // Por si hay typos
-                        u.role === 'discipler' || // Por si hay algunos en inglés
-                        u.role === 'disciplyer'      // Por si hay algunos en inglés
+                        u.role === 'discipulador' ||
+                        u.role === 'discipuladora' ||
+                        u.role === 'discipler' ||
+                        u.role === 'disciplyer'
                     ).length,
-                    // CORREGIDO: Buscar "discipulo" en español
                     discipulos: usersData.filter(u =>
                         u.role === 'discipulo' ||
                         u.role === 'disciple' ||
-                        !u.role  // Los que no tienen rol también son discípulos
+                        !u.role
                     ).length,
                     admins: usersData.filter(u => u.role === 'admin').length,
                     approved: usersData.filter(u => u.approved === true).length,
@@ -128,7 +121,7 @@ export default function DashboardClient() {
     };
 
     const handleLogout = async () => {
-        if (!confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+        if (!confirm(t('confirmLogout'))) {
             return;
         }
 
@@ -149,11 +142,10 @@ export default function DashboardClient() {
     }, [supabase]);
 
     return (
-        // Contenedor principal con márgenes y espaciado mejorado
         <div className="min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8 py-6">
             <div className="max-w-7xl mx-auto space-y-8">
 
-                {/* Header mejorado con usuario y logout */}
+                {/* Header */}
                 <div className="bg-white rounded-lg border shadow-sm p-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -161,8 +153,8 @@ export default function DashboardClient() {
                                 <span className="text-white font-bold text-lg">🚀</span>
                             </div>
                             <div>
-                                <h1 className="text-3xl font-bold text-gray-900">Dashboard Dinámico</h1>
-                                <p className="text-gray-600">Panel con datos reales de Disciplicando</p>
+                                <h1 className="text-3xl font-bold text-gray-900">{t("dashboardTitle")}</h1>
+                                <p className="text-gray-600">{t("dashboardSubtitle")}</p>
                             </div>
                         </div>
 
@@ -173,7 +165,7 @@ export default function DashboardClient() {
                                     <User className="w-4 h-4 text-blue-600" />
                                 </div>
                                 <div className="text-sm">
-                                    <p className="font-medium text-gray-900">Admin</p>
+                                    <p className="font-medium text-gray-900">{t("admin")}</p>
                                     <p className="text-gray-500">{user?.email}</p>
                                 </div>
                             </div>
@@ -181,7 +173,7 @@ export default function DashboardClient() {
                             {/* Controles */}
                             <div className="flex items-center gap-2">
                                 <div className="text-sm text-gray-500 hidden sm:block">
-                                    Actualizado: {lastUpdated.toLocaleTimeString()}
+                                    {t("updated")}: {lastUpdated.toLocaleTimeString()}
                                 </div>
 
                                 <button
@@ -190,18 +182,18 @@ export default function DashboardClient() {
                                     className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
                                 >
                                     <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                                    <span className="hidden sm:inline">Actualizar</span>
+                                    <span className="hidden sm:inline">{t("refresh")}</span>
                                 </button>
 
                                 <button
                                     onClick={handleLogout}
                                     disabled={loggingOut}
                                     className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
-                                    title="Cerrar sesión"
+                                    title={t("logout")}
                                 >
                                     <LogOut className={`w-4 h-4 ${loggingOut ? 'animate-pulse' : ''}`} />
                                     <span className="hidden sm:inline">
-                                        {loggingOut ? 'Saliendo...' : 'Salir'}
+                                        {loggingOut ? t("loggingOut") : t("exit")}
                                     </span>
                                 </button>
                             </div>
@@ -209,52 +201,52 @@ export default function DashboardClient() {
                     </div>
                 </div>
 
-                {/* Métricas principales con mejor espaciado */}
+                {/* Métricas principales */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <MetricCard
-                        title="Total Usuarios"
+                        title={t("totalUsers")}
                         value={stats.totalUsers}
-                        subtitle="Usuarios registrados"
+                        subtitle={t("registeredUsers")}
                         icon={Users}
                         color="blue"
                         loading={loading}
                     />
 
                     <MetricCard
-                        title="Disciplicadores"
+                        title={t("disciplers")}
                         value={stats.discipuladores}
-                        subtitle="Líderes activos"
+                        subtitle={t("activeLeaders")}
                         icon={UserCheck}
                         color="green"
                         loading={loading}
                     />
 
                     <MetricCard
-                        title="Discípulos"
+                        title={t("disciples")}
                         value={stats.discipulos}
-                        subtitle="En formación"
+                        subtitle={t("inTraining")}
                         icon={Users}
                         color="purple"
                         loading={loading}
                     />
 
                     <MetricCard
-                        title="Aprobados"
+                        title={t("approved")}
                         value={stats.approved}
-                        subtitle={`${stats.pending} pendientes`}
+                        subtitle={`${stats.pending} ${t("pending")}`}
                         icon={CheckCircle}
                         color="emerald"
                         loading={loading}
                     />
                 </div>
 
-                {/* Estado actual con gradiente mejorado */}
+                {/* Estado actual */}
                 <div className="bg-gradient-to-r from-blue-50 via-white to-green-50 rounded-lg border shadow-sm p-8">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-green-500 rounded-lg flex items-center justify-center">
                             <BarChart3 className="w-5 h-5 text-white" />
                         </div>
-                        <h3 className="text-xl font-semibold text-gray-900">Estado Actual del Sistema</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{t("systemStatus")}</h3>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -263,10 +255,10 @@ export default function DashboardClient() {
                                 <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                                     <Users className="w-4 h-4 text-blue-600" />
                                 </div>
-                                <p className="font-semibold text-blue-800">Total de Usuarios</p>
+                                <p className="font-semibold text-blue-800">{t("totalUsers")}</p>
                             </div>
                             <p className="text-3xl font-bold text-blue-600">{stats.totalUsers}</p>
-                            <p className="text-sm text-blue-600 mt-1">Registrados en la plataforma</p>
+                            <p className="text-sm text-blue-600 mt-1">{t("registeredInPlatform")}</p>
                         </div>
 
                         <div className="p-6 bg-white rounded-xl shadow-sm border">
@@ -274,10 +266,10 @@ export default function DashboardClient() {
                                 <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
                                     <span className="text-yellow-600 text-sm font-bold">⏳</span>
                                 </div>
-                                <p className="font-semibold text-yellow-800">Pendientes de Aprobación</p>
+                                <p className="font-semibold text-yellow-800">{t("pendingApproval")}</p>
                             </div>
                             <p className="text-3xl font-bold text-yellow-600">{stats.pending}</p>
-                            <p className="text-sm text-yellow-600 mt-1">Requieren atención</p>
+                            <p className="text-sm text-yellow-600 mt-1">{t("requireAttention")}</p>
                         </div>
 
                         <div className="p-6 bg-white rounded-xl shadow-sm border">
@@ -285,21 +277,21 @@ export default function DashboardClient() {
                                 <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
                                     <CheckCircle className="w-4 h-4 text-green-600" />
                                 </div>
-                                <p className="font-semibold text-green-800">Usuarios Aprobados</p>
+                                <p className="font-semibold text-green-800">{t("approvedUsers")}</p>
                             </div>
                             <p className="text-3xl font-bold text-green-600">{stats.approved}</p>
-                            <p className="text-sm text-green-600 mt-1">Listos para usar la app</p>
+                            <p className="text-sm text-green-600 mt-1">{t("readyToUse")}</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Enlaces rápidos mejorados */}
+                {/* Enlaces rápidos */}
                 <div className="bg-white rounded-lg border shadow-sm p-8">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
                             <span className="text-white text-lg">🔗</span>
                         </div>
-                        <h3 className="text-xl font-semibold text-gray-900">Acciones Rápidas</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{t("quickActions")}</h3>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -310,8 +302,8 @@ export default function DashboardClient() {
                         >
                             <TreePine className="w-11 h-11 text-green-600" />
                             <div>
-                                <p className="font-medium">Árbol de Discipulado</p>
-                                <p className="text-sm text-gray-600">Vista jerárquica con progreso</p>
+                                <p className="font-medium">{t("discipleshipTree")}</p>
+                                <p className="text-sm text-gray-600">{t("hierarchicalView")}</p>
                             </div>
                         </a>
 
@@ -321,8 +313,8 @@ export default function DashboardClient() {
                         >
                             <UserPlus className="w-8 h-8 text-green-800" />
                             <div>
-                                <p className="font-medium">Usuarios</p>
-                                <p className="text-sm text-gray-600">Administrar Usuarios</p>
+                                <p className="font-medium">{t("users")}</p>
+                                <p className="text-sm text-gray-600">{t("manageUsers")}</p>
                             </div>
                         </a>
 
@@ -334,8 +326,8 @@ export default function DashboardClient() {
                                 <Users className="w-6 h-6 text-blue-600" />
                             </div>
                             <div>
-                                <p className="font-semibold text-gray-900">Gestionar Usuarios</p>
-                                <p className="text-sm text-gray-600">Ver y aprobar usuarios</p>
+                                <p className="font-semibold text-gray-900">{t("userManagement")}</p>
+                                <p className="text-sm text-gray-600">{t("viewAndApprove")}</p>
                             </div>
                         </a>
 
@@ -347,8 +339,8 @@ export default function DashboardClient() {
                                 <Shuffle className="w-6 h-6 text-purple-600" />
                             </div>
                             <div>
-                                <p className="font-semibold text-gray-900">Reasignar</p>
-                                <p className="text-sm text-gray-600">Mover discípulos</p>
+                                <p className="font-semibold text-gray-900">{t("reassign")}</p>
+                                <p className="text-sm text-gray-600">{t("moveDisciples")}</p>
                             </div>
                         </a>
 
@@ -360,8 +352,8 @@ export default function DashboardClient() {
                                 <BookOpenText className="w-6 h-6 text-green-600" />
                             </div>
                             <div>
-                                <p className="font-semibold text-gray-900">Series</p>
-                                <p className="text-sm text-gray-600">Gestionar contenido</p>
+                                <p className="font-semibold text-gray-900">{t("series")}</p>
+                                <p className="text-sm text-gray-600">{t("manageContent")}</p>
                             </div>
                         </a>
 
@@ -373,20 +365,20 @@ export default function DashboardClient() {
                                 <BarChart3 className="w-6 h-6 text-orange-600" />
                             </div>
                             <div>
-                                <p className="font-semibold text-gray-900">Reportes</p>
-                                <p className="text-sm text-gray-600">Estadísticas</p>
+                                <p className="font-semibold text-gray-900">{t("reports")}</p>
+                                <p className="text-sm text-gray-600">{t("statistics")}</p>
                             </div>
                         </a>
 
                     </div>
                 </div>
 
-                {/* Footer con info adicional */}
+                {/* Footer */}
                 <div className="text-center py-4">
                     <p className="text-sm text-gray-500">
-                        Dashboard Dinámico - Disciplicando Admin Panel
+                        {t("dashboardTitle")} - {t("app_title")}
                         <span className="mx-2">•</span>
-                        Datos actualizados en tiempo real
+                        {t("updated")}: {new Date().toLocaleDateString()}
                     </p>
                 </div>
             </div>

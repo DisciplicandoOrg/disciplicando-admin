@@ -1,6 +1,12 @@
 // app/protected/layout.js
 import AdminLayoutClient from "../AdminLayoutClient";
 
+import { LangProvider } from "../i18n";
+
 export default function ProtectedLayout({ children }) {
-    return <AdminLayoutClient>{children}</AdminLayoutClient>;
+    return (
+        <LangProvider>
+            <AdminLayoutClient>{children}</AdminLayoutClient>
+        </LangProvider>
+    );
 }
