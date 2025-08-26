@@ -8,11 +8,13 @@ import {
     UserCheck, UserX, ChevronDown, ChevronRight
 } from "lucide-react";
 
+import { useLang } from "@/app/i18n";
+
 // Si tu campo de relación se llama distinto, cámbialo aquí:
 const DISCIPLER_FIELD = "discipler_id";
 
 // Modal de Progreso de Usuario
-const UserProgressModal = ({ user, isOpen, onClose, supabase }) => {
+const UserProgressModal = ({ user, isOpen, onClose, supabase, t }) => {
     const [loading, setLoading] = useState(false);
     const [progressData, setProgressData] = useState({
         series: [],
@@ -97,7 +99,7 @@ const UserProgressModal = ({ user, isOpen, onClose, supabase }) => {
                 <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
                     <div className="flex justify-between items-start">
                         <div>
-                            <h2 className="text-2xl font-bold mb-2">Progreso del Usuario</h2>
+                            <h2 className="text-2xl font-bold mb-2">{t("userProgress")}</h2>
                             <p className="text-blue-100">{user?.name || user?.email}</p>
                         </div>
                         <button
@@ -113,7 +115,7 @@ const UserProgressModal = ({ user, isOpen, onClose, supabase }) => {
                     {loading ? (
                         <div className="text-center py-12">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                            <p className="mt-4 text-gray-600">Cargando progreso...</p>
+                            <p className="mt-4 text-gray-600">{("loading")} progreso...</p>
                         </div>
                     ) : (
                         <div className="space-y-6">
@@ -122,7 +124,7 @@ const UserProgressModal = ({ user, isOpen, onClose, supabase }) => {
                                     <div className="flex items-center gap-3">
                                         <BookOpen className="w-8 h-8 text-blue-600" />
                                         <div>
-                                            <p className="text-sm text-gray-600">Lecciones</p>
+                                            <p className="text-sm text-gray-600">{t("lessons")}</p>
                                             <p className="text-xl font-bold">
                                                 {progressData.stats.completedLessons}/{progressData.stats.totalLessons}
                                             </p>
@@ -133,7 +135,7 @@ const UserProgressModal = ({ user, isOpen, onClose, supabase }) => {
                                     <div className="flex items-center gap-3">
                                         <CheckCircle className="w-8 h-8 text-green-600" />
                                         <div>
-                                            <p className="text-sm text-gray-600">Completado</p>
+                                            <p className="text-sm text-gray-600">{t("completed")}</p>
                                             <p className="text-xl font-bold">
                                                 {progressData.stats.totalLessons > 0
                                                     ? Math.round((progressData.stats.completedLessons / progressData.stats.totalLessons) * 100)
@@ -146,7 +148,7 @@ const UserProgressModal = ({ user, isOpen, onClose, supabase }) => {
                                     <div className="flex items-center gap-3">
                                         <Award className="w-8 h-8 text-purple-600" />
                                         <div>
-                                            <p className="text-sm text-gray-600">Quiz Promedio</p>
+                                            <p className="text-sm text-gray-600">{t("quizAverage")}</p>
                                             <p className="text-xl font-bold">
                                                 {Math.round(progressData.stats.averageQuizScore)}%
                                             </p>
@@ -157,7 +159,7 @@ const UserProgressModal = ({ user, isOpen, onClose, supabase }) => {
                                     <div className="flex items-center gap-3">
                                         <TrendingUp className="w-8 h-8 text-orange-600" />
                                         <div>
-                                            <p className="text-sm text-gray-600">Videos Vistos</p>
+                                            <p className="text-sm text-gray-600">{t("videosSeen")}</p>
                                             <p className="text-xl font-bold">
                                                 {progressData.stats.totalVideosWatched}
                                             </p>
@@ -167,7 +169,7 @@ const UserProgressModal = ({ user, isOpen, onClose, supabase }) => {
                             </div>
 
                             <div>
-                                <h3 className="text-lg font-semibold mb-4">Progreso por Series</h3>
+                                <h3 className="text-lg font-semibold mb-4">{t("userProgress")}</h3>
                                 {progressData.series.length > 0 ? (
                                     <div className="space-y-3">
                                         {progressData.series.map((serie) => {
@@ -195,7 +197,7 @@ const UserProgressModal = ({ user, isOpen, onClose, supabase }) => {
                                     </div>
                                 ) : (
                                     <p className="text-gray-500 text-center py-4">
-                                        No hay progreso registrado aún
+                                        {t("noProgress")}
                                     </p>
                                 )}
                             </div>
@@ -208,7 +210,7 @@ const UserProgressModal = ({ user, isOpen, onClose, supabase }) => {
 };
 
 // Modal de Edición de Usuario
-const EditUserModal = ({ user, isOpen, onClose, onSave, loading }) => {
+const EditUserModal = ({ user, isOpen, onClose, onSave, loading, t }) => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -238,7 +240,7 @@ const EditUserModal = ({ user, isOpen, onClose, onSave, loading }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold">Editar Usuario</h2>
+                    <h2 className="text-xl font-bold">{t("editUser")}</h2>
                     <button
                         onClick={onClose}
                         className="text-gray-500 hover:text-gray-700"
@@ -250,7 +252,7 @@ const EditUserModal = ({ user, isOpen, onClose, onSave, loading }) => {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Nombre
+                            {t("name")}
                         </label>
                         <input
                             type="text"
@@ -262,7 +264,7 @@ const EditUserModal = ({ user, isOpen, onClose, onSave, loading }) => {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Email
+                            {t("email")}
                         </label>
                         <input
                             type="email"
@@ -274,7 +276,7 @@ const EditUserModal = ({ user, isOpen, onClose, onSave, loading }) => {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Teléfono
+                            {t("phone")}
                         </label>
                         <input
                             type="tel"
@@ -286,16 +288,16 @@ const EditUserModal = ({ user, isOpen, onClose, onSave, loading }) => {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Rol
+                            {t("role")}
                         </label>
                         <select
                             value={formData.role}
                             onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                            <option value="disciple">Discípulo</option>
-                            <option value="disciplicador">Disciplicador</option>
-                            <option value="admin">Admin</option>
+                            <option value="disciple">{t("disciple")}</option>
+                            <option value="disciplicador">{t("discipler")}</option>
+                            <option value="admin">{t("admin")}</option>
                         </select>
                     </div>
 
@@ -305,7 +307,7 @@ const EditUserModal = ({ user, isOpen, onClose, onSave, loading }) => {
                             onClick={onClose}
                             className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
                         >
-                            Cancelar
+                            {t("cancel")}
                         </button>
                         <button
                             type="submit"
@@ -339,7 +341,7 @@ const Badge = ({ children, variant = "default" }) => {
 };
 
 // Tarjeta de Usuario
-function UserCard({ user, onEdit, onApprove, onReject, onViewProgress, onChangeRole, loading }) {
+function UserCard({ user, onEdit, onApprove, onReject, onViewProgress, onChangeRole, loading, t }) {
     const [isOpen, setIsOpen] = useState(false);
     const isPending = !user.approved; // Cambio: usar approved en lugar de status
 
@@ -396,8 +398,8 @@ function UserCard({ user, onEdit, onApprove, onReject, onViewProgress, onChangeR
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        {isPending && <Badge variant="pending">No Aprobado</Badge>}
-                        {user.approved && <Badge variant="approved">Aprobado</Badge>}
+                        {isPending && <Badge variant="pending">{t("notApproved")}</Badge>}
+                        {user.approved && <Badge variant="approved">{t("approved")}</Badge>}
                         <Badge variant={getRoleBadgeVariant(user.role)}>
                             {getRoleDisplay(user.role)}
                         </Badge>
@@ -430,13 +432,13 @@ function UserCard({ user, onEdit, onApprove, onReject, onViewProgress, onChangeR
                         {user.created_at && (
                             <div className="flex items-center gap-2 text-sm text-gray-600">
                                 <Clock className="w-4 h-4" />
-                                <span>Registrado: {new Date(user.created_at).toLocaleDateString('es-ES')}</span>
+                                <span>{t("registered")}: {new Date(user.created_at).toLocaleDateString('es-ES')}</span>
                             </div>
                         )}
                         {user.approved && user.approved_at && (
                             <div className="flex items-center gap-2 text-sm text-gray-600">
                                 <CheckCircle className="w-4 h-4" />
-                                <span>Aprobado: {new Date(user.approved_at).toLocaleDateString('es-ES')}</span>
+                                <span>{t("approvedOn")}: {new Date(user.approved_at).toLocaleDateString('es-ES')}</span>
                             </div>
                         )}
                     </div>
@@ -450,7 +452,7 @@ function UserCard({ user, onEdit, onApprove, onReject, onViewProgress, onChangeR
                                     className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-50"
                                 >
                                     <UserCheck className="w-4 h-4" />
-                                    Aprobar
+                                    {t("approve")}
                                 </button>
                                 <button
                                     onClick={() => onReject(user)}
@@ -458,7 +460,7 @@ function UserCard({ user, onEdit, onApprove, onReject, onViewProgress, onChangeR
                                     className="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-50"
                                 >
                                     <UserX className="w-4 h-4" />
-                                    Rechazar
+                                    {t("reject")}
                                 </button>
                             </>
                         )}
@@ -468,7 +470,7 @@ function UserCard({ user, onEdit, onApprove, onReject, onViewProgress, onChangeR
                             className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
                         >
                             <Edit2 className="w-4 h-4" />
-                            Editar
+                            {t("edit")}
                         </button>
 
                         <button
@@ -476,7 +478,7 @@ function UserCard({ user, onEdit, onApprove, onReject, onViewProgress, onChangeR
                             className="flex items-center gap-1 px-3 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700"
                         >
                             <TrendingUp className="w-4 h-4" />
-                            Ver Progreso
+                            {t("viewProgress")}
                         </button>
 
                         {user.role !== 'admin' && (
@@ -486,9 +488,9 @@ function UserCard({ user, onEdit, onApprove, onReject, onViewProgress, onChangeR
                                 disabled={loading}
                                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                             >
-                                <option value="discipulo">Discípulo</option>
-                                <option value="discipulador">Discipulador</option>
-                                <option value="admin">Admin</option>
+                                <option value="discipulo">{t("disciple")}</option>
+                                <option value="discipulador">{t("discipler")}</option>
+                                <option value="admin">{t("admin")}</option>
                             </select>
                         )}
                     </div>
@@ -499,7 +501,7 @@ function UserCard({ user, onEdit, onApprove, onReject, onViewProgress, onChangeR
 }
 
 // Vista de Árbol
-function TreeView({ leaders, childrenMap, onEdit, onViewProgress, onApprove, onReject, onChangeRole, loading }) {
+function TreeView({ leaders, childrenMap, onEdit, onViewProgress, onApprove, onReject, onChangeRole, loading, t }) {
     const [open, setOpen] = useState({});
 
     return (
@@ -588,6 +590,7 @@ function TreeView({ leaders, childrenMap, onEdit, onViewProgress, onApprove, onR
 
 export default function UsersClient() {
     const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+    const { t } = useLang();
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const [users, setUsers] = useState([]);
@@ -811,32 +814,32 @@ export default function UsersClient() {
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-3xl font-bold text-gray-900">Administrador de Usuarios</h1>
-                <p className="text-gray-600 mt-1">Administra usuarios, roles y permisos</p>
+                <h1 className="text-3xl font-bold text-gray-900">{t("users_title")}</h1>
+                <p className="text-gray-600 mt-1">{t("users_subtitle")}</p>
             </div>
 
             {/* Estadísticas */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <p className="text-sm text-gray-600">Total</p>
+                    <p className="text-sm text-gray-600">{t("total")}</p>
                     <p className="text-2xl font-bold">{counts.total}</p>
                 </div>
                 {counts.pending > 0 && (
                     <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-                        <p className="text-sm text-yellow-800">Pendientes</p>
+                        <p className="text-sm text-yellow-800">{t("pending")}</p>
                         <p className="text-2xl font-bold text-yellow-900">{counts.pending}</p>
                     </div>
                 )}
                 <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                    <p className="text-sm text-purple-800">Admins</p>
+                    <p className="text-sm text-purple-800">{t("admins")}</p>
                     <p className="text-2xl font-bold text-purple-900">{counts.admins}</p>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                    <p className="text-sm text-blue-800">Disciplicadores</p>
+                    <p className="text-sm text-blue-800">{t("disciplers")}</p>
                     <p className="text-2xl font-bold text-blue-900">{counts.disciplicadores}</p>
                 </div>
                 <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                    <p className="text-sm text-green-800">Discípulos</p>
+                    <p className="text-sm text-green-800">{t("disciples")}</p>
                     <p className="text-2xl font-bold text-green-900">{counts.disciples}</p>
                 </div>
             </div>
@@ -845,7 +848,7 @@ export default function UsersClient() {
             <div className="flex flex-col md:flex-row gap-4">
                 <input
                     type="text"
-                    placeholder="Buscar por nombre, username, email, teléfono..."
+                    placeholder={t("searchPlaceholder")}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -855,30 +858,31 @@ export default function UsersClient() {
                     onChange={(e) => setFilter(e.target.value)}
                     className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                    <option value="all">Todos</option>
-                    <option value="pending">No Aprobados</option>
-                    <option value="approved">Aprobados</option>
-                    <option value="admins">Solo Admins</option>
-                    <option value="disciplicadores">Solo Disciplicadores</option>
-                    <option value="disciples">Solo Discípulos</option>
+                    <option value="all">{t("filterAll")}</option>
+                    <option value="pending">{t("filterPending")}</option>
+                    <option value="approved">{t("filterApproved")}</option>
+                    <option value="admins">{t("filterAdmins")}</option>
+                    <option value="disciplicadores">{t("filterDisciplers")}</option>
+                    <option value="disciples">{t("filterDisciples")}</option>
                 </select>
             </div>
 
             {/* Lista de usuarios */}
             <div className="space-y-4">
-                <h2 className="text-xl font-semibold">Lista de Usuarios</h2>
+                <h2 className="text-xl font-semibold">{t("usersList")}</h2>
                 {loading ? (
                     <div className="text-center py-8">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                        <p className="mt-4 text-gray-600">Cargando usuarios...</p>
+                        <p className="mt-4 text-gray-600">{t("loadingUsers")}</p>
                     </div>
                 ) : filtered.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
-                        No se encontraron usuarios
+                        {t("noUsersFound")}
                     </div>
                 ) : (
                     <div className="space-y-3">
                         {filtered.map((user) => (
+
                             <UserCard
                                 key={user.id}
                                 user={user}
@@ -888,7 +892,9 @@ export default function UsersClient() {
                                 onViewProgress={handleViewProgress}
                                 onChangeRole={handleChangeRole}
                                 loading={actionLoading}
+                                t={t}
                             />
+
                         ))}
                     </div>
                 )}
@@ -904,6 +910,7 @@ export default function UsersClient() {
                 }}
                 onSave={handleSaveEdit}
                 loading={actionLoading}
+                t={t}
             />
 
             <UserProgressModal
@@ -914,6 +921,7 @@ export default function UsersClient() {
                     setSelectedUser(null);
                 }}
                 supabase={supabase}
+                t={t}
             />
         </div>
     );
