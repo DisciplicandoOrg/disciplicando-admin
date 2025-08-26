@@ -79,7 +79,9 @@ export default function DiscipleshipTree() {
 
         // Encontrar raíces (discipuladores sin discipler_id o con discipler_id que no existe)
         const roots = users.filter(user =>
-            user.role === 'discipulador' || user.role === 'admin'
+            user.role === 'discipulador' ||
+            user.role === 'disciplicador' ||
+            user.role === 'admin'
         ).filter(user =>
             !user.discipler_id || !userMap.has(user.discipler_id)
         );
@@ -125,7 +127,9 @@ export default function DiscipleshipTree() {
         const getRoleIcon = (role) => {
             switch (role) {
                 case 'admin': return <Crown className="w-4 h-4 text-red-500" />;
-                case 'discipulador': return <GraduationCap className="w-4 h-4 text-blue-500" />;
+                case 'discipulador':
+                case 'disciplicador':
+                    return <GraduationCap className="w-4 h-4 text-blue-500" />;
                 default: return <User className="w-4 h-4 text-green-500" />;
             }
         };
@@ -133,7 +137,9 @@ export default function DiscipleshipTree() {
         const getRoleLabel = (role) => {
             switch (role) {
                 case 'admin': return 'Admin';
-                case 'discipulador': return 'Discipulador';
+                case 'discipulador':
+                case 'disciplicador':
+                    return 'Disciplicador';
                 default: return 'Discípulo';
             }
         };
@@ -169,7 +175,7 @@ export default function DiscipleshipTree() {
                     {getRoleIcon(user.role)}
 
                     {/* Información del usuario */}
-                    <div className="flex-1 min-w-0">
+                    <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                             <span className="font-medium truncate">
                                 {user.name || 'Sin nombre'}
@@ -250,6 +256,29 @@ export default function DiscipleshipTree() {
                     </div>
                 </div>
 
+                {/* Leyenda MOVIDA ARRIBA */}
+                <div className="mb-4 p-4 bg-gray-50 rounded-lg border">
+                    <h3 className="text-sm font-medium text-gray-900 mb-2">Leyenda de Progreso:</h3>
+                    <div className="flex flex-wrap gap-4 text-xs">
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-2 bg-green-500 rounded"></div>
+                            <span>80-100% Excelente</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-2 bg-yellow-500 rounded"></div>
+                            <span>50-79% Bueno</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-2 bg-orange-500 rounded"></div>
+                            <span>20-49% Regular</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-2 bg-red-500 rounded"></div>
+                            <span>0-19% Necesita Atención</span>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Controles */}
                 <div className="flex flex-wrap items-center gap-4">
                     <div className="flex gap-2">
@@ -281,7 +310,7 @@ export default function DiscipleshipTree() {
                         <span className="text-sm text-gray-600 w-10">{zoom}%</span>
                     </div>
 
-                    {/* Estadísticas */}
+                    {/* Estadísticas de roles */}
                     <div className="flex gap-4 text-sm">
                         <div className="flex items-center gap-1">
                             <Crown className="w-4 h-4 text-red-500" />
@@ -289,7 +318,7 @@ export default function DiscipleshipTree() {
                         </div>
                         <div className="flex items-center gap-1">
                             <GraduationCap className="w-4 h-4 text-blue-500" />
-                            <span>Discipulador</span>
+                            <span>Disciplicador</span>
                         </div>
                         <div className="flex items-center gap-1">
                             <User className="w-4 h-4 text-green-500" />
@@ -299,55 +328,41 @@ export default function DiscipleshipTree() {
                 </div>
             </div>
 
-            {/* Árbol */}
-            <div
-                className="bg-white rounded-lg border shadow-sm p-4 overflow-auto"
-                style={{
-                    transform: `scale(${zoom / 100})`,
-                    transformOrigin: 'top left',
-                    maxHeight: '70vh'
-                }}
-            >
-                {tree.roots.length > 0 ? (
-                    <div className="space-y-2">
-                        {tree.roots
-                            .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
-                            .map(root => (
-                                <TreeNode
-                                    key={root.uuid}
-                                    user={root}
-                                    level={0}
-                                    childrenMap={tree.childrenMap}
-                                />
-                            ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-8 text-gray-500">
-                        <TreePine className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                        <p>No se encontraron discipuladores</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Leyenda */}
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-900 mb-2">Leyenda de Progreso:</h3>
-                <div className="flex flex-wrap gap-4 text-xs">
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-2 bg-green-500 rounded"></div>
-                        <span>80-100% Excelente</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-2 bg-yellow-500 rounded"></div>
-                        <span>50-79% Bueno</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-2 bg-orange-500 rounded"></div>
-                        <span>20-49% Regular</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-2 bg-red-500 rounded"></div>
-                        <span>0-19% Necesita Atención</span>
+            {/* Árbol con contenedor que se ajusta al zoom */}
+            <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+                <div
+                    className="p-4 overflow-auto"
+                    style={{
+                        maxHeight: '70vh',
+                        minHeight: '400px'
+                    }}
+                >
+                    <div
+                        style={{
+                            transform: `scale(${zoom / 100})`,
+                            transformOrigin: 'top left',
+                            width: `${100 * (100 / zoom)}%` // Ajusta el ancho para compensar el scale
+                        }}
+                    >
+                        {tree.roots.length > 0 ? (
+                            <div className="space-y-2">
+                                {tree.roots
+                                    .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+                                    .map(root => (
+                                        <TreeNode
+                                            key={root.uuid}
+                                            user={root}
+                                            level={0}
+                                            childrenMap={tree.childrenMap}
+                                        />
+                                    ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 text-gray-500">
+                                <TreePine className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                                <p>No se encontraron discipuladores</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
