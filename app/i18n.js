@@ -251,6 +251,17 @@ const M = {
         createdAt: "Creado",
         updatedAt: "Actualizado",
 
+        // Configuración - Sesión
+        sessionSettings: "Configuración de Sesión",
+        sessionTimeout: "Tiempo de sesión",
+        inactivityTimeout: "Tiempo de inactividad (minutos)",
+        inactivityTimeoutDesc: "Cerrar sesión automáticamente después de este tiempo sin actividad",
+        maxSessionTime: "Duración máxima de sesión (horas)",
+        maxSessionTimeDesc: "Tiempo máximo que una sesión puede estar activa",
+        warningTime: "Aviso antes de cerrar (minutos)",
+        warningTimeDesc: "Mostrar advertencia antes de cerrar sesión automáticamente",
+        sessionNote: "Nota: Estos ajustes son locales. Para cambios permanentes, configurar JWT en Supabase.",
+
         // Confirmaciones
         confirmLogout: "¿Estás seguro de que quieres cerrar sesión?",
         confirmDelete: "¿Estás seguro de eliminar este elemento?",
@@ -504,6 +515,17 @@ const M = {
         createdAt: "Created",
         updatedAt: "Updated",
 
+        // Settings - Session
+        sessionSettings: "Session Settings",
+        sessionTimeout: "Session Timeout",
+        inactivityTimeout: "Inactivity timeout (minutes)",
+        inactivityTimeoutDesc: "Automatically logout after this time without activity",
+        maxSessionTime: "Maximum session duration (hours)",
+        maxSessionTimeDesc: "Maximum time a session can be active",
+        warningTime: "Warning before logout (minutes)",
+        warningTimeDesc: "Show warning before automatic logout",
+        sessionNote: "Note: These settings are local. For permanent changes, configure JWT in Supabase.",
+
         // Confirmations
         confirmLogout: "Are you sure you want to logout?",
         confirmDelete: "Are you sure you want to delete this item?",
@@ -517,16 +539,23 @@ export function LangProvider({ children }) {
     const [lang, setLangState] = useState("es");
 
     useEffect(() => {
-        // Carga preferencia guardada o detecta por navegador
+        // Primero intenta obtener el idioma guardado del login o admin
         const stored = typeof window !== "undefined" ? localStorage.getItem("admin_lang") : null;
+
         if (stored === "en" || stored === "es") {
+            // Si hay un idioma guardado, úsalo
             setLangState(stored);
         } else {
-            const guess =
-                typeof navigator !== "undefined" && navigator.language?.toLowerCase().startsWith("en")
-                    ? "en"
-                    : "es";
-            setLangState(guess);
+            // Si no hay idioma guardado, detecta por navegador
+            const browserLang = typeof navigator !== "undefined" &&
+                navigator.language?.toLowerCase().startsWith("en") ? "en" : "es";
+
+            // Guarda el idioma detectado
+            if (typeof window !== "undefined") {
+                localStorage.setItem("admin_lang", browserLang);
+            }
+
+            setLangState(browserLang);
         }
     }, []);
 

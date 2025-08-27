@@ -47,7 +47,7 @@ export default function LoginPage() {
         },
         en: {
             title: "Sign In",
-            subtitle: "Disciplicando Administration Panel",
+            subtitle: "Disciplying Administration Panel",
             email: "Email address",
             password: "Password",
             login: "Sign In",
@@ -71,9 +71,17 @@ export default function LoginPage() {
     const t = texts[language];
 
     useEffect(() => {
-        // Detectar idioma guardado
-        const savedLang = localStorage.getItem('disciplicando-language') || 'es';
-        setLanguage(savedLang);
+        // Usar el mismo key que el admin para sincronizar
+        const savedLang = localStorage.getItem('admin_lang');
+
+        if (savedLang === 'en' || savedLang === 'es') {
+            setLanguage(savedLang);
+        } else {
+            // Si no hay idioma guardado, detectar del navegador
+            const browserLang = navigator.language?.toLowerCase().startsWith('en') ? 'en' : 'es';
+            setLanguage(browserLang);
+            localStorage.setItem('admin_lang', browserLang);
+        }
 
         // Verificar si ya está autenticado
         const checkAuth = async () => {
@@ -106,7 +114,8 @@ export default function LoginPage() {
     const handleLanguageToggle = () => {
         const newLang = language === 'es' ? 'en' : 'es';
         setLanguage(newLang);
-        localStorage.setItem('disciplicando-language', newLang);
+        // Usar el mismo key para sincronizar con el admin
+        localStorage.setItem('admin_lang', newLang);
     };
 
     const handleSubmit = async (e) => {
@@ -145,6 +154,9 @@ export default function LoginPage() {
                     setError(t.notAdmin);
                     return;
                 }
+
+                // Guardar el idioma actual para usarlo en el admin
+                localStorage.setItem('admin_lang', language);
 
                 // Paso 3: Éxito - redirigir al dashboard
                 router.push('/');

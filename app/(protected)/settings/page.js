@@ -1,5 +1,6 @@
 "use client"
 
+import { useLang } from "@/app/i18n";
 import React, { useState, useEffect } from "react";
 import {
     Settings, Shield, Database, Globe, Bell, Mail,
@@ -109,6 +110,15 @@ export default function ConfigPage() {
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
 
+    const { t } = useLang();
+
+    // Estado para configuración de sesión
+    const [sessionConfig, setSessionConfig] = useState({
+        inactivityTimeout: 30, // minutos
+        maxSessionTime: 8, // horas
+        warningTime: 5, // minutos antes
+    });
+
     // Estados de configuración
     const [config, setConfig] = useState({
         // General
@@ -144,6 +154,20 @@ export default function ConfigPage() {
         logoUrl: "/logo-admin.png"
     });
 
+    // Cargar configuración guardada al iniciar
+    useEffect(() => {
+        const savedConfig = localStorage.getItem('app_config');
+        if (savedConfig) {
+            setConfig(JSON.parse(savedConfig));
+        }
+
+        const savedSessionConfig = localStorage.getItem('session_config');
+        if (savedSessionConfig) {
+            setSessionConfig(JSON.parse(savedSessionConfig));
+        }
+    }, []);
+
+
     const sections = [
         {
             id: "general", label: "General", icon: Settings,
@@ -153,6 +177,14 @@ export default function ConfigPage() {
             id: "security", label: "Seguridad", icon: Shield,
             desc: "Control de acceso, autenticación, políticas de contraseñas y permisos"
         },
+
+        {
+            id: "session",
+            label: t("sessionTimeout"),
+            icon: Clock,
+            desc: t("sessionSettings")
+        },
+
         {
             id: "database", label: "Base de Datos", icon: Database,
             desc: "Respaldos automáticos, mantenimiento y optimización de datos"
@@ -173,6 +205,13 @@ export default function ConfigPage() {
 
     const handleSave = async () => {
         setSaving(true);
+
+        // Guardar configuración general
+        localStorage.setItem('app_config', JSON.stringify(config));
+
+        // Guardar configuración de sesión
+        localStorage.setItem('session_config', JSON.stringify(sessionConfig));
+
         // Simular guardado
         await new Promise(resolve => setTimeout(resolve, 1500));
         setSaving(false);
@@ -340,6 +379,109 @@ export default function ConfigPage() {
                             <li>• <strong>Disciplicador:</strong> Gestiona sus discípulos</li>
                             <li>• <strong>Discípulo:</strong> Solo ve su progreso</li>
                         </ul>
+                    </div>
+                </div>
+            </Card>
+        </div>
+    );
+
+    const renderSessionSection = () => (
+        <div className="space-y-6">
+            <div>
+                <h3 className="text-lg font-semibold mb-4">{t("sessionSettings")}</h3>
+                <p className="text-gray-600 mb-6">
+                    {t("sessionSettings")}
+                </p>
+            </div>
+
+            <Card className="p-6">
+                <h4 className="font-medium mb-4 flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    {t("sessionTimeout")}
+                </h4>
+
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-2">
+                            {t("inactivityTimeout")}
+                        </label>
+                        <div className="flex items-center gap-3">
+                            <Input
+                                type="number"
+                                value={sessionConfig.inactivityTimeout}
+                                onChange={(e) => setSessionConfig({
+                                    ...sessionConfig,
+                                    inactivityTimeout: parseInt(e.target.value)
+                                })}
+                                min="5"
+                                max="120"
+                                className="w-24"
+                            />
+                            <span className="text-sm text-gray-500">minutos</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                            {t("inactivityTimeoutDesc")}
+                        </p>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-2">
+                            {t("maxSessionTime")}
+                        </label>
+                        <div className="flex items-center gap-3">
+                            <Input
+                                type="number"
+                                value={sessionConfig.maxSessionTime}
+                                onChange={(e) => setSessionConfig({
+                                    ...sessionConfig,
+                                    maxSessionTime: parseInt(e.target.value)
+                                })}
+                                min="1"
+                                max="24"
+                                className="w-24"
+                            />
+                            <span className="text-sm text-gray-500">horas</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                            {t("maxSessionTimeDesc")}
+                        </p>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-2">
+                            {t("warningTime")}
+                        </label>
+                        <div className="flex items-center gap-3">
+                            <Input
+                                type="number"
+                                value={sessionConfig.warningTime}
+                                onChange={(e) => setSessionConfig({
+                                    ...sessionConfig,
+                                    warningTime: parseInt(e.target.value)
+                                })}
+                                min="1"
+                                max="15"
+                                className="w-24"
+                            />
+                            <span className="text-sm text-gray-500">minutos</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                            {t("warningTimeDesc")}
+                        </p>
+                    </div>
+                </div>
+            </Card>
+
+            <Card className="p-4 bg-amber-50 border-amber-200">
+                <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
+                    <div>
+                        <p className="text-sm text-amber-700">
+                            {t("sessionNote")}
+                        </p>
+                        <p className="text-xs text-amber-600 mt-2">
+                            <strong>Supabase Dashboard → Settings → Auth → JWT Expiry</strong>
+                        </p>
                     </div>
                 </div>
             </Card>
@@ -649,6 +791,7 @@ export default function ConfigPage() {
             case "notifications": return renderNotificationsSection();
             case "communications": return renderCommunicationsSection();
             case "appearance": return renderAppearanceSection();
+            case "session": return renderSessionSection();
             default: return renderGeneralSection();
         }
     };
@@ -676,8 +819,8 @@ export default function ConfigPage() {
                                             key={section.id}
                                             onClick={() => setActiveSection(section.id)}
                                             className={`w-full text-left px-3 py-2 rounded-md transition-colors flex items-center gap-3 ${activeSection === section.id
-                                                    ? 'bg-blue-50 text-blue-600'
-                                                    : 'hover:bg-gray-50'
+                                                ? 'bg-blue-50 text-blue-600'
+                                                : 'hover:bg-gray-50'
                                                 }`}
                                         >
                                             <Icon className="w-5 h-5" />
