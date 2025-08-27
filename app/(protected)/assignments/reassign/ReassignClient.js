@@ -7,6 +7,8 @@ import {
     ArrowRight, Check, X, AlertCircle, Loader2,
     User, Mail, Phone, Calendar, Shield
 } from "lucide-react";
+import { useLang } from "@/app/i18n";
+
 
 // Componente de Badge
 const Badge = ({ children, variant = "default" }) => {
@@ -54,7 +56,7 @@ const DiscipleCard = ({ disciple, isDragging, onDragStart, onDragEnd }) => {
 };
 
 // Componente de Disciplicador (drop zone)
-const DisciplerZone = ({ discipler, disciples, onDrop, isDragOver, onDragOver, onDragLeave, isExpanded, onToggle }) => {
+const DisciplerZone = ({ discipler, disciples, onDrop, isDragOver, onDragOver, onDragLeave, isExpanded, onToggle, t }) => {
     const isLeader = discipler.role === 'discipulador' || discipler.role === 'discipuladora' ||
         discipler.role === 'discipler' || discipler.role === 'admin';
 
@@ -84,17 +86,17 @@ const DisciplerZone = ({ discipler, disciples, onDrop, isDragOver, onDragOver, o
                         </div>
                         <div>
                             <h3 className="font-semibold text-gray-900">
-                                {discipler.name || discipler.username || 'Sin nombre'}
+                                {discipler.name || discipler.username || t("noName")}
                             </h3>
                             <p className="text-sm text-gray-500">{discipler.email}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
                         <Badge variant={discipler.role === 'admin' ? 'admin' : 'disciplicador'}>
-                            {discipler.role === 'admin' ? 'Admin' : 'Disciplicador'}
+                            {discipler.role === 'admin' ? t("admin") : t("discipler")}
                         </Badge>
                         <Badge variant="default">
-                            {disciples.length} {disciples.length === 1 ? 'discípulo' : 'discípulos'}
+                            {disciples.length} {disciples.length === 1 ? t("disciple_singular") : t("disciples_plural")}
                         </Badge>
                     </div>
                 </div>
@@ -106,10 +108,10 @@ const DisciplerZone = ({ discipler, disciples, onDrop, isDragOver, onDragOver, o
                     {disciples.length === 0 ? (
                         <div className="text-center py-8 text-gray-400">
                             <UserX className="w-12 h-12 mx-auto mb-2" />
-                            <p className="text-sm">Sin discípulos asignados</p>
+                            <p className="text-sm">{t("withoutAssigned")}</p>
                             {isDragOver && (
                                 <p className="text-sm text-blue-600 mt-2">
-                                    Suelta aquí para asignar
+                                    {t("dropHereToAssign")}
                                 </p>
                             )}
                         </div>
@@ -133,7 +135,7 @@ const DisciplerZone = ({ discipler, disciples, onDrop, isDragOver, onDragOver, o
 };
 
 // Modal de confirmación
-const ConfirmModal = ({ isOpen, onClose, onConfirm, disciple, fromDiscipler, toDiscipler, loading }) => {
+const ConfirmModal = ({ isOpen, onClose, onConfirm, disciple, fromDiscipler, toDiscipler, loading, t }) => {
     if (!isOpen) return null;
 
     return (
@@ -143,12 +145,12 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, disciple, fromDiscipler, toD
                     <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
                         <AlertCircle className="w-6 h-6 text-yellow-600" />
                     </div>
-                    <h2 className="text-xl font-bold">Confirmar Reasignación</h2>
+                    <h2 className="text-xl font-bold">{t("confirmReassignment")}</h2>
                 </div>
 
                 <div className="space-y-4 mb-6">
                     <p className="text-gray-600">
-                        ¿Estás seguro de que quieres reasignar a:
+                        {t("confirmReassignText")}
                     </p>
 
                     <div className="bg-gray-50 rounded-lg p-3">
@@ -158,12 +160,12 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, disciple, fromDiscipler, toD
 
                     <div className="flex items-center gap-3">
                         <div className="flex-1">
-                            <p className="text-xs text-gray-500 mb-1">De:</p>
+                            <p className="text-xs text-gray-500 mb-1">{t("from")}:</p>
                             <p className="font-medium">{fromDiscipler?.name || 'Sin asignar'}</p>
                         </div>
                         <ArrowRight className="w-5 h-5 text-gray-400" />
                         <div className="flex-1">
-                            <p className="text-xs text-gray-500 mb-1">A:</p>
+                            <p className="text-xs text-gray-500 mb-1">{t("to")}:</p>
                             <p className="font-medium">{toDiscipler?.name}</p>
                         </div>
                     </div>
@@ -175,7 +177,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, disciple, fromDiscipler, toD
                         disabled={loading}
                         className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50"
                     >
-                        Cancelar
+                        {t("cancel")}
                     </button>
                     <button
                         onClick={onConfirm}
@@ -185,12 +187,12 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, disciple, fromDiscipler, toD
                         {loading ? (
                             <>
                                 <Loader2 className="w-4 h-4 animate-spin" />
-                                Reasignando...
+                                {t("reassigning")}
                             </>
                         ) : (
                             <>
                                 <Check className="w-4 h-4" />
-                                Confirmar
+                                {t("confirm")}
                             </>
                         )}
                     </button>
@@ -216,6 +218,8 @@ export default function ReassignClient() {
         fromDiscipler: null,
         toDiscipler: null
     });
+
+    const { t } = useLang();
 
     // Cargar usuarios
     useEffect(() => {
@@ -416,30 +420,30 @@ export default function ReassignClient() {
         <div className="p-6 space-y-6 max-w-7xl mx-auto">
             {/* Header */}
             <div>
-                <h1 className="text-3xl font-bold text-gray-900">Reasignar Discípulos</h1>
+                <h1 className="text-3xl font-bold text-gray-900">{t("reassignDisciples")}</h1>
                 <p className="text-gray-600 mt-1">
-                    Arrastra y suelta discípulos entre disciplicadores para reasignarlos
+                    {t("reassignSubtitle")}
                 </p>
             </div>
 
             {/* Estadísticas */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <p className="text-sm text-gray-600">Disciplicadores</p>
+                    <p className="text-sm text-gray-600">{t("disciplers")}</p>
                     <p className="text-2xl font-bold">{disciplers.length}</p>
                 </div>
                 <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <p className="text-sm text-gray-600">Discípulos Asignados</p>
+                    <p className="text-sm text-gray-600">{t("assigned")}</p>
                     <p className="text-2xl font-bold">
                         {users.filter(u => u.discipler_id && !isLeaderRole(u.role)).length}
                     </p>
                 </div>
                 <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <p className="text-sm text-gray-600">Sin Asignar</p>
+                    <p className="text-sm text-gray-600">{t("withoutAssigned")}</p>
                     <p className="text-2xl font-bold">{unassignedDisciples.length}</p>
                 </div>
                 <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <p className="text-sm text-gray-600">Total Usuarios</p>
+                    <p className="text-sm text-gray-600">{t("totalUsers")}</p>
                     <p className="text-2xl font-bold">{users.length}</p>
                 </div>
             </div>
@@ -449,7 +453,7 @@ export default function ReassignClient() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                     type="text"
-                    placeholder="Buscar discípulos por nombre o email..."
+                    placeholder={t("searchDisciples")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -460,7 +464,7 @@ export default function ReassignClient() {
             {unassignedDisciples.length > 0 && (
                 <div className="bg-yellow-50 rounded-xl border-2 border-yellow-200 p-4">
                     <h2 className="text-lg font-semibold text-yellow-900 mb-3">
-                        Discípulos Sin Asignar ({unassignedDisciples.length})
+                        {t("withoutAssigned")} ({unassignedDisciples.length})
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                         {unassignedDisciples.map((disciple) => (
@@ -478,11 +482,11 @@ export default function ReassignClient() {
 
             {/* Lista de disciplicadores */}
             <div className="space-y-4">
-                <h2 className="text-xl font-semibold">Disciplicadores y sus Discípulos</h2>
+                <h2 className="text-xl font-semibold">{t("disciplersWithDisciples")}</h2>
                 {disciplers.length === 0 ? (
                     <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
                         <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-500">No hay disciplicadores disponibles</p>
+                        <p className="text-gray-500">{t("noDisciplersAvailable")}</p>
                     </div>
                 ) : (
                     <div className="space-y-4">
@@ -497,6 +501,7 @@ export default function ReassignClient() {
                                 onDragLeave={handleDragLeave}
                                 isExpanded={expandedDisciplers[discipler.id]}
                                 onToggle={toggleDiscipler}
+                                t={t}
                             />
                         ))}
                     </div>
@@ -512,6 +517,7 @@ export default function ReassignClient() {
                 fromDiscipler={confirmModal.fromDiscipler}
                 toDiscipler={confirmModal.toDiscipler}
                 loading={saving}
+                t={t}
             />
         </div>
     );

@@ -196,6 +196,23 @@ const M = {
         tip4: "Importación masiva:",
         tip4Text: "Para agregar muchos usuarios a la vez, usa la opción de importar desde CSV con formato: nombre, email, teléfono, rol.",
 
+        // Reassign (Reasignar)
+        reassignDisciples: "Reasignar Discípulos",
+        reassignSubtitle: "Arrastra y suelta discípulos entre disciplicadores para reasignarlos",
+        dragAndDrop: "Arrastra y suelta para reasignar",
+        withoutAssigned: "Sin Asignar",
+        confirmReassignment: "Confirmar Reasignación",
+        confirmReassignText: "¿Estás seguro de que quieres reasignar a:",
+        from: "De",
+        to: "A",
+        confirming: "Confirmando...",
+        reassigning: "Reasignando...",
+        disciplersWithDisciples: "Disciplicadores y sus Discípulos",
+        noDisciplersAvailable: "No hay disciplicadores disponibles",
+        dropHereToAssign: "Suelta aquí para asignar",
+        searchDisciples: "Buscar discípulos por nombre o email...",
+        assigned: "Asignados",
+
         // Series
         seriesTitle: "Series de Estudio",
         seriesSubtitle: "Gestiona las series, bloques y lecciones",
@@ -459,6 +476,23 @@ const M = {
         tip3Text: "You can create users without assigning a discipler immediately and do it later in 'Reassign'.",
         tip4: "Bulk import:",
         tip4Text: "To add many users at once, use the import from CSV option with format: name, email, phone, role.",
+
+        // Reassign
+        reassignDisciples: "Reassign Disciples",
+        reassignSubtitle: "Drag and drop disciples between disciplers to reassign them",
+        dragAndDrop: "Drag and drop to reassign",
+        withoutAssigned: "Unassigned",
+        confirmReassignment: "Confirm Reassignment",
+        confirmReassignText: "Are you sure you want to reassign:",
+        from: "From",
+        to: "To",
+        confirming: "Confirming...",
+        reassigning: "Reassigning...",
+        disciplersWithDisciples: "Disciplers and their Disciples",
+        noDisciplersAvailable: "No disciplers available",
+        dropHereToAssign: "Drop here to assign",
+        searchDisciples: "Search disciples by name or email...",
+        assigned: "Assigned",
 
         // Series
         seriesTitle: "Study Series",
