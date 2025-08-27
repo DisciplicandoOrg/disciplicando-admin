@@ -115,7 +115,7 @@ const UserProgressModal = ({ user, isOpen, onClose, supabase, t }) => {
                     {loading ? (
                         <div className="text-center py-12">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                            <p className="mt-4 text-gray-600">{("loading")} progreso...</p>
+                            <p className="mt-4 text-gray-600">{("loading")}</p>
                         </div>
                     ) : (
                         <div className="space-y-6">
@@ -831,7 +831,7 @@ export default function UsersClient() {
                     </div>
                 )}
                 <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                    <p className="text-sm text-purple-800">{t("admins")}</p>
+                    <p className="text-sm text-purple-800">{t("admin")}</p>
                     <p className="text-2xl font-bold text-purple-900">{counts.admins}</p>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">

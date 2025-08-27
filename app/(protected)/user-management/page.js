@@ -1,5 +1,6 @@
 "use client"
 
+import { useLang } from "@/app/i18n";
 import React, { useState, useEffect, useMemo } from "react";
 import {
     UserPlus, Users, Award, CheckCircle, AlertCircle,
@@ -116,6 +117,7 @@ export default function UserManagementPage() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showValidateModal, setShowValidateModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+    const { t } = useLang();
 
     // Form states
     const [newUser, setNewUser] = useState({
@@ -209,7 +211,7 @@ export default function UserManagementPage() {
         <Modal
             isOpen={showAddModal}
             onClose={() => setShowAddModal(false)}
-            title="Agregar Nuevo Usuario"
+            title={t("addNewUser")}
             size="lg"
         >
             <div className="space-y-6">
@@ -217,12 +219,12 @@ export default function UserManagementPage() {
                 <div>
                     <h4 className="font-medium mb-4 flex items-center gap-2">
                         <Users className="w-4 h-4" />
-                        Información Básica
+                        {t("basicInfo")}
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium mb-2">
-                                Nombre Completo *
+                                {t("fullName")} *
                             </label>
                             <Input
                                 value={newUser.name}
@@ -243,7 +245,7 @@ export default function UserManagementPage() {
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-2">
-                                Teléfono
+                                {t("phone")} *
                             </label>
                             <Input
                                 value={newUser.phone}
@@ -259,9 +261,9 @@ export default function UserManagementPage() {
                                 value={newUser.role}
                                 onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                             >
-                                <option value="disciple">Discípulo</option>
-                                <option value="discipler">Disciplicador</option>
-                                <option value="admin">Administrador</option>
+                                <option value="disciple">{t("disciple")}</option>
+                                <option value="discipler">{t("discipler")}</option>
+                                <option value="admin">{t("admin")}</option>
                             </Select>
                         </div>
                     </div>
@@ -272,23 +274,23 @@ export default function UserManagementPage() {
                     <div>
                         <h4 className="font-medium mb-4 flex items-center gap-2">
                             <Shield className="w-4 h-4" />
-                            Asignación
+                            {t("assignment")}
                         </h4>
                         <div>
                             <label className="block text-sm font-medium mb-2">
-                                Disciplicador
+                                {t("discipler")}
                             </label>
                             <Select
                                 value={newUser.discipler_id}
                                 onChange={(e) => setNewUser({ ...newUser, discipler_id: e.target.value })}
                             >
-                                <option value="">Seleccionar disciplicador...</option>
+                                <option value="">{t("selectDiscipler")}...</option>
                                 {disciplers.map(d => (
                                     <option key={d.id} value={d.id}>{d.name}</option>
                                 ))}
                             </Select>
                             <p className="text-xs text-gray-500 mt-1">
-                                Puedes asignarlo después si no estás seguro
+                                {t("canAssignLater")}
                             </p>
                         </div>
                     </div>
@@ -299,11 +301,10 @@ export default function UserManagementPage() {
                     <Card className="p-4 bg-amber-50 border-amber-200">
                         <h4 className="font-medium mb-3 flex items-center gap-2 text-amber-900">
                             <Award className="w-4 h-4" />
-                            Validación para Disciplicador Probado
+                            {t("validationForProven")}
                         </h4>
                         <p className="text-sm text-amber-700 mb-3">
-                            Si esta persona ya es un disciplicador con experiencia,
-                            puedes validar automáticamente la Serie 1.
+                            {t("provenDisciplerText")}
                         </p>
                         <label className="flex items-center gap-3">
                             <input
@@ -321,7 +322,7 @@ export default function UserManagementPage() {
                                 }}
                             />
                             <span className="text-sm">
-                                Validar Serie 1 completa (Certificación como Disciplicador)
+                                {t("validateSeries1")}
                             </span>
                         </label>
                     </Card>
@@ -330,12 +331,12 @@ export default function UserManagementPage() {
                 {/* Notas */}
                 <div>
                     <label className="block text-sm font-medium mb-2">
-                        Notas (Opcional)
+                        {t("notesOptional")}
                     </label>
                     <Textarea
                         value={newUser.notes}
                         onChange={(e) => setNewUser({ ...newUser, notes: e.target.value })}
-                        placeholder="Ej: Pastor de iglesia local, 10 años de experiencia..."
+                        placeholder={t("notesPlaceholder")}
                         rows={3}
                     />
                 </div>
@@ -343,23 +344,23 @@ export default function UserManagementPage() {
                 {/* Método de Invitación */}
                 <Card className="p-4 bg-blue-50 border-blue-200">
                     <h4 className="font-medium mb-3 text-blue-900">
-                        Método de Invitación
+                        {t("invitationMethod")}
                     </h4>
                     <div className="space-y-2">
                         <label className="flex items-center gap-3">
                             <input type="radio" name="invite" defaultChecked />
                             <Mail className="w-4 h-4 text-blue-600" />
-                            <span className="text-sm">Enviar invitación por email</span>
+                            <span className="text-sm">{t("sendEmailInvite")}</span>
                         </label>
                         <label className="flex items-center gap-3">
                             <input type="radio" name="invite" />
                             <Phone className="w-4 h-4 text-blue-600" />
-                            <span className="text-sm">Enviar invitación por WhatsApp</span>
+                            <span className="text-sm">{t("sendWhatsAppInvite")}</span>
                         </label>
                         <label className="flex items-center gap-3">
                             <input type="radio" name="invite" />
                             <UserPlus className="w-4 h-4 text-blue-600" />
-                            <span className="text-sm">Crear cuenta directamente (sin invitación)</span>
+                            <span className="text-sm">{t("createDirectly")}</span>
                         </label>
                     </div>
                 </Card>
@@ -370,11 +371,11 @@ export default function UserManagementPage() {
                         variant="secondary"
                         onClick={() => setShowAddModal(false)}
                     >
-                        Cancelar
+                        {t("cancel")}
                     </Button>
                     <Button onClick={handleAddUser}>
                         <UserPlus className="w-4 h-4" />
-                        Agregar Usuario
+                        {t("addUser")}
                     </Button>
                 </div>
             </div>
@@ -385,14 +386,14 @@ export default function UserManagementPage() {
         <Modal
             isOpen={showValidateModal}
             onClose={() => setShowValidateModal(false)}
-            title="Validar Competencias"
+            title={t("validateCompetencies")}
             size="lg"
         >
             <div className="space-y-6">
                 {/* Selección de Usuario */}
                 <div>
                     <label className="block text-sm font-medium mb-2">
-                        Seleccionar Usuario
+                        {t("selectUser")}
                     </label>
                     <Select
                         value={validation.user_id}
@@ -402,7 +403,7 @@ export default function UserManagementPage() {
                             setSelectedUser(user);
                         }}
                     >
-                        <option value="">Seleccionar...</option>
+                        <option value="">{t("selectUserPlaceholder")}</option>
                         {users.map(u => (
                             <option key={u.id} value={u.id}>
                                 {u.name} - {u.email}
@@ -425,7 +426,7 @@ export default function UserManagementPage() {
                                         </Badge>
                                         {selectedUser.current_lesson && (
                                             <span className="text-sm text-gray-500">
-                                                Lección actual: {selectedUser.current_lesson}
+                                                {t("currentLesson")}: {selectedUser.current_lesson}
                                             </span>
                                         )}
                                     </div>
@@ -438,7 +439,7 @@ export default function UserManagementPage() {
                         <div>
                             <h4 className="font-medium mb-4 flex items-center gap-2">
                                 <BookOpen className="w-4 h-4" />
-                                Validar Series Completas
+                                {t("validateCompletesSeries")}
                             </h4>
                             <div className="space-y-3">
                                 {series.map(s => (
@@ -476,33 +477,33 @@ export default function UserManagementPage() {
                         <div>
                             <h4 className="font-medium mb-4 flex items-center gap-2">
                                 <Award className="w-4 h-4" />
-                                Nivel de Certificación
+                                {t("certificationLevel")}
                             </h4>
                             <Select
                                 value={validation.certification_level}
                                 onChange={(e) => setValidation({ ...validation, certification_level: e.target.value })}
                             >
-                                <option value="none">Sin certificación</option>
-                                <option value="discipler">Disciplicador Certificado</option>
-                                <option value="advanced">Disciplicador Avanzado</option>
-                                <option value="master">Disciplicador Master</option>
+                                <option value="none">{t("noCertification")}</option>
+                                <option value="discipler">{t("certifiedDiscipler")}</option>
+                                <option value="advanced">{t("advancedDiscipler")}</option>
+                                <option value="master">{t("masterDiscipler")}</option>
                             </Select>
                             <p className="text-xs text-gray-500 mt-2">
-                                • <strong>Disciplicador Certificado:</strong> Completó Serie 1<br />
-                                • <strong>Disciplicador Avanzado:</strong> Completó Series 1 y 2<br />
-                                • <strong>Disciplicador Master:</strong> Completó todas las series
+                                • <strong>{t("certifiedDiscipler")}:</strong> {t("certificationNote1")}<br />
+                                • <strong>{t("advancedDiscipler")}:</strong> {t("certificationNote2")}<br />
+                                • <strong>{t("masterDiscipler")}:</strong> {t("certificationNote3")}
                             </p>
                         </div>
 
                         {/* Notas de Validación */}
                         <div>
                             <label className="block text-sm font-medium mb-2">
-                                Notas de Validación
+                                {t("validationNotes")}
                             </label>
                             <Textarea
                                 value={validation.notes}
                                 onChange={(e) => setValidation({ ...validation, notes: e.target.value })}
-                                placeholder="Ej: Pastor con 15 años de experiencia, ya ha discipulado a 20+ personas..."
+                                placeholder={t("validationNotesPlaceholder")}
                                 rows={3}
                             />
                         </div>
@@ -515,7 +516,7 @@ export default function UserManagementPage() {
                         variant="secondary"
                         onClick={() => setShowValidateModal(false)}
                     >
-                        Cancelar
+                        {t("cancel")}
                     </Button>
                     <Button
                         onClick={handleValidateUser}
@@ -523,7 +524,7 @@ export default function UserManagementPage() {
                         variant="success"
                     >
                         <CheckCircle className="w-4 h-4" />
-                        Validar Competencias
+                        {t("validateCompetencies")}
                     </Button>
                 </div>
             </div>
@@ -538,21 +539,21 @@ export default function UserManagementPage() {
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <Input
-                            placeholder="Buscar por nombre, email..."
+                            placeholder={t("searchPlaceholder")}
                             className="pl-10"
                         />
                     </div>
                 </div>
                 <Select className="md:w-48">
-                    <option value="">Todos los roles</option>
-                    <option value="admin">Administradores</option>
-                    <option value="discipler">Disciplicadores</option>
-                    <option value="disciple">Discípulos</option>
+                    <option value="">{t("allUsers")}</option>
+                    <option value="admin">{t("admins")}</option>
+                    <option value="discipler">{t("disciplers")}</option>
+                    <option value="disciple">{t("disciples")}</option>
                 </Select>
                 <Select className="md:w-48">
-                    <option value="">Todos los estados</option>
-                    <option value="validated">Validados</option>
-                    <option value="not-validated">Sin validar</option>
+                    <option value="">{t("allStates")}</option>
+                    <option value="validated">{t("validated")}</option>
+                    <option value="not-validated">{t("noValidated")}</option>
                 </Select>
             </div>
 
@@ -672,10 +673,10 @@ export default function UserManagementPage() {
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        Gestión de Usuarios
+                        {t("userManagement")}
                     </h1>
                     <p className="text-gray-600">
-                        Agregar nuevos usuarios y validar competencias de disciplicadores experimentados
+                        {t("addNewUser")} y {t("validateCompetencies").toLowerCase()}
                     </p>
                 </div>
 
@@ -691,8 +692,8 @@ export default function UserManagementPage() {
                                     <UserPlus className="w-5 h-5 text-blue-600" />
                                 </div>
                                 <div>
-                                    <div className="font-medium">Agregar Usuario</div>
-                                    <div className="text-sm text-gray-500">Nuevo discípulo o disciplicador</div>
+                                    <div className="font-medium">{t("addNewUser")}</div>
+                                    <div className="text-sm text-gray-500">{t("disciples")} o {t("discipler").toLowerCase()}</div>
                                 </div>
                                 <ChevronRight className="w-5 h-5 text-gray-400 ml-auto" />
                             </div>
@@ -709,8 +710,8 @@ export default function UserManagementPage() {
                                     <Award className="w-5 h-5 text-green-600" />
                                 </div>
                                 <div>
-                                    <div className="font-medium">Validar Competencias</div>
-                                    <div className="text-sm text-gray-500">Para disciplicadores probados</div>
+                                    <div className="font-medium">{t("validateCompetencies")}</div>
+                                    <div className="text-sm text-gray-500">{t("forProvenDisciplers")}</div>
                                 </div>
                                 <ChevronRight className="w-5 h-5 text-gray-400 ml-auto" />
                             </div>
@@ -726,8 +727,8 @@ export default function UserManagementPage() {
                                     <Users className="w-5 h-5 text-purple-600" />
                                 </div>
                                 <div>
-                                    <div className="font-medium">Importar Múltiples</div>
-                                    <div className="text-sm text-gray-500">Desde CSV o Excel</div>
+                                    <div className="font-medium">{t("importMultiple")}</div>
+                                    <div className="text-sm text-gray-500">{t("fromCSVExcel")}</div>
                                 </div>
                                 <ChevronRight className="w-5 h-5 text-gray-400 ml-auto" />
                             </div>
@@ -751,24 +752,20 @@ export default function UserManagementPage() {
                 <Card className="mt-8 p-6 bg-blue-50 border-blue-200">
                     <h3 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
                         <AlertCircle className="w-5 h-5" />
-                        Tips para la Gestión de Usuarios
+                        {t("tipsTitle")}
                     </h3>
                     <div className="space-y-2 text-sm text-blue-800">
                         <p>
-                            • <strong>Para disciplicadores experimentados:</strong> Usa "Validar Competencias" para marcar
-                            la Serie 1 como completa automáticamente.
+                            • <strong>{t("tip1")}</strong> {t("tip1Text")}
                         </p>
                         <p>
-                            • <strong>Invitaciones:</strong> Los usuarios recibirán un link único para crear su contraseña
-                            y acceder por primera vez.
+                            • <strong>{t("tip2")}</strong> {t("tip2Text")}
                         </p>
                         <p>
-                            • <strong>Asignación flexible:</strong> Puedes crear usuarios sin asignar disciplicador
-                            inmediatamente y hacerlo después en "Reasignar".
+                            • <strong>{t("tip3")}</strong> {t("tip3Text")}
                         </p>
                         <p>
-                            • <strong>Importación masiva:</strong> Para agregar muchos usuarios a la vez,
-                            usa la opción de importar desde CSV con formato: nombre, email, teléfono, rol.
+                            • <strong>{t("tip4")}</strong> {t("tip4Text")}
                         </p>
                     </div>
                 </Card>
