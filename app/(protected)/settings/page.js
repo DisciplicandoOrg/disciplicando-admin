@@ -1,6 +1,5 @@
 "use client"
 
-import { useLang } from "@/app/i18n";
 import React, { useState, useEffect } from "react";
 import {
     Settings, Shield, Database, Globe, Bell, Mail,
@@ -8,6 +7,7 @@ import {
     Server, Lock, Users, AlertCircle, Check, X,
     ChevronRight, Save, RefreshCw, Download, Upload
 } from "lucide-react";
+import { useLang } from "@/app/i18n";
 
 // Componentes UI
 const Card = ({ children, className = "" }) => (
