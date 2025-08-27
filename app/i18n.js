@@ -21,7 +21,7 @@ const M = {
         reports: "Reportes",
         settings: "Configuración",
         discipleshipTree: "Árbol de Discipulado",
-        userManagement: "Gestión Usuarios",
+        userManagement: "Agregar y Validar",
         logout: "Salir",
 
         // Dashboard
@@ -73,6 +73,7 @@ const M = {
         noDisciplersFound: "No se encontraron disciplicadores",
         loading: "Cargando",
         loadingTree: "Cargando árbol de discipulado...",
+
         // Adicionales para Árbol de Discipulado
         discipler: "Disciplicador",
         disciple: "Discípulo",
@@ -136,6 +137,60 @@ const M = {
         quizAverage: "Quiz Promedio",
         videosSeen: "Videos Vistos",
         noProgress: "No hay prograso registrado aún",
+
+        // User Management (Agregar y Validar)
+        addNewUser: "Agregar Nuevo Usuario",
+        validateCompetencies: "Validar Competencias",
+        forProvenDisciplers: "Para disciplicadores probados",
+        importMultiple: "Importar Múltiples",
+        fromCSVExcel: "Desde CSV o Excel",
+        allUsers: "Todos los Usuarios",
+
+        // Modal Agregar Usuario
+        basicInfo: "Información Básica",
+        fullName: "Nombre Completo",
+        assignment: "Asignación",
+        selectDiscipler: "Seleccionar disciplicador...",
+        canAssignLater: "Puedes asignarlo después si no estás seguro",
+        validationForProven: "Validación para Disciplicador Probado",
+        provenDisciplerText: "Si esta persona ya es un disciplicador con experiencia, puedes validar automáticamente la Serie 1.",
+        validateSeries1: "Validar Serie 1 completa (Certificación como Disciplicador)",
+        notes: "Notas",
+        notesOptional: "Notas (Opcional)",
+        notesPlaceholder: "Ej: Pastor de iglesia local, 10 años de experiencia...",
+        invitationMethod: "Método de Invitación",
+        sendEmailInvite: "Enviar invitación por email",
+        sendWhatsAppInvite: "Enviar invitación por WhatsApp",
+        createDirectly: "Crear cuenta directamente (sin invitación)",
+        addUser: "Agregar Usuario",
+
+        // Modal Validar Competencias
+        selectUser: "Seleccionar Usuario",
+        selectUserPlaceholder: "Seleccionar...",
+        currentLesson: "Lección actual",
+        validateCompletesSeries: "Validar Series Completas",
+        certificationLevel: "Nivel de Certificación",
+        noCertification: "Sin certificación",
+        certifiedDiscipler: "Disciplicador Certificado",
+        advancedDiscipler: "Disciplicador Avanzado",
+        masterDiscipler: "Disciplicador Master",
+        certificationNote1: "Disciplicador Certificado: Completó Serie 1",
+        certificationNote2: "Disciplicador Avanzado: Completó Series 1 y 2",
+        certificationNote3: "Disciplicador Master: Completó todas las series",
+        validationNotes: "Notas de Validación",
+        validationNotesPlaceholder: "Ej: Pastor con 15 años de experiencia, ya ha discipulado a 20+ personas...",
+        validateCompetencies: "Validar Competencias",
+
+        // Tips
+        tipsTitle: "Tips para la Gestión de Usuarios",
+        tip1: "Para disciplicadores experimentados:",
+        tip1Text: "Usa 'Validar Competencias' para marcar la Serie 1 como completa automáticamente.",
+        tip2: "Invitaciones:",
+        tip2Text: "Los usuarios recibirán un link único para crear su contraseña y acceder por primera vez.",
+        tip3: "Asignación flexible:",
+        tip3Text: "Puedes crear usuarios sin asignar disciplicador inmediatamente y hacerlo después en 'Reasignar'.",
+        tip4: "Importación masiva:",
+        tip4Text: "Para agregar muchos usuarios a la vez, usa la opción de importar desde CSV con formato: nombre, email, teléfono, rol.",
 
         // Series
         seriesTitle: "Series de Estudio",
@@ -214,7 +269,7 @@ const M = {
         reports: "Reports",
         settings: "Settings",
         discipleshipTree: "Discipleship Tree",
-        userManagement: "Manage Users",
+        userManagement: "Add & Validate",
         logout: "Logout",
 
         // Dashboard
@@ -266,6 +321,7 @@ const M = {
         noDisciplersFound: "No disciplers found",
         loading: "Loading",
         loadingTree: "Loading discipleship tree...",
+
         // Additional for Discipleship Tree
         discipler: "Disciplyer",
         disciple: "Disciple",
@@ -329,6 +385,60 @@ const M = {
         quizAverage: "Quiz Average",
         videosSeen: "Videos Seen",
         noProgress: "No progress recorded yet",
+
+        // User Management (Add & Validate)
+        addNewUser: "Add New User",
+        validateCompetencies: "Validate Competencies",
+        forProvenDisciplers: "For proven disciplers",
+        importMultiple: "Import Multiple",
+        fromCSVExcel: "From CSV or Excel",
+        allUsers: "All Users",
+
+        // Add User Modal
+        basicInfo: "Basic Information",
+        fullName: "Full Name",
+        assignment: "Assignment",
+        selectDiscipler: "Select discipler...",
+        canAssignLater: "You can assign later if not sure",
+        validationForProven: "Validation for Proven Discipler",
+        provenDisciplerText: "If this person is already an experienced discipler, you can automatically validate Series 1.",
+        validateSeries1: "Validate complete Series 1 (Certification as Discipler)",
+        notes: "Notes",
+        notesOptional: "Notes (Optional)",
+        notesPlaceholder: "E.g.: Local church pastor, 10 years of experience...",
+        invitationMethod: "Invitation Method",
+        sendEmailInvite: "Send email invitation",
+        sendWhatsAppInvite: "Send WhatsApp invitation",
+        createDirectly: "Create account directly (no invitation)",
+        addUser: "Add User",
+
+        // Validate Competencies Modal
+        selectUser: "Select User",
+        selectUserPlaceholder: "Select...",
+        currentLesson: "Current lesson",
+        validateCompletesSeries: "Validate Complete Series",
+        certificationLevel: "Certification Level",
+        noCertification: "No certification",
+        certifiedDiscipler: "Certified Discipler",
+        advancedDiscipler: "Advanced Discipler",
+        masterDiscipler: "Master Discipler",
+        certificationNote1: "Certified Discipler: Completed Series 1",
+        certificationNote2: "Advanced Discipler: Completed Series 1 and 2",
+        certificationNote3: "Master Discipler: Completed all series",
+        validationNotes: "Validation Notes",
+        validationNotesPlaceholder: "E.g.: Pastor with 15 years of experience, has discipled 20+ people...",
+        validateCompetencies: "Validate Competencies",
+
+        // Tips
+        tipsTitle: "Tips for User Management",
+        tip1: "For experienced disciplers:",
+        tip1Text: "Use 'Validate Competencies' to automatically mark Series 1 as complete.",
+        tip2: "Invitations:",
+        tip2Text: "Users will receive a unique link to create their password and access for the first time.",
+        tip3: "Flexible assignment:",
+        tip3Text: "You can create users without assigning a discipler immediately and do it later in 'Reassign'.",
+        tip4: "Bulk import:",
+        tip4Text: "To add many users at once, use the import from CSV option with format: name, email, phone, role.",
 
         // Series
         seriesTitle: "Study Series",
