@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
 import { useLang } from "@/app/i18n"; // ← IMPORTAR useLang
+import { APP_VERSION, getVersionBadgeClass } from "@/lib/version";
 import {
     Users,
     Shuffle,
@@ -125,12 +126,15 @@ const Header = ({ onToggleSidebar, user }) => {
         <header className="bg-white border-b border-slate-200 px-4 py-3 lg:px-6">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
+                    {/* Selector de idioma*/}
                     <button
                         onClick={onToggleSidebar}
                         className="p-2 rounded-md hover:bg-slate-100 lg:hidden"
                     >
                         <Menu className="w-5 h-5" />
                     </button>
+
+
                     <h2 className="text-lg font-semibold text-slate-800 hidden lg:block">
                         {t("panel")}
                     </h2>
@@ -146,6 +150,14 @@ const Header = ({ onToggleSidebar, user }) => {
                         <span>{lang === 'es' ? 'ES' : 'EN'}</span>
                     </button>
 
+                    {/* Versión - NUEVO */}
+                    <div className={getVersionBadgeClass()}>
+                        v. {APP_VERSION}
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm text-slate-600"></div>
+
+                    {/* Usuario */}
                     <div className="flex items-center gap-2 text-sm text-slate-600">
                         <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center">
                             {user?.email?.[0]?.toUpperCase() || 'U'}
