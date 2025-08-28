@@ -564,22 +564,22 @@ export default function UserManagementPage() {
                         <thead className="bg-gray-50 border-b">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Usuario
+                                    {t("user")}
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Rol
+                                    {t("rol")}
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Estado
+                                    {t("status")}
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Progreso
+                                    {t("progress")}
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Fecha Ingreso
+                                    {t("dateAdded")}
                                 </th>
                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Acciones
+                                    {t("actions")}
                                 </th>
                             </tr>
                         </thead>
@@ -597,35 +597,40 @@ export default function UserManagementPage() {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
+
                                         <Badge variant={
                                             user.role === 'admin' ? 'danger' :
                                                 user.role === 'discipler' ? 'success' : 'info'
                                         }>
-                                            {user.role}
+                                            {user.role === 'admin' ? t("admin") :
+                                                user.role === 'discipler' ? t("discipler") :
+                                                    user.role === 'disciple' ? t("disciple") :
+                                                        user.role}
                                         </Badge>
+
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         {user.validated ? (
                                             <div className="flex items-center gap-2">
                                                 <CheckCircle className="w-4 h-4 text-green-500" />
-                                                <span className="text-sm text-green-700">Validado</span>
+                                                <span className="text-sm text-green-700">{t("validated")}</span>
                                             </div>
                                         ) : (
                                             <div className="flex items-center gap-2">
                                                 <Clock className="w-4 h-4 text-gray-400" />
-                                                <span className="text-sm text-gray-500">Pendiente</span>
+                                                <span className="text-sm text-gray-500">{t("pending")}</span>
                                             </div>
                                         )}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         {user.role === 'discipler' ? (
                                             <div className="text-sm">
-                                                <div>{user.disciples_count || 0} discípulos</div>
+                                                <div>{user.disciples_count || 0} {t("disciples")}</div>
                                                 <div className="text-gray-500">Serie {user.current_series || 1}</div>
                                             </div>
                                         ) : user.role === 'disciple' ? (
                                             <div className="text-sm">
-                                                <div>Lección {user.current_lesson || 1}</div>
+                                                <div>{t("lesson")} {user.current_lesson || 1}</div>
                                                 <div className="text-gray-500">{user.discipler}</div>
                                             </div>
                                         ) : (
@@ -739,7 +744,7 @@ export default function UserManagementPage() {
                 {/* Main Content */}
                 <Card>
                     <div className="p-6">
-                        <h2 className="text-lg font-semibold mb-4">Todos los Usuarios</h2>
+                        <h2 className="text-lg font-semibold mb-4">{t("allUsers")}</h2>
                         {renderUsersList()}
                     </div>
                 </Card>
