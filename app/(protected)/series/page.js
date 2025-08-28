@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
 import { BookOpenText, Plus, Edit, Trash2, ChevronDown, ChevronRight, Globe, Folder, FileText } from "lucide-react";
+import { useLang } from "@/app/i18n";
 
 // Modal para editar serie
-function EditSerieModal({ serie, isOpen, onClose, onSave, supabase }) {
+function EditSerieModal({ serie, isOpen, onClose, onSave, supabase, t }) {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         nombre_es: "",
@@ -127,7 +128,7 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase }) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <h2 className="text-xl font-bold mb-4">
-                    {serie ? "Editar Serie" : "Nueva Serie"}
+                    {serie ? t("editSaries") : t("newSeries")}
                 </h2>
 
                 <div className="space-y-4">
@@ -145,7 +146,7 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase }) {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-1">Descripción</label>
+                                <label className="block text-sm font-medium mb-1">Descripción:</label>
                                 <textarea
                                     value={formData.descripcion_es}
                                     onChange={(e) => setFormData({ ...formData, descripcion_es: e.target.value })}
@@ -160,7 +161,7 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase }) {
                         <h3 className="font-semibold mb-3">🇺🇸 English</h3>
                         <div className="space-y-3">
                             <div>
-                                <label className="block text-sm font-medium mb-1">Name</label>
+                                <label className="block text-sm font-medium mb-1">Name *</label>
                                 <input
                                     type="text"
                                     value={formData.nombre_en}
@@ -169,7 +170,7 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase }) {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-1">Description</label>
+                                <label className="block text-sm font-medium mb-1">Description:</label>
                                 <textarea
                                     value={formData.descripcion_en}
                                     onChange={(e) => setFormData({ ...formData, descripcion_en: e.target.value })}
@@ -182,7 +183,7 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase }) {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1">Orden</label>
+                            <label className="block text-sm font-medium mb-1">{t("order")}</label>
                             <input
                                 type="number"
                                 value={formData.orden}
@@ -192,14 +193,14 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase }) {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">Estado</label>
+                            <label className="block text-sm font-medium mb-1">{t("status")}</label>
                             <select
                                 value={formData.is_active}
                                 onChange={(e) => setFormData({ ...formData, is_active: e.target.value === "true" })}
                                 className="w-full px-3 py-2 border rounded-md"
                             >
-                                <option value="true">Activa</option>
-                                <option value="false">Inactiva</option>
+                                <option value="true">{t("active")}</option>
+                                <option value="false">{t("inactive")}</option>
                             </select>
                         </div>
                     </div>
@@ -210,14 +211,14 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase }) {
                         onClick={onClose}
                         className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
                     >
-                        Cancelar
+                        {t("cancel")}
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={loading || !formData.nombre_es}
                         className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
                     >
-                        {loading ? "Guardando..." : "Guardar"}
+                        {loading ? t("saving") : t("save")}
                     </button>
                 </div>
             </div>
@@ -226,7 +227,7 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase }) {
 }
 
 // Modal para bloques
-function BloqueModal({ bloque, serieId, isOpen, onClose, onSave, supabase }) {
+function BloqueModal({ bloque, serieId, isOpen, onClose, onSave, supabase, t }) {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         nombre_es: "",
@@ -322,7 +323,7 @@ function BloqueModal({ bloque, serieId, isOpen, onClose, onSave, supabase }) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-lg">
                 <h2 className="text-xl font-bold mb-4">
-                    {bloque ? "Editar Bloque" : "Nuevo Bloque"}
+                    {bloque ? "Editar Bloque" : t("newBlock")}
                 </h2>
 
                 <div className="space-y-4">
@@ -348,7 +349,7 @@ function BloqueModal({ bloque, serieId, isOpen, onClose, onSave, supabase }) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium mb-1">Orden</label>
+                        <label className="block text-sm font-medium mb-1">{t("order")}</label>
                         <input
                             type="number"
                             value={formData.orden}
@@ -380,7 +381,7 @@ function BloqueModal({ bloque, serieId, isOpen, onClose, onSave, supabase }) {
 }
 
 // Modal para lecciones
-function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) {
+function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase, t }) {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         titulo_es: "",
@@ -513,7 +514,7 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
                 <h2 className="text-xl font-bold mb-4">
-                    {leccion ? "Editar Lección" : "Nueva Lección"}
+                    {leccion ? "Editar Lección" : t("newLesson")}
                 </h2>
 
                 <div className="space-y-4">
@@ -543,7 +544,7 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                     {/* Configuración básica */}
                     <div className="grid grid-cols-3 gap-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1">Número de lección</label>
+                            <label className="block text-sm font-medium mb-1">{t("lessonNumber")}</label>
                             <input
                                 type="number"
                                 value={formData.numero}
@@ -553,19 +554,19 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">Estado</label>
+                            <label className="block text-sm font-medium mb-1">{t("status")}</label>
                             <select
                                 value={formData.is_active}
                                 onChange={(e) => setFormData({ ...formData, is_active: e.target.value === "true" })}
                                 className="w-full px-3 py-2 border rounded-md"
                             >
-                                <option value="true">Activa</option>
-                                <option value="false">Inactiva</option>
+                                <option value="true">{t("active")}</option>
+                                <option value="false">{t("inactive")}</option>
                             </select>
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-1">
-                                % Mínimo para aprobar quiz
+                                {t("minScoreToPass")}
                             </label>
                             <input
                                 type="number"
@@ -580,15 +581,15 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
 
                     {/* Sección de recursos */}
                     <div className="border-t pt-4">
-                        <h3 className="font-semibold mb-3">📚 Recursos de la Lección</h3>
+                        <h3 className="font-semibold mb-3">📚 {t("lessonResources")}</h3>
                         <p className="text-sm text-gray-600 mb-3">
-                            El discípulo tendrá acceso a estos 4 recursos. Si alguno no está disponible, se mostrará deshabilitado.
+                            {t("lessonText1")}
                         </p>
 
                         <div className="space-y-3">
                             <div>
                                 <label className="block text-sm font-medium mb-1">
-                                    🎥 URL del Video (YouTube no listado)
+                                    🎥 {t("videoUrl")}
                                 </label>
                                 <input
                                     type="text"
@@ -598,55 +599,55 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                                     placeholder="https://youtube.com/watch?v=..."
                                 />
                                 <p className="text-xs text-gray-500 mt-1">
-                                    Video explicativo de la lección
+                                    {t("lessonText2")}
                                 </p>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium mb-1">
-                                    🎙️ URL del Podcast (Audio)
+                                    🎙️ {t("podcastUrl")}
                                 </label>
                                 <input
                                     type="text"
                                     value={formData.blog_url}
                                     onChange={(e) => setFormData({ ...formData, blog_url: e.target.value })}
                                     className="w-full px-3 py-2 border rounded-md"
-                                    placeholder="URL del podcast/audio de la lección"
+                                    placeholder="URL podcast/audio"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">
-                                    Versión en audio/podcast para quienes prefieren escuchar. Opcional - se mostrará gris si no está disponible.
+                                    {t("lessonText3")}
                                 </p>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium mb-1">
-                                    📖 URL del Estudio Bíblico
+                                    📖 {t("studyUrl")}
                                 </label>
                                 <input
                                     type="text"
                                     value={formData.estudio_url}
                                     onChange={(e) => setFormData({ ...formData, estudio_url: e.target.value })}
                                     className="w-full px-3 py-2 border rounded-md"
-                                    placeholder="https://sermons.church/... o URL personalizada"
+                                    placeholder="https://sermons.church/... or URL"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">
-                                    Estudio escrito que pueden completar, imprimir o enviar por email
+                                    {t("lessonText4")}
                                 </p>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium mb-1">
-                                    ✅ URL del Quiz/Cuestionario
+                                    ✅ {t("quizUrl")}
                                 </label>
                                 <input
                                     type="text"
                                     value={formData.quiz_url}
                                     onChange={(e) => setFormData({ ...formData, quiz_url: e.target.value })}
                                     className="w-full px-3 py-2 border rounded-md"
-                                    placeholder="URL del cuestionario o quiz"
+                                    placeholder="URL del cuestionario or quiz"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">
-                                    Evaluación final - Requiere {formData.quiz_min_score}% para aprobar y notificar al discipulador
+                                    {t("lessonText5a")} {formData.quiz_min_score}% {t("lessonText5b")}
                                 </p>
                             </div>
                         </div>
@@ -655,7 +656,7 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                     {/* Notas adicionales */}
                     <div>
                         <label className="block text-sm font-medium mb-1">
-                            📝 Notas o contenido adicional (opcional)
+                            📝 {t("additionalNotes")}
                         </label>
                         <textarea
                             value={formData.contenido_md}
@@ -705,6 +706,9 @@ export default function SeriesPage() {
     const [editingLeccion, setEditingLeccion] = useState(null);
     const [showLeccionModal, setShowLeccionModal] = useState(false);
     const [selectedBloqueId, setSelectedBloqueId] = useState(null);
+
+    // cambio de lenguaje
+    const { t } = useLang();
 
     useEffect(() => {
         fetchSeries();
@@ -836,8 +840,8 @@ export default function SeriesPage() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-semibold">Series de Estudio</h2>
-                    <p className="text-gray-600">Gestiona las series, bloques y lecciones</p>
+                    <h2 className="text-2xl font-semibold">{t("seriesTitle")}</h2>
+                    <p className="text-gray-600">{t("seriesSubtitle")}</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
@@ -862,12 +866,12 @@ export default function SeriesPage() {
                         className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                     >
                         <Plus className="w-4 h-4" />
-                        Nueva Serie
+                        {t("newSeries")}
                     </button>
                 </div>
             </div>
 
-            {loading && <p className="text-gray-500">Cargando series...</p>}
+            {loading && <p className="text-gray-500">{t("loadingSeries")}</p>}
 
             {!loading && series.length > 0 && (
                 <div className="space-y-4">
@@ -894,13 +898,13 @@ export default function SeriesPage() {
                                         )}
                                         <div className="flex items-center gap-3 mt-1">
                                             <span className="text-xs text-gray-500">
-                                                {serie.bloques?.length || 0} bloques
+                                                {serie.bloques?.length || 0} {t("totalBlocks")}
                                             </span>
                                             <span className="text-xs text-gray-500">•</span>
                                             <span className="text-xs text-gray-500">
                                                 {serie.bloques?.reduce((total, bloque) =>
                                                     total + (bloque.lecciones?.length || 0), 0
-                                                ) || 0} lecciones totales
+                                                ) || 0} {t("totalLessons")}
                                             </span>
                                             {!serie.is_active && (
                                                 <>
@@ -935,7 +939,7 @@ export default function SeriesPage() {
                             {expandedSeries[serie.id] && (
                                 <div className="border-t px-4 pb-4">
                                     <div className="flex justify-between items-center mt-4 mb-2">
-                                        <span className="text-sm font-semibold text-gray-700">Bloques</span>
+                                        <span className="text-sm font-semibold text-gray-700">{t("blocks")}</span>
                                         <button
                                             onClick={() => {
                                                 setEditingBloque(null);
@@ -945,12 +949,12 @@ export default function SeriesPage() {
                                             className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
                                         >
                                             <Plus className="w-3 h-3" />
-                                            Agregar Bloque
+                                            {t("addBlock")}
                                         </button>
                                     </div>
 
                                     {(!serie.bloques || serie.bloques.length === 0) ? (
-                                        <p className="text-gray-500 py-4">No hay bloques en esta serie</p>
+                                        <p className="text-gray-500 py-4">{t("noBlocks")}</p>
                                     ) : (
                                         <div className="space-y-2">
                                             {serie.bloques.map((bloque) => (
@@ -969,7 +973,7 @@ export default function SeriesPage() {
                                                                 {getDisplayName(bloque, "nombre")}
                                                             </h4>
                                                             <span className="text-sm text-gray-500">
-                                                                ({bloque.lecciones?.length || 0} lecciones)
+                                                                ({bloque.lecciones?.length || 0} {t("lessons")})
                                                             </span>
                                                         </div>
                                                         <div className="flex gap-1">
@@ -995,7 +999,7 @@ export default function SeriesPage() {
                                                     {expandedBloques[bloque.id] && (
                                                         <div className="mt-3">
                                                             <div className="flex justify-between items-center mb-2">
-                                                                <span className="text-xs font-semibold text-gray-600 ml-6">Lecciones</span>
+                                                                <span className="text-xs font-semibold text-gray-600 ml-6">{t("lessons")}</span>
                                                                 <button
                                                                     onClick={() => {
                                                                         setEditingLeccion(null);
@@ -1005,12 +1009,12 @@ export default function SeriesPage() {
                                                                     className="flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
                                                                 >
                                                                     <Plus className="w-3 h-3" />
-                                                                    Agregar Lección
+                                                                    {t("addLesson")}
                                                                 </button>
                                                             </div>
 
                                                             {(!bloque.lecciones || bloque.lecciones.length === 0) ? (
-                                                                <p className="text-xs text-gray-500 ml-6">No hay lecciones en este bloque</p>
+                                                                <p className="text-xs text-gray-500 ml-6">{t("noLessons")}</p>
                                                             ) : (
                                                                 <div className="ml-6 space-y-1">
                                                                     {bloque.lecciones.map((leccion) => (
@@ -1074,6 +1078,7 @@ export default function SeriesPage() {
                 }}
                 onSave={fetchSeries}
                 supabase={supabase}
+                t={t}
             />
 
             <BloqueModal
@@ -1086,6 +1091,7 @@ export default function SeriesPage() {
                 }}
                 onSave={fetchSeries}
                 supabase={supabase}
+                t={t}
             />
 
             <LeccionModal
@@ -1098,6 +1104,7 @@ export default function SeriesPage() {
                 }}
                 onSave={fetchSeries}
                 supabase={supabase}
+                t={t}
             />
         </div>
     );
