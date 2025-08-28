@@ -8,6 +8,8 @@ import {
     ChevronRight, UserCheck, AlertCircle, CheckCircle
 } from "lucide-react";
 
+import { useLang } from "@/app/i18n";
+
 // Componente de tarjeta de estadística
 function StatCard({ title, value, subtitle, icon: Icon, color = "blue" }) {
     const colorClasses = {
@@ -36,113 +38,9 @@ function StatCard({ title, value, subtitle, icon: Icon, color = "blue" }) {
     );
 }
 
-// Componente de tabla de progreso
-function ProgressTable({ data, title, onAction }) {
-    return (
-        <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b">
-                <h3 className="font-semibold text-lg">{title}</h3>
-            </div>
-            <div className="overflow-x-auto">
-                <table className="w-full">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Nombre
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Discipulador
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Serie Actual
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Progreso
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Estado
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Acciones
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                        {data.map((item) => (
-                            <tr key={item.id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                                    {item.name}
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-500">
-                                    {item.discipler || "Sin asignar"}
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-500">
-                                    {item.currentSeries}
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center">
-                                        <div className="w-32 bg-gray-200 rounded-full h-2 mr-2">
-                                            <div
-                                                className="bg-blue-600 h-2 rounded-full"
-                                                style={{ width: `${item.progress}%` }}
-                                            />
-                                        </div>
-                                        <span className="text-sm text-gray-600">
-                                            {item.progress}%
-                                        </span>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    {item.status === "active" ? (
-                                        <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                                            Activo
-                                        </span>
-                                    ) : item.status === "ready" ? (
-                                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                                            Listo para discipular
-                                        </span>
-                                    ) : (
-                                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
-                                            Inactivo
-                                        </span>
-                                    )}
-                                </td>
-                                <td className="px-6 py-4 text-sm">
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => onAction('email', item)}
-                                            className="text-gray-600 hover:text-blue-600"
-                                            title="Enviar email"
-                                        >
-                                            <Mail className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => onAction('whatsapp', item)}
-                                            className="text-gray-600 hover:text-green-600"
-                                            title="Enviar WhatsApp"
-                                        >
-                                            <MessageSquare className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => onAction('view', item)}
-                                            className="text-gray-600 hover:text-purple-600"
-                                            title="Ver detalles"
-                                        >
-                                            <ChevronRight className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
-}
-
 export default function ReportsPage() {
     const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+    const { t } = useLang();
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("dashboard");
 
@@ -164,15 +62,120 @@ export default function ReportsPage() {
     const [readyToBeDiscipiers, setReadyToBeDiscipiers] = useState([]);
     const [needsAttentionList, setNeedsAttentionList] = useState([]);
     const [seriesStats, setSeriesStats] = useState([]);
-    const [allProgressData, setAllProgressData] = useState([]); // Agregar este estado
-    const [users, setUsers] = useState([]); // Agregar estado para users
-    const [series, setSeries] = useState([]); // Agregar estado para series
+    const [allProgressData, setAllProgressData] = useState([]);
+    const [users, setUsers] = useState([]);
+    const [series, setSeries] = useState([]);
     const [selectedSeriesFilter, setSelectedSeriesFilter] = useState("all");
     const [roleFilter, setRoleFilter] = useState("all");
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [selectedUserDetails, setSelectedUserDetails] = useState(null);
     const [showExportMenu, setShowExportMenu] = useState(false);
-    const [dateRange, setDateRange] = useState("month"); // week, month, year
+    const [dateRange, setDateRange] = useState("month");
+
+    // Componente de tabla de progreso
+    function ProgressTable({ data, title, onAction }) {
+        return (
+            <div className="bg-white rounded-lg shadow">
+                <div className="px-6 py-4 border-b">
+                    <h3 className="font-semibold text-lg">{title}</h3>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    {t("name_column")}
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    {t("discipler_column")}
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    {t("current_series_column")}
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    {t("progress_column")}
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    {t("status_column")}
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    {t("actions_column")}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                            {data.map((item) => (
+                                <tr key={item.id} className="hover:bg-gray-50">
+                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                                        {item.name}
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                        {item.discipler || t("not_assigned")}
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                        {item.currentSeries}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center">
+                                            <div className="w-32 bg-gray-200 rounded-full h-2 mr-2">
+                                                <div
+                                                    className="bg-blue-600 h-2 rounded-full"
+                                                    style={{ width: `${item.progress}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-sm text-gray-600">
+                                                {item.progress}%
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {item.status === "active" ? (
+                                            <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                                                {t("status_active")}
+                                            </span>
+                                        ) : item.status === "ready" ? (
+                                            <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                                                {t("status_ready")}
+                                            </span>
+                                        ) : (
+                                            <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
+                                                {t("status_inactive")}
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4 text-sm">
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => onAction('email', item)}
+                                                className="text-gray-600 hover:text-blue-600"
+                                                title={t("send_email")}
+                                            >
+                                                <Mail className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => onAction('whatsapp', item)}
+                                                className="text-gray-600 hover:text-green-600"
+                                                title="WhatsApp"
+                                            >
+                                                <MessageSquare className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => onAction('view', item)}
+                                                className="text-gray-600 hover:text-purple-600"
+                                                title={t("view_details_log")}
+                                            >
+                                                <ChevronRight className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    }
 
     useEffect(() => {
         fetchAllData();
@@ -195,12 +198,12 @@ export default function ReportsPage() {
             const { data: series, error: seriesError } = await supabase
                 .from("series")
                 .select(`
+                *,
+                bloques (
                     *,
-                    bloques (
-                        *,
-                        lecciones (*)
-                    )
-                `)
+                    lecciones (*)
+                )
+            `)
                 .eq("is_active", true)
                 .order("orden", { ascending: true });
 
@@ -227,7 +230,7 @@ export default function ReportsPage() {
 
             // Calcular total de lecciones y crear mapa de lecciones
             let totalLessonsCount = 0;
-            const lessonNumberMap = {}; // Mapa de número de lección a información
+            const lessonNumberMap = {};
 
             series?.forEach(s => {
                 s.bloques?.forEach(b => {
@@ -253,22 +256,12 @@ export default function ReportsPage() {
             // Procesar datos de progreso basado en current_lesson
             let progressData = disciples.map(d => {
                 const currentLessonNumber = d.current_lesson || 0;
-
-                // Calcular progreso basado en el número de lección actual
-                // Si current_lesson = 4, significa que completó 3 lecciones (1, 2, 3)
                 const completedLessons = currentLessonNumber > 0 ? currentLessonNumber - 1 : 0;
-
-                // Buscar información de la lección actual
                 const currentLessonInfo = lessonNumberMap[currentLessonNumber];
-                const currentSerieName = currentLessonInfo?.serie?.nombre || d.current_series || "No iniciado";
-
-                // Calcular si completó la primera serie
-                // Asumiendo que si está en una lección mayor al total de la primera serie, la completó
+                const currentSerieName = currentLessonInfo?.serie?.nombre || d.current_series || t("not_assigned");
                 const firstSeriesCompleted = firstSeriesLessonsCount > 0 &&
                     currentLessonNumber > firstSeriesLessonsCount;
 
-                // Calcular porcentaje de progreso
-                // Para simplificar, usamos el progreso sobre el total de lecciones de la primera serie
                 let progressPercentage = 0;
                 if (firstSeriesLessonsCount > 0) {
                     if (firstSeriesCompleted) {
@@ -278,7 +271,6 @@ export default function ReportsPage() {
                     }
                 }
 
-                // Determinar estado
                 let status = "inactive";
                 if (currentLessonNumber === 0) {
                     status = "inactive";
@@ -288,15 +280,14 @@ export default function ReportsPage() {
                     status = "active";
                 }
 
-                // Calcular última actividad (usar updated_at si existe, si no created_at)
                 const lastActivity = d.updated_at || d.created_at;
 
                 return {
                     id: d.id,
-                    name: d.name || d.username || d.email || "Sin nombre",
+                    name: d.name || d.username || d.email || t("no_name"),
                     email: d.email || "",
                     phone: d.phone || "",
-                    discipler: disciplerMap[d.id]?.name || disciplerMap[d.id]?.username || "Sin asignar",
+                    discipler: disciplerMap[d.id]?.name || disciplerMap[d.id]?.username || t("not_assigned"),
                     discipler_id: d.discipler_id,
                     currentSeries: currentSerieName,
                     currentLesson: currentLessonNumber,
@@ -322,7 +313,6 @@ export default function ReportsPage() {
                 progressData = progressData.map(d => {
                     const userProgress = seriesProgress.find(sp => sp.user_id === d.id);
                     if (userProgress) {
-                        // Si hay datos nuevos, usarlos
                         return {
                             ...d,
                             progress: userProgress.progress_percentage || d.progress,
@@ -336,51 +326,37 @@ export default function ReportsPage() {
             // Filtrar los que están listos para ser discipuladores
             const readyList = progressData.filter(p => p.firstSeriesCompleted || p.status === "ready");
 
-            // Filtrar los que necesitan atención - LÓGICA MEJORADA
+            // Filtrar los que necesitan atención
             const sevenDaysAgo = new Date();
             sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
             const attentionList = progressData.filter(p => {
                 const lastActivity = new Date(p.lastActivity);
-
-                // Criterios para necesitar atención:
-                // 1. Tiene discipulador pero nunca empezó (current_lesson = 0)
-                // 2. Empezó pero lleva más de 7 días sin actividad
-                // 3. Lleva más de 30 días en la misma lección (estancado)
-                // 4. Muy poco progreso después de mucho tiempo (< 20% después de 30 días)
-
                 const daysSinceCreated = Math.floor((new Date() - new Date(p.lastActivity)) / (1000 * 60 * 60 * 24));
 
                 return (
-                    // Tiene discipulador pero nunca empezó
                     (p.discipler_id && p.currentLesson === 0) ||
-                    // Empezó pero inactivo por más de 7 días
                     (p.currentLesson > 0 && p.currentLesson < firstSeriesLessonsCount && lastActivity < sevenDaysAgo) ||
-                    // Muy poco progreso después de 30 días
                     (p.progress < 20 && daysSinceCreated > 30 && p.currentLesson > 0)
                 );
             });
 
-            // Calcular completadas este mes (basado en current_lesson cambios)
+            // Calcular completadas este mes
             const thisMonthStart = new Date();
             thisMonthStart.setDate(1);
-
-            // Por ahora estimamos basado en los que tienen progreso
             const completedThisMonth = progressData.filter(p => p.currentLesson > 3).length;
 
-            // Calcular progreso promedio (solo de usuarios activos)
+            // Calcular progreso promedio
             const activeUsers = progressData.filter(p => p.currentLesson > 0);
             const avgProgress = activeUsers.length > 0
                 ? Math.round(activeUsers.reduce((acc, p) => acc + p.progress, 0) / activeUsers.length)
                 : 0;
 
-            // Estadísticas por serie (estimadas basado en current_lesson)
+            // Estadísticas por serie
             const seriesStats = series?.map(s => {
-                // Estimar cuántos están en cada serie basado en el rango de lecciones
                 let startLesson = 1;
                 let endLesson = 0;
 
-                // Calcular rango de lecciones para esta serie
                 for (let i = 0; i < series.indexOf(s); i++) {
                     startLesson += series[i].bloques?.reduce((acc, b) =>
                         acc + (b.lecciones?.length || 0), 0
@@ -390,7 +366,6 @@ export default function ReportsPage() {
                     acc + (b.lecciones?.length || 0), 0
                 ) || 0) - 1;
 
-                // Contar usuarios en este rango
                 const usersInSerie = progressData.filter(p =>
                     p.currentLesson >= startLesson && p.currentLesson <= endLesson
                 );
@@ -442,13 +417,11 @@ export default function ReportsPage() {
             setReadyToBeDiscipiers(readyList);
             setNeedsAttentionList(attentionList);
             setSeriesStats(seriesStats);
-
-            // IMPORTANTE: Guardar allProgressData para uso en progreso avanzado
             setAllProgressData(allProgressData || []);
 
         } catch (error) {
             console.error("Error cargando datos:", error);
-            alert("Error cargando reportes. Ver consola para detalles.");
+            alert(t("error_loading_reports"));
         } finally {
             setLoading(false);
         }
@@ -463,20 +436,18 @@ export default function ReportsPage() {
                 if (user.phone) {
                     window.open(`https://wa.me/${user.phone.replace(/\D/g, '')}`, '_blank');
                 } else {
-                    alert("Este usuario no tiene número de WhatsApp registrado");
+                    alert(t("no_whatsapp_number"));
                 }
                 break;
             case 'view':
-                // Aquí podrías navegar a una vista detallada
-                console.log("Ver detalles de:", user);
+                console.log(t("view_details_log"), user);
                 break;
         }
     };
 
     const exportToCSV = () => {
-        // Función simple para exportar datos
         const csvContent = "data:text/csv;charset=utf-8,"
-            + "Nombre,Email,Teléfono,Discipulador,Progreso,Estado\n"
+            + `${t("csv_name")},${t("csv_email")},${t("csv_phone")},${t("csv_discipler")},${t("csv_progress")},${t("csv_status")}\n`
             + disciplesProgress.map(d =>
                 `${d.name},${d.email},${d.phone || ''},${d.discipler || ''},${d.progress}%,${d.status}`
             ).join("\n");
@@ -491,11 +462,11 @@ export default function ReportsPage() {
     };
 
     const tabs = [
-        { id: "dashboard", label: "Dashboard", icon: TrendingUp },
-        { id: "progress", label: "Progreso Serie 1", icon: Target },
-        { id: "ready", label: "Disciplicadores", icon: Award },
-        { id: "attention", label: "Necesitan Atención", icon: AlertCircle },
-        { id: "advanced", label: "Progreso Avanzado", icon: BookOpen },
+        { id: "dashboard", label: t("dashboard_tab"), icon: TrendingUp },
+        { id: "progress", label: t("progress_series1_tab"), icon: Target },
+        { id: "ready", label: t("disciplers_tab"), icon: Award },
+        { id: "attention", label: t("needs_attention_tab"), icon: AlertCircle },
+        { id: "advanced", label: t("advanced_progress_tab"), icon: BookOpen },
     ];
 
     return (
@@ -503,8 +474,8 @@ export default function ReportsPage() {
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-semibold">Reportes</h2>
-                    <p className="text-gray-600">Análisis y métricas del discipulado</p>
+                    <h2 className="text-2xl font-semibold">{t("reports")}</h2>
+                    <p className="text-gray-600">{t("reports_subtitle")}</p>
                 </div>
                 <div className="flex gap-2">
                     <select
@@ -512,20 +483,20 @@ export default function ReportsPage() {
                         onChange={(e) => setDateRange(e.target.value)}
                         className="px-3 py-2 border rounded-md"
                     >
-                        <option value="week">Esta Semana</option>
-                        <option value="month">Este Mes</option>
-                        <option value="year">Este Año</option>
-                        <option value="all">Todo</option>
+                        <option value="week">{t("this_week")}</option>
+                        <option value="month">{t("this_month")}</option>
+                        <option value="year">{t("this_year")}</option>
+                        <option value="all">{t("all_time")}</option>
                     </select>
 
-                    {/* Menú de exportación mejorado */}
+                    {/* Menú de exportación */}
                     <div className="relative">
                         <button
                             onClick={() => setShowExportMenu(!showExportMenu)}
                             className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                         >
                             <Download className="w-4 h-4" />
-                            Exportar ▼
+                            {t("export_btn")} ▼
                         </button>
                         {showExportMenu && (
                             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
@@ -536,7 +507,7 @@ export default function ReportsPage() {
                                     }}
                                     className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                 >
-                                    Todos los Discípulos
+                                    {t("export_all_disciples")}
                                 </button>
                                 <button
                                     onClick={() => {
@@ -545,7 +516,7 @@ export default function ReportsPage() {
                                     }}
                                     className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                 >
-                                    Solo Disciplicadores
+                                    {t("export_disciplers_only")}
                                 </button>
                                 <button
                                     onClick={() => {
@@ -554,7 +525,7 @@ export default function ReportsPage() {
                                     }}
                                     className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                 >
-                                    Necesitan Atención
+                                    {t("export_needs_attention")}
                                 </button>
                                 <button
                                     onClick={() => {
@@ -564,7 +535,7 @@ export default function ReportsPage() {
                                     }}
                                     className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                 >
-                                    Solo Activos
+                                    {t("export_active_only")}
                                 </button>
                             </div>
                         )}
@@ -579,8 +550,8 @@ export default function ReportsPage() {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-2 px-4 py-2 border-b-2 transition-colors ${activeTab === tab.id
-                                ? "border-blue-600 text-blue-600"
-                                : "border-transparent text-gray-600 hover:text-gray-900"
+                            ? "border-blue-600 text-blue-600"
+                            : "border-transparent text-gray-600 hover:text-gray-900"
                             }`}
                     >
                         <tab.icon className="w-4 h-4" />
@@ -591,61 +562,61 @@ export default function ReportsPage() {
 
             {loading ? (
                 <div className="text-center py-12">
-                    <p className="text-gray-500">Cargando reportes...</p>
+                    <p className="text-gray-500">{t("loading_reports_text")}</p>
                 </div>
             ) : (
                 <>
                     {/* Dashboard Tab */}
                     {activeTab === "dashboard" && (
                         <div className="space-y-6">
-                            {/* Estadísticas principales con tooltips explicativos */}
+                            {/* Estadísticas principales */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <div className="relative group">
                                     <StatCard
-                                        title="Total Usuarios"
+                                        title={t("total_users_stat")}
                                         value={stats.totalUsers}
-                                        subtitle={`${stats.totalAdmins} admins, ${stats.totalDisciplers} discipuladores`}
+                                        subtitle={`${stats.totalAdmins} admins, ${stats.totalDisciplers} ${t("disciplers")}`}
                                         icon={Users}
                                         color="blue"
                                     />
                                     <div className="absolute bottom-full mb-2 hidden group-hover:block bg-black text-white text-xs p-2 rounded whitespace-nowrap z-10">
-                                        Total de usuarios registrados en el sistema
+                                        {t("tooltip_total_users")}
                                     </div>
                                 </div>
                                 <div className="relative group">
                                     <StatCard
-                                        title="Discípulos Activos"
+                                        title={t("active_disciples_stat")}
                                         value={stats.totalDisciples}
-                                        subtitle={`${stats.avgProgress}% progreso promedio`}
+                                        subtitle={`${stats.avgProgress}% ${t("avg_progress_desc")}`}
                                         icon={UserCheck}
                                         color="green"
                                     />
                                     <div className="absolute bottom-full mb-2 hidden group-hover:block bg-black text-white text-xs p-2 rounded whitespace-nowrap z-10">
-                                        Usuarios con rol 'discípulo' que tienen progreso &gt; 0
+                                        {t("tooltip_active_disciples")}
                                     </div>
                                 </div>
                                 <div className="relative group">
                                     <StatCard
-                                        title="Disciplicadores"
+                                        title={t("certified_disciplers_stat")}
                                         value={stats.readyToDisciple}
-                                        subtitle="Completaron primera serie"
+                                        subtitle={t("completed_first_series")}
                                         icon={Award}
                                         color="purple"
                                     />
                                     <div className="absolute bottom-full mb-2 hidden group-hover:block bg-black text-white text-xs p-2 rounded whitespace-nowrap z-10">
-                                        Usuarios que completaron Serie 1 (certificados)
+                                        {t("tooltip_certified")}
                                     </div>
                                 </div>
                                 <div className="relative group">
                                     <StatCard
-                                        title="Necesitan Atención"
+                                        title={t("needs_attention_count")}
                                         value={stats.needsAttention}
-                                        subtitle="Inactivos o bajo progreso"
+                                        subtitle={t("inactive_or_low")}
                                         icon={AlertCircle}
                                         color="red"
                                     />
                                     <div className="absolute bottom-full mb-2 hidden group-hover:block bg-black text-white text-xs p-2 rounded whitespace-nowrap z-10">
-                                        Inactivos &gt;7 días o progreso &lt;20% después de 30 días
+                                        {t("tooltip_needs_attention")}
                                     </div>
                                 </div>
                             </div>
@@ -653,23 +624,23 @@ export default function ReportsPage() {
                             {/* Estadísticas de contenido */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <StatCard
-                                    title="Series Activas"
+                                    title={t("active_series_stat")}
                                     value={stats.activeSeries}
-                                    subtitle={`${stats.totalLessons} lecciones totales`}
+                                    subtitle={`${stats.totalLessons} ${t("total_lessons_desc")}`}
                                     icon={BookOpen}
                                     color="blue"
                                 />
                                 <StatCard
-                                    title="Completadas Este Mes"
+                                    title={t("completed_this_month_stat")}
                                     value={stats.completedThisMonth}
-                                    subtitle="Lecciones terminadas"
+                                    subtitle={t("lessons_finished_desc")}
                                     icon={CheckCircle}
                                     color="green"
                                 />
                                 <StatCard
-                                    title="Tiempo Promedio"
+                                    title={t("avg_time_stat")}
                                     value="3.5"
-                                    subtitle="Días por lección"
+                                    subtitle={t("days_per_lesson_desc")}
                                     icon={Clock}
                                     color="yellow"
                                 />
@@ -677,7 +648,7 @@ export default function ReportsPage() {
 
                             {/* Gráfico de progreso general */}
                             <div className="bg-white rounded-lg shadow p-6">
-                                <h3 className="font-semibold text-lg mb-4">Progreso General por Serie</h3>
+                                <h3 className="font-semibold text-lg mb-4">{t("overall_progress_title")}</h3>
                                 {seriesStats && seriesStats.length > 0 ? (
                                     <div className="space-y-4">
                                         {seriesStats.map((serie, index) => {
@@ -690,9 +661,9 @@ export default function ReportsPage() {
                                                             {serie.nombre}
                                                         </span>
                                                         <div className="flex gap-4 text-xs text-gray-600">
-                                                            <span>{serie.active} activos</span>
-                                                            <span>{serie.completed} completados</span>
-                                                            <span>{serie.avgProgress}% promedio</span>
+                                                            <span>{serie.active} {t("active_users_count")}</span>
+                                                            <span>{serie.completed} {t("completed_users_count")}</span>
+                                                            <span>{serie.avgProgress}% {t("average_text")}</span>
                                                         </div>
                                                     </div>
                                                     <div className="w-full bg-gray-200 rounded-full h-2">
@@ -702,7 +673,7 @@ export default function ReportsPage() {
                                                         />
                                                     </div>
                                                     <p className="text-xs text-gray-500 mt-1">
-                                                        {serie.totalLessons} lecciones totales
+                                                        {serie.totalLessons} {t("total_lessons_desc")}
                                                     </p>
                                                 </div>
                                             );
@@ -710,7 +681,7 @@ export default function ReportsPage() {
                                     </div>
                                 ) : (
                                     <p className="text-gray-500 text-sm">
-                                        No hay datos de progreso disponibles aún
+                                        {t("no_progress_available")}
                                     </p>
                                 )}
                             </div>
@@ -721,33 +692,33 @@ export default function ReportsPage() {
                     {activeTab === "progress" && (
                         <ProgressTable
                             data={disciplesProgress}
-                            title="Progreso de Todos los Discípulos"
+                            title={t("all_disciples_title")}
                             onAction={handleAction}
                         />
                     )}
 
-                    {/* Ready Tab - DISCIPLICADORES */}
+                    {/* Ready Tab */}
                     {activeTab === "ready" && (
                         <div className="space-y-4">
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                 <p className="text-sm text-blue-800">
-                                    🎉 Estos usuarios han completado la primera serie y están certificados como disciplicadores.
+                                    {t("certified_message")}
                                 </p>
                             </div>
                             {readyToBeDiscipiers.length > 0 ? (
                                 <ProgressTable
                                     data={readyToBeDiscipiers}
-                                    title="Disciplicadores Certificados"
+                                    title={t("certified_disciplers_title")}
                                     onAction={handleAction}
                                 />
                             ) : (
                                 <div className="bg-white rounded-lg shadow p-8 text-center">
                                     <Award className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                                     <p className="text-gray-500">
-                                        No hay usuarios que hayan completado la primera serie aún.
+                                        {t("no_certified_yet")}
                                     </p>
                                     <p className="text-sm text-gray-400 mt-2">
-                                        Los usuarios aparecerán aquí cuando completen todas las lecciones de "Fundamentos De Nuestra Fe"
+                                        {t("users_will_appear")}
                                     </p>
                                 </div>
                             )}
@@ -759,23 +730,23 @@ export default function ReportsPage() {
                         <div className="space-y-4">
                             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                                 <p className="text-sm text-yellow-800">
-                                    ⚠️ Estos discípulos necesitan motivación o seguimiento adicional.
+                                    {t("attention_message")}
                                 </p>
                             </div>
                             <ProgressTable
                                 data={needsAttentionList}
-                                title="Requieren Atención"
+                                title={t("require_attention_title")}
                                 onAction={handleAction}
                             />
                         </div>
                     )}
 
-                    {/* Advanced Progress Tab - NUEVO */}
+                    {/* Advanced Progress Tab */}
                     {activeTab === "advanced" && (
                         <div className="space-y-6">
                             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                                 <p className="text-sm text-purple-800">
-                                    📚 Vista completa del progreso en todas las series, incluyendo series opcionales y avanzadas.
+                                    {t("advanced_view_message")}
                                 </p>
                             </div>
 
@@ -784,35 +755,35 @@ export default function ReportsPage() {
                                 <div className="flex gap-4 items-center">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Filtrar por Serie
+                                            {t("filter_by_series")}
                                         </label>
                                         <select
                                             className="px-3 py-2 border rounded-md"
                                             value={selectedSeriesFilter}
                                             onChange={(e) => setSelectedSeriesFilter(e.target.value)}
                                         >
-                                            <option value="all">Todas las Series</option>
+                                            <option value="all">{t("all_series_option")}</option>
                                             {series?.map(s => (
                                                 <option key={s.id} value={s.id}>
                                                     {s.nombre} ({s.bloques?.reduce((acc, b) =>
                                                         acc + (b.lecciones?.length || 0), 0
-                                                    )} lecciones)
+                                                    )} {t("lessons")})
                                                 </option>
                                             ))}
                                         </select>
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Filtrar por Rol
+                                            {t("filter_by_role")}
                                         </label>
                                         <select
                                             className="px-3 py-2 border rounded-md"
                                             value={roleFilter}
                                             onChange={(e) => setRoleFilter(e.target.value)}
                                         >
-                                            <option value="all">Todos</option>
-                                            <option value="disciple">Solo Discípulos</option>
-                                            <option value="discipler">Discipuladores Estudiando</option>
+                                            <option value="all">{t("all_roles_option")}</option>
+                                            <option value="disciple">{t("disciples_only_option")}</option>
+                                            <option value="discipler">{t("studying_disciplers_option")}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -820,35 +791,28 @@ export default function ReportsPage() {
 
                             {/* Vista por Series */}
                             {series?.filter(serie => {
-                                // Aplicar filtro de serie
                                 if (selectedSeriesFilter !== "all" && serie.id !== selectedSeriesFilter) {
                                     return false;
                                 }
                                 return true;
                             }).map(serie => {
-                                // Calcular usuarios en esta serie basado en el rango de lecciones
                                 const serieInfo = seriesStats?.find(s => s.id === serie.id);
-
-                                // Usar allProgressData si existe y tiene datos, sino usar disciplesProgress
                                 const dataToFilter = (allProgressData && allProgressData.length > 0)
                                     ? allProgressData
                                     : disciplesProgress || [];
 
-                                // Filtrar usuarios según los criterios
                                 let usersInSerie = [];
 
                                 if (dataToFilter && dataToFilter.length > 0) {
                                     usersInSerie = dataToFilter.filter(d => {
-                                        if (!d) return false; // Verificar que d existe
+                                        if (!d) return false;
 
-                                        // Verificar si está en el rango de lecciones de esta serie
                                         if (serieInfo) {
                                             const inRange = d.currentLesson >= serieInfo.startLesson &&
                                                 d.currentLesson <= serieInfo.endLesson;
                                             if (!inRange) return false;
                                         }
 
-                                        // Aplicar filtro de rol
                                         if (roleFilter === "disciple" && d.isDiscipulador) return false;
                                         if (roleFilter === "discipler" && !d.isDiscipulador) return false;
 
@@ -856,7 +820,6 @@ export default function ReportsPage() {
                                     });
                                 }
 
-                                // Si no hay usuarios y hay filtros activos, no mostrar la serie
                                 if (usersInSerie.length === 0 && (selectedSeriesFilter !== "all" || roleFilter !== "all")) {
                                     return null;
                                 }
@@ -871,28 +834,28 @@ export default function ReportsPage() {
                                                         {serie.nombre}
                                                         {serie.orden === 1 && (
                                                             <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                                                                Requerida
+                                                                {t("required_label")}
                                                             </span>
                                                         )}
                                                         {serie.orden === 2 && (
                                                             <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                                                                Requerida para Discipular
+                                                                {t("required_for_discipling")}
                                                             </span>
                                                         )}
                                                         {serie.orden > 2 && (
                                                             <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">
-                                                                Opcional
+                                                                {t("optional_label")}
                                                             </span>
                                                         )}
                                                     </h3>
                                                     <p className="text-sm text-gray-600 mt-1">
-                                                        {serie.bloques?.length || 0} bloques •
+                                                        {serie.bloques?.length || 0} {t("blocks_text")} •
                                                         {serie.bloques?.reduce((acc, b) =>
                                                             acc + (b.lecciones?.length || 0), 0
-                                                        )} lecciones totales
+                                                        )} {t("total_lessons_desc")}
                                                         {serieInfo && (
                                                             <span className="text-xs text-gray-500 ml-2">
-                                                                (Lecciones {serieInfo.startLesson}-{serieInfo.endLesson})
+                                                                ({t("lessons_range")} {serieInfo.startLesson}-{serieInfo.endLesson})
                                                             </span>
                                                         )}
                                                     </p>
@@ -902,7 +865,7 @@ export default function ReportsPage() {
                                                         {usersInSerie.length}
                                                     </p>
                                                     <p className="text-sm text-gray-600">
-                                                        usuarios activos
+                                                        {t("active_users_text")}
                                                     </p>
                                                 </div>
                                             </div>
@@ -927,7 +890,7 @@ export default function ReportsPage() {
                                                                     </div>
                                                                     {isDiscipulador && (
                                                                         <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">
-                                                                            Discipulador
+                                                                            {t("discipler")}
                                                                         </span>
                                                                     )}
                                                                 </div>
@@ -935,7 +898,7 @@ export default function ReportsPage() {
                                                                 <div className="space-y-2">
                                                                     <div>
                                                                         <div className="flex justify-between text-xs mb-1">
-                                                                            <span>Lección {user.currentLesson}</span>
+                                                                            <span>{t("lesson")} {user.currentLesson}</span>
                                                                             <span>{user.progress}%</span>
                                                                         </div>
                                                                         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -948,7 +911,7 @@ export default function ReportsPage() {
 
                                                                     <div className="flex justify-between text-xs">
                                                                         <span className="text-gray-600">
-                                                                            Discipulador: {user.discipler || "N/A"}
+                                                                            {t("discipler")}: {user.discipler || "N/A"}
                                                                         </span>
                                                                         <div className="flex gap-2">
                                                                             <button
@@ -976,10 +939,10 @@ export default function ReportsPage() {
                                         ) : (
                                             <div className="p-8 text-center text-gray-500">
                                                 <BookOpen className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                                                <p>No hay usuarios activos en esta serie</p>
+                                                <p>{t("no_active_in_series")}</p>
                                                 {selectedSeriesFilter === "all" && roleFilter === "all" && (
                                                     <p className="text-xs text-gray-400 mt-2">
-                                                        Los usuarios aparecerán aquí cuando comiencen las lecciones {serieInfo?.startLesson}-{serieInfo?.endLesson}
+                                                        {t("users_appear_when")} {serieInfo?.startLesson}-{serieInfo?.endLesson}
                                                     </p>
                                                 )}
                                             </div>
@@ -997,7 +960,7 @@ export default function ReportsPage() {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                         <div className="flex justify-between items-start mb-4">
-                            <h2 className="text-xl font-bold">Detalles del Discípulo</h2>
+                            <h2 className="text-xl font-bold">{t("user_details_title")}</h2>
                             <button
                                 onClick={() => {
                                     setShowDetailsModal(false);
@@ -1012,22 +975,22 @@ export default function ReportsPage() {
                         <div className="space-y-4">
                             {/* Información Personal */}
                             <div className="border rounded-lg p-4">
-                                <h3 className="font-semibold mb-3 text-blue-600">Información Personal</h3>
+                                <h3 className="font-semibold mb-3 text-blue-600">{t("personal_info")}</h3>
                                 <div className="grid grid-cols-2 gap-3 text-sm">
                                     <div>
-                                        <span className="font-medium">Nombre:</span>
+                                        <span className="font-medium">{t("name")}:</span>
                                         <p className="text-gray-700">{selectedUserDetails.name}</p>
                                     </div>
                                     <div>
-                                        <span className="font-medium">Email:</span>
-                                        <p className="text-gray-700">{selectedUserDetails.email || "No registrado"}</p>
+                                        <span className="font-medium">{t("email")}:</span>
+                                        <p className="text-gray-700">{selectedUserDetails.email || t("no_registered")}</p>
                                     </div>
                                     <div>
-                                        <span className="font-medium">Teléfono:</span>
-                                        <p className="text-gray-700">{selectedUserDetails.phone || "No registrado"}</p>
+                                        <span className="font-medium">{t("phone")}:</span>
+                                        <p className="text-gray-700">{selectedUserDetails.phone || t("no_registered")}</p>
                                     </div>
                                     <div>
-                                        <span className="font-medium">Discipulador:</span>
+                                        <span className="font-medium">{t("discipler")}:</span>
                                         <p className="text-gray-700">{selectedUserDetails.discipler}</p>
                                     </div>
                                 </div>
@@ -1035,11 +998,11 @@ export default function ReportsPage() {
 
                             {/* Progreso Académico */}
                             <div className="border rounded-lg p-4">
-                                <h3 className="font-semibold mb-3 text-green-600">Progreso Académico</h3>
+                                <h3 className="font-semibold mb-3 text-green-600">{t("academic_progress")}</h3>
                                 <div className="space-y-3">
                                     <div>
                                         <div className="flex justify-between mb-1">
-                                            <span className="text-sm font-medium">Serie Actual: {selectedUserDetails.currentSeries}</span>
+                                            <span className="text-sm font-medium">{t("current_series")}: {selectedUserDetails.currentSeries}</span>
                                             <span className="text-sm">{selectedUserDetails.progress}%</span>
                                         </div>
                                         <div className="w-full bg-gray-200 rounded-full h-3">
@@ -1051,22 +1014,22 @@ export default function ReportsPage() {
                                     </div>
                                     <div className="grid grid-cols-2 gap-3 text-sm">
                                         <div>
-                                            <span className="font-medium">Lección Actual:</span>
-                                            <p className="text-gray-700">Lección {selectedUserDetails.currentLesson}</p>
+                                            <span className="font-medium">{t("current_lesson")}:</span>
+                                            <p className="text-gray-700">{t("lesson")} {selectedUserDetails.currentLesson}</p>
                                         </div>
                                         <div>
-                                            <span className="font-medium">Lecciones Completadas:</span>
+                                            <span className="font-medium">{t("lessons_completed")}:</span>
                                             <p className="text-gray-700">{selectedUserDetails.totalLessonsCompleted}</p>
                                         </div>
                                         <div>
-                                            <span className="font-medium">Estado:</span>
+                                            <span className="font-medium">{t("status")}:</span>
                                             <p className="text-gray-700">
-                                                {selectedUserDetails.status === "ready" ? "Disciplicador" :
-                                                    selectedUserDetails.status === "active" ? "Activo" : "Inactivo"}
+                                                {selectedUserDetails.status === "ready" ? t("discipler") :
+                                                    selectedUserDetails.status === "active" ? t("status_active") : t("status_inactive")}
                                             </p>
                                         </div>
                                         <div>
-                                            <span className="font-medium">Última Actividad:</span>
+                                            <span className="font-medium">{t("last_activity")}:</span>
                                             <p className="text-gray-700">
                                                 {new Date(selectedUserDetails.lastActivity).toLocaleDateString()}
                                             </p>
@@ -1077,7 +1040,7 @@ export default function ReportsPage() {
 
                             {/* Acciones Disponibles */}
                             <div className="border rounded-lg p-4">
-                                <h3 className="font-semibold mb-3 text-purple-600">Acciones Rápidas</h3>
+                                <h3 className="font-semibold mb-3 text-purple-600">{t("quick_actions")}</h3>
                                 <div className="grid grid-cols-2 gap-3">
                                     <button
                                         onClick={() => {
@@ -1087,7 +1050,7 @@ export default function ReportsPage() {
                                         className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                                     >
                                         <Mail className="w-4 h-4" />
-                                        Enviar Email
+                                        {t("send_email")}
                                     </button>
                                     {selectedUserDetails.phone && (
                                         <button
@@ -1103,17 +1066,15 @@ export default function ReportsPage() {
                                     )}
                                     <button
                                         onClick={() => {
-                                            // Aquí podrías navegar a la página de edición del usuario
-                                            alert("Función de edición próximamente");
+                                            alert(t("edit_function_soon"));
                                         }}
                                         className="flex items-center justify-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
                                     >
                                         <UserCheck className="w-4 h-4" />
-                                        Promover a Disciplicador
+                                        {t("promote_discipler")}
                                     </button>
                                     <button
                                         onClick={() => {
-                                            // Función para enviar motivación
                                             const message = `Hola ${selectedUserDetails.name}, ¡sigue adelante con tu estudio! Estás en ${selectedUserDetails.progress}% de progreso.`;
                                             if (selectedUserDetails.phone) {
                                                 const cleanPhone = selectedUserDetails.phone.replace(/\D/g, '');
@@ -1123,7 +1084,7 @@ export default function ReportsPage() {
                                         className="flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
                                     >
                                         <TrendingUp className="w-4 h-4" />
-                                        Enviar Motivación
+                                        {t("send_motivation")}
                                     </button>
                                 </div>
                             </div>

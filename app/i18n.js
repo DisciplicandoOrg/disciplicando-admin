@@ -262,23 +262,100 @@ const M = {
         lessonText5a: "Evaluación final - requiere",
         lessonText5b: "para aprobar y notificar al disciplicador.",
 
-        // Reportes
-        reportsTitle: "Reportes",
-        reportsSubtitle: "Análisis y métricas del discipulado",
-        thisWeek: "Esta Semana",
-        thisMonth: "Este Mes",
-        thisYear: "Este Año",
-        allTime: "Todo",
-        export: "Exportar",
-        exportAll: "Todos los Discípulos",
-        exportDisciplers: "Solo Disciplicadores",
-        exportNeedAttention: "Necesitan Atención",
-        exportActive: "Solo Activos",
-        dashboardTab: "Dashboard",
-        progressTab: "Progreso Serie 1",
-        disciplersTab: "Disciplicadores",
-        attentionTab: "Necesitan Atención",
-        advancedTab: "Progreso Avanzado",
+        // Página de Reportes - COMPLETO
+        reports: "Reportes",
+        reports_subtitle: "Análisis y métricas del discipulado",
+        this_week: "Esta Semana",
+        this_month: "Este Mes",
+        this_year: "Este Año",
+        all_time: "Todo",
+        export_btn: "Exportar",
+        export_all_disciples: "Todos los Discípulos",
+        export_disciplers_only: "Solo Disciplicadores",
+        export_needs_attention: "Necesitan Atención",
+        export_active_only: "Solo Activos",
+
+        // Tabs de reportes
+        dashboard_tab: "Dashboard",
+        progress_series1_tab: "Progreso Serie 1",
+        disciplers_tab: "Disciplicadores",
+        needs_attention_tab: "Necesitan Atención",
+        advanced_progress_tab: "Progreso Avanzado",
+
+        // Estadísticas del dashboard
+        total_users_stat: "Total Usuarios",
+        registered_users_desc: "Usuarios registrados",
+        active_disciples_stat: "Discípulos Activos",
+        avg_progress_desc: "progreso promedio",
+        certified_disciplers_stat: "Disciplicadores",
+        completed_first_series: "Completaron primera serie",
+        needs_attention_count: "Necesitan Atención",
+        inactive_or_low: "Inactivos o bajo progreso",
+        active_series_stat: "Series Activas",
+        total_lessons_desc: "lecciones totales",
+        completed_this_month_stat: "Completadas Este Mes",
+        lessons_finished_desc: "Lecciones terminadas",
+        avg_time_stat: "Tiempo Promedio",
+        days_per_lesson_desc: "Días por lección",
+
+        // Columnas de tabla
+        name_column: "Nombre",
+        discipler_column: "Disciplicador",
+        current_series_column: "Serie Actual",
+        progress_column: "Progreso",
+        status_column: "Estado",
+        actions_column: "Acciones",
+
+        // Estados
+        status_active: "Activo",
+        status_ready: "Listo para discipular",
+        status_inactive: "Inactivo",
+        not_assigned: "Sin asignar",
+
+        // Sección de progreso
+        overall_progress_title: "Progreso General por Serie",
+        active_users_count: "activos",
+        completed_users_count: "completados",
+        average_text: "promedio",
+        no_progress_available: "No hay datos de progreso disponibles aún",
+        all_disciples_title: "Progreso de Todos los Discípulos",
+
+        // Sección certificados
+        certified_message: "🎉 Estos usuarios han completado la primera serie y están certificados como disciplicadores.",
+        certified_disciplers_title: "Disciplicadores Certificados",
+        no_certified_yet: "No hay usuarios que hayan completado la primera serie aún.",
+        users_will_appear: "Los usuarios aparecerán aquí cuando completen todas las lecciones de \"Fundamentos De Nuestra Fe\"",
+
+        // Sección atención
+        attention_message: "⚠️ Estos discípulos necesitan motivación o seguimiento adicional.",
+        require_attention_title: "Requieren Atención",
+
+        // Sección avanzada
+        advanced_view_message: "📚 Vista completa del progreso en todas las series, incluyendo series opcionales y avanzadas.",
+        filter_by_series: "Filtrar por Serie",
+        filter_by_role: "Filtrar por Rol",
+        all_series_option: "Todas las Series",
+        all_roles_option: "Todos",
+        disciples_only_option: "Solo Discípulos",
+        studying_disciplers_option: "Disciplicadores Estudiando",
+        required_label: "Requerida",
+        required_for_discipling: "Requerida para Discipular",
+        optional_label: "Opcional",
+        blocks_text: "bloques",
+        lessons_range: "Lecciones",
+        active_users_text: "usuarios activos",
+        no_active_in_series: "No hay usuarios activos en esta serie",
+        users_appear_when: "Los usuarios aparecerán aquí cuando comiencen las lecciones",
+
+        // Leyenda
+        progress_legend: "Leyenda de Progreso:",
+        excellent_level: "Excelente",
+        good_level: "Bueno",
+        regular_level: "Regular",
+        needs_attention_level: "Necesita Atención",
+
+        // Cargando
+        loading_reports_text: "Cargando reportes...",
 
         // Comunes
         yes: "Sí",
@@ -313,6 +390,131 @@ const M = {
         confirmLogout: "¿Estás seguro de que quieres cerrar sesión?",
         confirmDelete: "¿Estás seguro de eliminar este elemento?",
         confirmReject: "¿Estás seguro de rechazar este usuario?",
+
+        // Configuración - Títulos principales
+        settings: "Configuración",
+        settingsSubtitle: "Administra todos los aspectos de tu aplicación",
+
+        // Secciones de configuración
+        generalSection: "General",
+        generalSectionDesc: "Configuración básica de la aplicación: nombre, zona horaria, idioma principal",
+        securitySection: "Seguridad",
+        securitySectionDesc: "Control de acceso, autenticación, políticas de contraseñas y permisos",
+        databaseSection: "Base de Datos",
+        databaseSectionDesc: "Respaldos automáticos, mantenimiento y optimización de datos",
+        notificationsSection: "Notificaciones",
+        notificationsSectionDesc: "Configurar qué tipos de notificaciones enviar y cuándo",
+        communicationsSection: "Comunicaciones",
+        communicationsSectionDesc: "Proveedores de email, SMS y WhatsApp para enviar mensajes",
+        appearanceSection: "Apariencia",
+        appearanceSectionDesc: "Personalización visual: colores, logos, temas",
+
+        // General
+        generalConfig: "Configuración General",
+        generalConfigDesc: "Ajustes básicos que afectan a toda la aplicación",
+        appName: "Nombre de la Aplicación",
+        appNameDesc: "Aparece en emails y notificaciones",
+        mainLanguage: "Idioma Principal",
+        mainLanguageDesc: "Idioma por defecto para nuevos usuarios",
+        timezone: "Zona Horaria",
+        timezoneDesc: "Afecta horarios de reportes y notificaciones automáticas",
+        timezonesTip: "Tip sobre zonas horarias",
+        timezonesTipText: "Memphis está en zona Central (CST/CDT). Honduras también usa CST pero sin horario de verano. La mayoría de Centroamérica está en CST permanente.",
+
+        // Zonas horarias
+        unitedStates: "Estados Unidos",
+        latinAmerica: "Latinoamérica",
+        eastern: "Este",
+        central: "Central",
+        mountain: "Montaña",
+        pacific: "Pacífico",
+
+        // Seguridad
+        securityConfig: "Configuración de Seguridad",
+        securityConfigDesc: "Protege las cuentas y datos de tus usuarios",
+        authentication: "Autenticación",
+        requireTwoFactor: "Requerir autenticación de dos factores para admins",
+        sessionTime: "Tiempo de sesión (minutos)",
+        sessionTimeDesc: "Cierra sesión tras inactividad",
+        passwordPolicies: "Políticas de Contraseñas",
+        minPasswordLength: "Longitud mínima",
+        requireSpecialChars: "Requerir caracteres especiales (!@#$%)",
+        accessLevels: "Niveles de acceso actuales",
+        adminAccess: "Control total del sistema",
+        disciplerAccess: "Gestiona sus discípulos",
+        discipleAccess: "Solo ve su progreso",
+
+        // Base de datos
+        databaseTitle: "Base de Datos",
+        databaseDesc: "Respaldos y mantenimiento de datos",
+        autoBackups: "Respaldos Automáticos",
+        enableAutoBackup: "Activar respaldos automáticos",
+        backupFrequency: "Frecuencia de respaldo",
+        hourly: "Cada hora",
+        daily: "Diario",
+        weekly: "Semanal",
+        monthly: "Mensual",
+        retentionDays: "Retención de respaldos (días)",
+        retentionDesc: "Los respaldos más antiguos se eliminarán automáticamente",
+        manualActions: "Acciones Manuales",
+        downloadBackup: "Descargar Respaldo",
+        restoreBackup: "Restaurar Respaldo",
+        supabaseInfo: "Información de Supabase",
+        supabaseInfoText: "Tu base de datos está alojada en Supabase con respaldos automáticos diarios incluidos. Los respaldos adicionales aquí son para mayor seguridad.",
+
+        // Notificaciones
+        notificationsTitle: "Notificaciones",
+        notificationsDesc: "Configura cuándo y cómo notificar a los usuarios",
+        notificationChannels: "Canales de Notificación",
+        emailChannel: "Email",
+        smsChannel: "SMS",
+        whatsappChannel: "WhatsApp",
+        pushChannel: "Notificaciones Push (App móvil)",
+        notificationTypes: "Tipos de Notificaciones",
+        newLessonAvailable: "Nueva lección disponible",
+        activityReminder: "Recordatorio de actividad pendiente",
+        lessonCompleted: "Felicitación por completar lección",
+        messageFromDiscipler: "Mensaje del disciplicador",
+        weeklyProgressSummary: "Resumen semanal de progreso",
+
+        // Comunicaciones
+        communicationProviders: "Proveedores de Comunicación",
+        communicationProvidersDesc: "Servicios externos para enviar mensajes",
+        emailProvider: "Proveedor",
+        apiKey: "API Key",
+        customSMTP: "SMTP Personalizado",
+        smsWhatsapp: "SMS y WhatsApp",
+        accountSID: "Account SID",
+        authToken: "Auth Token",
+        whatsappBusinessNumber: "Número de WhatsApp Business",
+        whatsappBusinessNumberDesc: "Debe estar verificado en WhatsApp Business API",
+
+        // Apariencia
+        appearanceTitle: "Apariencia",
+        appearanceDesc: "Personaliza el aspecto visual de la aplicación",
+        theme: "Tema",
+        darkMode: "Modo oscuro",
+        primaryColor: "Color principal",
+        logo: "Logo",
+        changeLogo: "Cambiar Logo",
+        logoRecommendation: "Recomendado: 512x512px, formato PNG con fondo transparente",
+
+        // Botones y acciones
+        saveChanges: "Guardar Cambios",
+        saving: "Guardando...",
+        saved: "Guardado",
+        changesWillApply: "Los cambios se aplicarán inmediatamente",
+
+        // Comunes de configuración
+        minutes: "minutos",
+        hours: "horas",
+        days: "días",
+        enabled: "Activado",
+        disabled: "Desactivado",
+        select: "Seleccionar",
+        configure: "Configurar",
+        test: "Probar",
+        testConnection: "Probar conexión",
     },
 
     en: {
@@ -573,23 +775,100 @@ const M = {
         lessonText5a: "Final evaluation - ",
         lessonText5b: "or greater required to pass and notify the disciplyer",
 
-        // Reports
-        reportsTitle: "Reports",
-        reportsSubtitle: "Discipleship analysis and metrics",
-        thisWeek: "This Week",
-        thisMonth: "This Month",
-        thisYear: "This Year",
-        allTime: "All Time",
-        export: "Export",
-        exportAll: "All Disciples",
-        exportDisciplers: "Disciplers Only",
-        exportNeedAttention: "Need Attention",
-        exportActive: "Active Only",
-        dashboardTab: "Dashboard",
-        progressTab: "Series 1 Progress",
-        disciplersTab: "Disciplers",
-        attentionTab: "Need Attention",
-        advancedTab: "Advanced Progress",
+        // Reports Page - COMPLETE
+        reports: "Reports",
+        reports_subtitle: "Analysis and discipleship metrics",
+        this_week: "This Week",
+        this_month: "This Month",
+        this_year: "This Year",
+        all_time: "All",
+        export_btn: "Export",
+        export_all_disciples: "All Disciples",
+        export_disciplers_only: "Disciplers Only",
+        export_needs_attention: "Need Attention",
+        export_active_only: "Active Only",
+
+        // Report tabs
+        dashboard_tab: "Dashboard",
+        progress_series1_tab: "Series 1 Progress",
+        disciplers_tab: "Disciplyers",
+        needs_attention_tab: "Need Attention",
+        advanced_progress_tab: "Advanced Progress",
+
+        // Dashboard stats
+        total_users_stat: "Total Users",
+        registered_users_desc: "Registered users",
+        active_disciples_stat: "Active Disciples",
+        avg_progress_desc: "average progress",
+        certified_disciplers_stat: "Disciplyers",
+        completed_first_series: "Completed first series",
+        needs_attention_count: "Need Attention",
+        inactive_or_low: "Inactive or low progress",
+        active_series_stat: "Active Series",
+        total_lessons_desc: "total lessons",
+        completed_this_month_stat: "Completed This Month",
+        lessons_finished_desc: "Lessons completed",
+        avg_time_stat: "Average Time",
+        days_per_lesson_desc: "Days per lesson",
+
+        // Table columns
+        name_column: "Name",
+        discipler_column: "Disciplyer",
+        current_series_column: "Current Series",
+        progress_column: "Progress",
+        status_column: "Status",
+        actions_column: "Actions",
+
+        // Status labels
+        status_active: "Active",
+        status_ready: "Ready to disciple",
+        status_inactive: "Inactive",
+        not_assigned: "Not assigned",
+
+        // Progress section
+        overall_progress_title: "Overall Progress by Series",
+        active_users_count: "active",
+        completed_users_count: "completed",
+        average_text: "average",
+        no_progress_available: "No progress data available yet",
+        all_disciples_title: "All Disciples Progress",
+
+        // Certified section
+        certified_message: "🎉 These users have completed the first series and are certified as disciplers.",
+        certified_disciplers_title: "Certified Disciplers",
+        no_certified_yet: "No users have completed the first series yet.",
+        users_will_appear: "Users will appear here when they complete all lessons from \"Foundations of Our Faith\"",
+
+        // Attention section
+        attention_message: "⚠️ These disciples need additional motivation or follow-up.",
+        require_attention_title: "Require Attention",
+
+        // Advanced section
+        advanced_view_message: "📚 Complete view of progress across all series, including optional and advanced series.",
+        filter_by_series: "Filter by Series",
+        filter_by_role: "Filter by Role",
+        all_series_option: "All Series",
+        all_roles_option: "All",
+        disciples_only_option: "Disciples Only",
+        studying_disciplers_option: "Studying Disciplers",
+        required_label: "Required",
+        required_for_discipling: "Required to Disciple",
+        optional_label: "Optional",
+        blocks_text: "blocks",
+        lessons_range: "Lessons",
+        active_users_text: "active users",
+        no_active_in_series: "No active users in this series",
+        users_appear_when: "Users will appear here when they start lessons",
+
+        // Legend
+        progress_legend: "Progress Legend:",
+        excellent_level: "Excellent",
+        good_level: "Good",
+        regular_level: "Regular",
+        needs_attention_level: "Needs Attention",
+
+        // Loading
+        loading_reports_text: "Loading reports...",
 
         // Common
         yes: "Yes",
@@ -624,6 +903,132 @@ const M = {
         confirmLogout: "Are you sure you want to logout?",
         confirmDelete: "Are you sure you want to delete this item?",
         confirmReject: "Are you sure you want to reject this user?",
+
+        // Settings - Main titles
+        settings: "Settings",
+        settingsSubtitle: "Manage all aspects of your application",
+
+        // Settings sections
+        generalSection: "General",
+        generalSectionDesc: "Basic application settings: name, timezone, main language",
+        securitySection: "Security",
+        securitySectionDesc: "Access control, authentication, password policies and permissions",
+        databaseSection: "Database",
+        databaseSectionDesc: "Automatic backups, maintenance and data optimization",
+        notificationsSection: "Notifications",
+        notificationsSectionDesc: "Configure what notifications to send and when",
+        communicationsSection: "Communications",
+        communicationsSectionDesc: "Email, SMS and WhatsApp providers for sending messages",
+        appearanceSection: "Appearance",
+        appearanceSectionDesc: "Visual customization: colors, logos, themes",
+
+        // General
+        generalConfig: "General Settings",
+        generalConfigDesc: "Basic settings that affect the entire application",
+        appName: "Application Name",
+        appNameDesc: "Appears in emails and notifications",
+        mainLanguage: "Main Language",
+        mainLanguageDesc: "Default language for new users",
+        timezone: "Timezone",
+        timezoneDesc: "Affects report schedules and automatic notifications",
+        timezonesTip: "Timezone tip",
+        timezonesTipText: "Memphis is in Central Time (CST/CDT). Honduras also uses CST but without daylight saving time. Most of Central America is on permanent CST.",
+
+        // Timezones
+        unitedStates: "United States",
+        latinAmerica: "Latin America",
+        eastern: "Eastern",
+        central: "Central",
+        mountain: "Mountain",
+        pacific: "Pacific",
+
+        // Security
+        securityConfig: "Security Settings",
+        securityConfigDesc: "Protect your users' accounts and data",
+        authentication: "Authentication",
+        requireTwoFactor: "Require two-factor authentication for admins",
+        sessionTime: "Session time (minutes)",
+        sessionTimeDesc: "Auto-logout after inactivity",
+        passwordPolicies: "Password Policies",
+        minPasswordLength: "Minimum length",
+        requireSpecialChars: "Require special characters (!@#$%)",
+        accessLevels: "Current access levels",
+        adminAccess: "Full system control",
+        disciplerAccess: "Manages their disciples",
+        discipleAccess: "Only sees their progress",
+
+        // Database
+        databaseTitle: "Database",
+        databaseDesc: "Backups and data maintenance",
+        autoBackups: "Automatic Backups",
+        enableAutoBackup: "Enable automatic backups",
+        backupFrequency: "Backup frequency",
+        hourly: "Hourly",
+        daily: "Daily",
+        weekly: "Weekly",
+        monthly: "Monthly",
+        retentionDays: "Backup retention (days)",
+        retentionDesc: "Older backups will be automatically deleted",
+        manualActions: "Manual Actions",
+        downloadBackup: "Download Backup",
+        restoreBackup: "Restore Backup",
+        supabaseInfo: "Supabase Information",
+        supabaseInfoText: "Your database is hosted on Supabase with included daily automatic backups. Additional backups here are for extra security.",
+
+        // Notifications
+        notificationsTitle: "Notifications",
+        notificationsDesc: "Configure when and how to notify users",
+        notificationChannels: "Notification Channels",
+        emailChannel: "Email",
+        smsChannel: "SMS",
+        whatsappChannel: "WhatsApp",
+        pushChannel: "Push Notifications (Mobile App)",
+        notificationTypes: "Notification Types",
+        newLessonAvailable: "New lesson available",
+        activityReminder: "Pending activity reminder",
+        lessonCompleted: "Congratulations for completing lesson",
+        messageFromDiscipler: "Message from discipler",
+        weeklyProgressSummary: "Weekly progress summary",
+
+        // Communications
+        communicationProviders: "Communication Providers",
+        communicationProvidersDesc: "External services for sending messages",
+        emailProvider: "Provider",
+        apiKey: "API Key",
+        customSMTP: "Custom SMTP",
+        smsWhatsapp: "SMS and WhatsApp",
+        accountSID: "Account SID",
+        authToken: "Auth Token",
+        whatsappBusinessNumber: "WhatsApp Business Number",
+        whatsappBusinessNumberDesc: "Must be verified in WhatsApp Business API",
+
+        // Appearance
+        appearanceTitle: "Appearance",
+        appearanceDesc: "Customize the visual appearance of the application",
+        theme: "Theme",
+        darkMode: "Dark mode",
+        primaryColor: "Primary color",
+        logo: "Logo",
+        changeLogo: "Change Logo",
+        logoRecommendation: "Recommended: 512x512px, PNG format with transparent background",
+
+        // Buttons and actions
+        saveChanges: "Save Changes",
+        saving: "Saving...",
+        saved: "Saved",
+        changesWillApply: "Changes will apply immediately",
+
+        // Common settings terms
+        minutes: "minutes",
+        hours: "hours",
+        days: "days",
+        enabled: "Enabled",
+        disabled: "Disabled",
+        select: "Select",
+        configure: "Configure",
+        test: "Test",
+        testConnection: "Test connection",
+
     },
 };
 

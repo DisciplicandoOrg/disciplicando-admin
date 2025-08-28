@@ -107,10 +107,9 @@ const TIMEZONES = {
 
 export default function ConfigPage() {
     const [activeSection, setActiveSection] = useState("general");
+    const { t } = useLang();
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
-
-    const { t } = useLang();
 
     // Estado para configuración de sesión
     const [sessionConfig, setSessionConfig] = useState({
@@ -170,12 +169,16 @@ export default function ConfigPage() {
 
     const sections = [
         {
-            id: "general", label: "General", icon: Settings,
-            desc: "Configuración básica de la aplicación: nombre, zona horaria, idioma principal"
+            id: "general",
+            label: t("generalSection"),
+            icon: Settings,
+            desc: t("generalSectionDesc")
         },
         {
-            id: "security", label: "Seguridad", icon: Shield,
-            desc: "Control de acceso, autenticación, políticas de contraseñas y permisos"
+            id: "security",
+            label: t("securitySection"),
+            icon: Shield,
+            desc: t("securitySectionDesc")
         },
 
         {
@@ -186,20 +189,28 @@ export default function ConfigPage() {
         },
 
         {
-            id: "database", label: "Base de Datos", icon: Database,
-            desc: "Respaldos automáticos, mantenimiento y optimización de datos"
+            id: "database",
+            label: t("databaseSection"),
+            icon: Database,
+            desc: t("databaseSectionDesc")
         },
         {
-            id: "notifications", label: "Notificaciones", icon: Bell,
-            desc: "Configurar qué tipos de notificaciones enviar y cuándo"
+            id: "notifications",
+            label: t("notificationsSection"),
+            icon: Bell,
+            desc: t("notificationsSectionDesc")
         },
         {
-            id: "communications", label: "Comunicaciones", icon: Mail,
-            desc: "Proveedores de email, SMS y WhatsApp para enviar mensajes"
+            id: "communications",
+            label: t("communicationsSection"),
+            icon: Mail,
+            desc: t("communicationsSectionDesc")
         },
         {
-            id: "appearance", label: "Apariencia", icon: Palette,
-            desc: "Personalización visual: colores, logos, temas"
+            id: "appearance",
+            label: t("appearanceSection"),
+            icon: Palette,
+            desc: t("appearanceSectionDesc")
         }
     ];
 
@@ -222,16 +233,16 @@ export default function ConfigPage() {
     const renderGeneralSection = () => (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-semibold mb-4">Configuración General</h3>
+                <h3 className="text-lg font-semibold mb-4">{t("generalConfig")}</h3>
                 <p className="text-gray-600 mb-6">
-                    Ajustes básicos que afectan a toda la aplicación
+                    {t("generalConfigDesc")}
                 </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label className="block text-sm font-medium mb-2">
-                        Nombre de la Aplicación
+                        {t("appName")}
                     </label>
                     <Input
                         value={config.appName}
@@ -239,42 +250,42 @@ export default function ConfigPage() {
                         placeholder="Disciplicando"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                        Aparece en emails y notificaciones
+                        {t("appNameDesc")}
                     </p>
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium mb-2">
-                        Idioma Principal
+                        {t("mainLanguage")}
                     </label>
                     <Select
                         value={config.language}
                         onChange={(e) => setConfig({ ...config, language: e.target.value })}
                     >
-                        <option value="es">Español</option>
-                        <option value="en">English</option>
+                        <option value="es">{t("spanish")}</option>
+                        <option value="en">{t("english")}</option>
                     </Select>
                     <p className="text-xs text-gray-500 mt-1">
-                        Idioma por defecto para nuevos usuarios
+                        {t("mainLanguageDesc")}
                     </p>
                 </div>
 
                 <div className="md:col-span-2">
                     <label className="block text-sm font-medium mb-2">
-                        Zona Horaria
+                        {t("timezone")}
                     </label>
                     <Select
                         value={config.timezone}
                         onChange={(e) => setConfig({ ...config, timezone: e.target.value })}
                     >
-                        <optgroup label="Estados Unidos">
+                        <optgroup label={t("unitedStates")}>
                             {TIMEZONES.usa.map(tz => (
                                 <option key={tz.value} value={tz.value}>
                                     {tz.label} ({tz.abbr})
                                 </option>
                             ))}
                         </optgroup>
-                        <optgroup label="Latinoamérica">
+                        <optgroup label={t("latinAmerica")}>
                             {TIMEZONES.latam.map(tz => (
                                 <option key={tz.value} value={tz.value}>
                                     {tz.label} ({tz.abbr})
@@ -283,7 +294,7 @@ export default function ConfigPage() {
                         </optgroup>
                     </Select>
                     <p className="text-xs text-gray-500 mt-1">
-                        Afecta horarios de reportes y notificaciones automáticas
+                        {t("timezoneDesc")}
                     </p>
                 </div>
             </div>
@@ -292,10 +303,9 @@ export default function ConfigPage() {
                 <div className="flex items-start gap-3">
                     <Globe className="w-5 h-5 text-blue-600 mt-0.5" />
                     <div>
-                        <p className="font-medium text-blue-900">Tip sobre zonas horarias</p>
+                        <p className="font-medium text-blue-900">{t("timezonesTip")}</p>
                         <p className="text-sm text-blue-700 mt-1">
-                            Memphis está en zona Central (CST/CDT). Honduras también usa CST pero sin horario de verano.
-                            La mayoría de Centroamérica está en CST permanente.
+                            {t("timezonesTipText")}
                         </p>
                     </div>
                 </div>
@@ -306,27 +316,27 @@ export default function ConfigPage() {
     const renderSecuritySection = () => (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-semibold mb-4">Configuración de Seguridad</h3>
+                <h3 className="text-lg font-semibold mb-4">{t("securityConfig")}</h3>
                 <p className="text-gray-600 mb-6">
-                    Protege las cuentas y datos de tus usuarios
+                    {t("securityConfigDesc")}
                 </p>
             </div>
 
             <Card className="p-6">
                 <h4 className="font-medium mb-4 flex items-center gap-2">
                     <Lock className="w-4 h-4" />
-                    Autenticación
+                    {t("authentication")}
                 </h4>
                 <div className="space-y-4">
                     <Switch
                         checked={config.twoFactorRequired}
                         onChange={(e) => setConfig({ ...config, twoFactorRequired: e.target.checked })}
-                        label="Requerir autenticación de dos factores para admins"
+                        label={t("requireTwoFactor")}
                     />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium mb-2">
-                                Tiempo de sesión (minutos)
+                                {t("sessionTime")}
                             </label>
                             <Input
                                 type="number"
@@ -336,7 +346,7 @@ export default function ConfigPage() {
                                 max="1440"
                             />
                             <p className="text-xs text-gray-500 mt-1">
-                                Cierra sesión tras inactividad
+                                {t("sessionTimeDesc")}
                             </p>
                         </div>
                     </div>
@@ -346,12 +356,12 @@ export default function ConfigPage() {
             <Card className="p-6">
                 <h4 className="font-medium mb-4 flex items-center gap-2">
                     <Key className="w-4 h-4" />
-                    Políticas de Contraseñas
+                    {t("passwordPolicies")}
                 </h4>
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium mb-2">
-                            Longitud mínima
+                            {t("minPasswordLength")}
                         </label>
                         <Input
                             type="number"
@@ -364,7 +374,7 @@ export default function ConfigPage() {
                     <Switch
                         checked={config.requireSpecialChars}
                         onChange={(e) => setConfig({ ...config, requireSpecialChars: e.target.checked })}
-                        label="Requerir caracteres especiales (!@#$%)"
+                        label={t("requireSpecialChars")}
                     />
                 </div>
             </Card>
@@ -373,11 +383,11 @@ export default function ConfigPage() {
                 <div className="flex items-start gap-3">
                     <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
                     <div>
-                        <p className="font-medium text-amber-900">Niveles de acceso actuales</p>
+                        <p className="font-medium text-amber-900">{t("accessLevels")}</p>
                         <ul className="text-sm text-amber-700 mt-2 space-y-1">
-                            <li>• <strong>Admin:</strong> Control total del sistema</li>
-                            <li>• <strong>Disciplicador:</strong> Gestiona sus discípulos</li>
-                            <li>• <strong>Discípulo:</strong> Solo ve su progreso</li>
+                            <li>• <strong>Admin:</strong> {t("adminAccess")}</li>
+                            <li>• <strong>{t("discipler")}:</strong> {t("disciplerAccess")}</li>
+                            <li>• <strong>{t("disciple")}:</strong> {t("discipleAccess")}</li>
                         </ul>
                     </div>
                 </div>
@@ -417,7 +427,7 @@ export default function ConfigPage() {
                                 max="120"
                                 className="w-24"
                             />
-                            <span className="text-sm text-gray-500">minutos</span>
+                            <span className="text-sm text-gray-500">{t("minutes")}</span>
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
                             {t("inactivityTimeoutDesc")}
@@ -440,7 +450,7 @@ export default function ConfigPage() {
                                 max="24"
                                 className="w-24"
                             />
-                            <span className="text-sm text-gray-500">horas</span>
+                            <span className="text-sm text-gray-500">{t("hours")}</span>
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
                             {t("maxSessionTimeDesc")}
@@ -463,7 +473,7 @@ export default function ConfigPage() {
                                 max="15"
                                 className="w-24"
                             />
-                            <span className="text-sm text-gray-500">minutos</span>
+                            <span className="text-sm text-gray-500">{t("minutes")}</span>
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
                             {t("warningTimeDesc")}
@@ -491,44 +501,44 @@ export default function ConfigPage() {
     const renderDatabaseSection = () => (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-semibold mb-4">Base de Datos</h3>
+                <h3 className="text-lg font-semibold mb-4">{t("databaseTitle")}</h3>
                 <p className="text-gray-600 mb-6">
-                    Respaldos y mantenimiento de datos
+                    {t("databaseDesc")}
                 </p>
             </div>
 
             <Card className="p-6">
                 <h4 className="font-medium mb-4 flex items-center gap-2">
                     <Server className="w-4 h-4" />
-                    Respaldos Automáticos
+                    {t("autoBackups")}
                 </h4>
                 <div className="space-y-4">
                     <Switch
                         checked={config.autoBackup}
                         onChange={(e) => setConfig({ ...config, autoBackup: e.target.checked })}
-                        label="Activar respaldos automáticos"
+                        label={t("enableAutoBackup")}
                     />
 
                     {config.autoBackup && (
                         <>
                             <div>
                                 <label className="block text-sm font-medium mb-2">
-                                    Frecuencia de respaldo
+                                    {t("backupFrequency")}
                                 </label>
                                 <Select
                                     value={config.backupFrequency}
                                     onChange={(e) => setConfig({ ...config, backupFrequency: e.target.value })}
                                 >
-                                    <option value="hourly">Cada hora</option>
-                                    <option value="daily">Diario</option>
-                                    <option value="weekly">Semanal</option>
-                                    <option value="monthly">Mensual</option>
+                                    <option value="hourly">{t("hourly")}</option>
+                                    <option value="daily">{t("daily")}</option>
+                                    <option value="weekly">{t("weekly")}</option>
+                                    <option value="monthly">{t("monthly")}</option>
                                 </Select>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium mb-2">
-                                    Retención de respaldos (días)
+                                    {t("retentionDays")}
                                 </label>
                                 <Input
                                     type="number"
@@ -538,7 +548,7 @@ export default function ConfigPage() {
                                     max="365"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">
-                                    Los respaldos más antiguos se eliminarán automáticamente
+                                    {t("retentionDesc")}
                                 </p>
                             </div>
                         </>
@@ -547,15 +557,15 @@ export default function ConfigPage() {
             </Card>
 
             <Card className="p-6">
-                <h4 className="font-medium mb-4">Acciones Manuales</h4>
+                <h4 className="font-medium mb-4">{t("manualActions")}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Button variant="secondary" className="justify-center">
                         <Download className="w-4 h-4" />
-                        Descargar Respaldo
+                        {t("downloadBackup")}
                     </Button>
                     <Button variant="secondary" className="justify-center">
                         <Upload className="w-4 h-4" />
-                        Restaurar Respaldo
+                        {t("restoreBackup")}
                     </Button>
                 </div>
             </Card>
@@ -564,10 +574,9 @@ export default function ConfigPage() {
                 <div className="flex items-start gap-3">
                     <Database className="w-5 h-5 text-green-600 mt-0.5" />
                     <div>
-                        <p className="font-medium text-green-900">Información de Supabase</p>
+                        <p className="font-medium text-green-900">{t("supabaseInfo")}</p>
                         <p className="text-sm text-green-700 mt-1">
-                            Tu base de datos está alojada en Supabase con respaldos automáticos diarios incluidos.
-                            Los respaldos adicionales aquí son para mayor seguridad.
+                            {t("supabaseInfoText")}
                         </p>
                     </div>
                 </div>
@@ -578,60 +587,60 @@ export default function ConfigPage() {
     const renderNotificationsSection = () => (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-semibold mb-4">Notificaciones</h3>
+                <h3 className="text-lg font-semibold mb-4">{t("notificationsTitle")}</h3>
                 <p className="text-gray-600 mb-6">
-                    Configura cuándo y cómo notificar a los usuarios
+                    {t("notificationsDesc")}
                 </p>
             </div>
 
             <Card className="p-6">
-                <h4 className="font-medium mb-4">Canales de Notificación</h4>
+                <h4 className="font-medium mb-4">{t("notificationChannels")}</h4>
                 <div className="space-y-4">
                     <Switch
                         checked={config.emailEnabled}
                         onChange={(e) => setConfig({ ...config, emailEnabled: e.target.checked })}
-                        label="Email"
+                        label={t("emailChannel")}
                     />
                     <Switch
                         checked={config.smsEnabled}
                         onChange={(e) => setConfig({ ...config, smsEnabled: e.target.checked })}
-                        label="SMS"
+                        label={t("smsChannel")}
                     />
                     <Switch
                         checked={config.whatsappEnabled}
                         onChange={(e) => setConfig({ ...config, whatsappEnabled: e.target.checked })}
-                        label="WhatsApp"
+                        label={t("whatsappChannel")}
                     />
                     <Switch
                         checked={config.pushEnabled}
                         onChange={(e) => setConfig({ ...config, pushEnabled: e.target.checked })}
-                        label="Notificaciones Push (App móvil)"
+                        label={t("pushChannel")}
                     />
                 </div>
             </Card>
 
             <Card className="p-6">
-                <h4 className="font-medium mb-4">Tipos de Notificaciones</h4>
+                <h4 className="font-medium mb-4">{t("notificationTypes")}</h4>
                 <div className="space-y-3">
                     <label className="flex items-center gap-3">
                         <input type="checkbox" defaultChecked className="rounded" />
-                        <span>Nueva lección disponible</span>
+                        <span>{t("newLessonAvailable")}</span>
                     </label>
                     <label className="flex items-center gap-3">
                         <input type="checkbox" defaultChecked className="rounded" />
-                        <span>Recordatorio de actividad pendiente</span>
+                        <span>{t("activityReminder")}</span>
                     </label>
                     <label className="flex items-center gap-3">
                         <input type="checkbox" defaultChecked className="rounded" />
-                        <span>Felicitación por completar lección</span>
+                        <span>{t("lessonCompleted")}</span>
                     </label>
                     <label className="flex items-center gap-3">
                         <input type="checkbox" defaultChecked className="rounded" />
-                        <span>Mensaje del disciplicador</span>
+                        <span>{t("messageFromDiscipler")}</span>
                     </label>
                     <label className="flex items-center gap-3">
                         <input type="checkbox" className="rounded" />
-                        <span>Resumen semanal de progreso</span>
+                        <span>{t("weeklyProgressSummary")}</span>
                     </label>
                 </div>
             </Card>
@@ -641,21 +650,21 @@ export default function ConfigPage() {
     const renderCommunicationsSection = () => (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-semibold mb-4">Proveedores de Comunicación</h3>
+                <h3 className="text-lg font-semibold mb-4">{t("communicationProviders")}</h3>
                 <p className="text-gray-600 mb-6">
-                    Servicios externos para enviar mensajes
+                    {t("communicationProvidersDesc")}
                 </p>
             </div>
 
             <Card className="p-6">
                 <h4 className="font-medium mb-4 flex items-center gap-2">
                     <Mail className="w-4 h-4" />
-                    Email
+                    {t("emailChannel")}
                 </h4>
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium mb-2">
-                            Proveedor
+                            {t("emailProvider")}
                         </label>
                         <Select
                             value={config.emailProvider}
@@ -664,12 +673,12 @@ export default function ConfigPage() {
                             <option value="sendgrid">SendGrid</option>
                             <option value="mailgun">Mailgun</option>
                             <option value="ses">Amazon SES</option>
-                            <option value="smtp">SMTP Personalizado</option>
+                            <option value="smtp">{t("customSMTP")}</option>
                         </Select>
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-2">
-                            API Key
+                            {t("apiKey")}
                         </label>
                         <Input type="password" placeholder="••••••••••••••••" />
                     </div>
@@ -679,12 +688,12 @@ export default function ConfigPage() {
             <Card className="p-6">
                 <h4 className="font-medium mb-4 flex items-center gap-2">
                     <MessageSquare className="w-4 h-4" />
-                    SMS y WhatsApp
+                    {t("smsWhatsapp")}
                 </h4>
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium mb-2">
-                            Proveedor
+                            {t("emailProvider")}
                         </label>
                         <Select
                             value={config.smsProvider}
@@ -698,24 +707,24 @@ export default function ConfigPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium mb-2">
-                                Account SID
+                                {t("accountSID")}
                             </label>
                             <Input type="password" placeholder="••••••••••••••••" />
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-2">
-                                Auth Token
+                                {t("authToken")}
                             </label>
                             <Input type="password" placeholder="••••••••••••••••" />
                         </div>
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-2">
-                            Número de WhatsApp Business
+                            {t("whatsappBusinessNumber")}
                         </label>
                         <Input placeholder="+1 (901) 555-0123" />
                         <p className="text-xs text-gray-500 mt-1">
-                            Debe estar verificado en WhatsApp Business API
+                            {t("whatsappBusinessNumberDesc")}
                         </p>
                     </div>
                 </div>
@@ -726,23 +735,23 @@ export default function ConfigPage() {
     const renderAppearanceSection = () => (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-semibold mb-4">Apariencia</h3>
+                <h3 className="text-lg font-semibold mb-4">{t("appearanceTitle")}</h3>
                 <p className="text-gray-600 mb-6">
-                    Personaliza el aspecto visual de la aplicación
+                    {t("appearanceDesc")}
                 </p>
             </div>
 
             <Card className="p-6">
-                <h4 className="font-medium mb-4">Tema</h4>
+                <h4 className="font-medium mb-4">{t("theme")}</h4>
                 <div className="space-y-4">
                     <Switch
                         checked={config.darkMode}
                         onChange={(e) => setConfig({ ...config, darkMode: e.target.checked })}
-                        label="Modo oscuro"
+                        label={t("darkMode")}
                     />
                     <div>
                         <label className="block text-sm font-medium mb-2">
-                            Color principal
+                            {t("primaryColor")}
                         </label>
                         <div className="flex items-center gap-3">
                             <input
@@ -762,7 +771,7 @@ export default function ConfigPage() {
             </Card>
 
             <Card className="p-6">
-                <h4 className="font-medium mb-4">Logo</h4>
+                <h4 className="font-medium mb-4">{t("logo")}</h4>
                 <div className="space-y-4">
                     <div className="flex items-center gap-4">
                         <img
@@ -772,11 +781,11 @@ export default function ConfigPage() {
                         />
                         <Button variant="secondary">
                             <Upload className="w-4 h-4" />
-                            Cambiar Logo
+                            {t("changeLogo")}
                         </Button>
                     </div>
                     <p className="text-xs text-gray-500">
-                        Recomendado: 512x512px, formato PNG con fondo transparente
+                        {t("logoRecommendation")}
                     </p>
                 </div>
             </Card>
@@ -801,9 +810,9 @@ export default function ConfigPage() {
             <div className="max-w-7xl mx-auto p-6">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Configuración</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{t("settings")}</h1>
                     <p className="text-gray-600">
-                        Administra todos los aspectos de tu aplicación
+                        {t("settingsSubtitle")}
                     </p>
                 </div>
 
@@ -850,13 +859,13 @@ export default function ConfigPage() {
                             {/* Save Button */}
                             <div className="mt-8 pt-6 border-t flex items-center justify-between">
                                 <div className="text-sm text-gray-500">
-                                    Los cambios se aplicarán inmediatamente
+                                    {t("changesWillApply")}
                                 </div>
                                 <div className="flex items-center gap-3">
                                     {saved && (
                                         <span className="text-green-600 flex items-center gap-2">
                                             <Check className="w-4 h-4" />
-                                            Guardado
+                                            {t("saved")}
                                         </span>
                                     )}
                                     <Button
@@ -867,17 +876,18 @@ export default function ConfigPage() {
                                         {saving ? (
                                             <>
                                                 <RefreshCw className="w-4 h-4 animate-spin" />
-                                                Guardando...
+                                                {t("saving")}
                                             </>
                                         ) : (
                                             <>
                                                 <Save className="w-4 h-4" />
-                                                Guardar Cambios
+                                                {t("saveChanges")}
                                             </>
                                         )}
                                     </Button>
                                 </div>
                             </div>
+
                         </Card>
                     </div>
                 </div>
