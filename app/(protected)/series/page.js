@@ -3,10 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
 import { BookOpenText, Plus, Edit, Trash2, ChevronDown, ChevronRight, Globe, Folder, FileText } from "lucide-react";
-import { useLang } from "@/app/i18n";
 
 // Modal para editar serie
-function EditSerieModal({ serie, isOpen, onClose, onSave, supabase, t }) {
+function EditSerieModal({ serie, isOpen, onClose, onSave, supabase }) {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         nombre_es: "",
@@ -77,18 +76,17 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase, t }) {
                 }
             } else {
                 // Crear nueva serie
-                // Generar slug desde el nombre
                 const slug = formData.nombre_es
                     .toLowerCase()
                     .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "") // Quitar acentos
-                    .replace(/[^a-z0-9]+/g, '-') // Reemplazar espacios y caracteres especiales con guiones
-                    .replace(/^-+|-+$/g, ''); // Quitar guiones al inicio y final
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
 
                 const { data: newSerie, error: serieError } = await supabase
                     .from("series")
                     .insert({
-                        slug: slug || 'serie-' + Date.now(), // Usar timestamp si no hay slug
+                        slug: slug || 'serie-' + Date.now(),
                         nombre: formData.nombre_es,
                         descripcion: formData.descripcion_es,
                         orden: formData.orden,
@@ -99,7 +97,6 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase, t }) {
 
                 if (serieError) throw serieError;
 
-                // Crear traducción al inglés si hay contenido
                 if ((formData.nombre_en || formData.descripcion_en) && newSerie) {
                     await supabase
                         .from("series_i18n")
@@ -128,7 +125,7 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase, t }) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <h2 className="text-xl font-bold mb-4">
-                    {serie ? t("editSaries") : t("newSeries")}
+                    {serie ? "Editar Serie" : "Nueva Serie"}
                 </h2>
 
                 <div className="space-y-4">
@@ -146,7 +143,7 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase, t }) {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-1">Descripción:</label>
+                                <label className="block text-sm font-medium mb-1">Descripción</label>
                                 <textarea
                                     value={formData.descripcion_es}
                                     onChange={(e) => setFormData({ ...formData, descripcion_es: e.target.value })}
@@ -161,7 +158,7 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase, t }) {
                         <h3 className="font-semibold mb-3">🇺🇸 English</h3>
                         <div className="space-y-3">
                             <div>
-                                <label className="block text-sm font-medium mb-1">Name *</label>
+                                <label className="block text-sm font-medium mb-1">Name</label>
                                 <input
                                     type="text"
                                     value={formData.nombre_en}
@@ -170,7 +167,7 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase, t }) {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-1">Description:</label>
+                                <label className="block text-sm font-medium mb-1">Description</label>
                                 <textarea
                                     value={formData.descripcion_en}
                                     onChange={(e) => setFormData({ ...formData, descripcion_en: e.target.value })}
@@ -183,7 +180,7 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase, t }) {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1">{t("order")}</label>
+                            <label className="block text-sm font-medium mb-1">Orden</label>
                             <input
                                 type="number"
                                 value={formData.orden}
@@ -193,14 +190,14 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase, t }) {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">{t("status")}</label>
+                            <label className="block text-sm font-medium mb-1">Estado</label>
                             <select
                                 value={formData.is_active}
                                 onChange={(e) => setFormData({ ...formData, is_active: e.target.value === "true" })}
                                 className="w-full px-3 py-2 border rounded-md"
                             >
-                                <option value="true">{t("active")}</option>
-                                <option value="false">{t("inactive")}</option>
+                                <option value="true">Activa</option>
+                                <option value="false">Inactiva</option>
                             </select>
                         </div>
                     </div>
@@ -211,14 +208,14 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase, t }) {
                         onClick={onClose}
                         className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
                     >
-                        {t("cancel")}
+                        Cancelar
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={loading || !formData.nombre_es}
                         className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
                     >
-                        {loading ? t("saving") : t("save")}
+                        {loading ? "Guardando..." : "Guardar"}
                     </button>
                 </div>
             </div>
@@ -227,7 +224,7 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase, t }) {
 }
 
 // Modal para bloques
-function BloqueModal({ bloque, serieId, isOpen, onClose, onSave, supabase, t }) {
+function BloqueModal({ bloque, serieId, isOpen, onClose, onSave, supabase }) {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         nombre_es: "",
@@ -255,7 +252,6 @@ function BloqueModal({ bloque, serieId, isOpen, onClose, onSave, supabase, t }) 
         setLoading(true);
         try {
             if (bloque?.id) {
-                // Actualizar bloque
                 const { error } = await supabase
                     .from("bloques")
                     .update({
@@ -266,7 +262,6 @@ function BloqueModal({ bloque, serieId, isOpen, onClose, onSave, supabase, t }) 
 
                 if (error) throw error;
 
-                // Actualizar traducción
                 if (formData.nombre_en) {
                     await supabase
                         .from("bloques_i18n")
@@ -283,7 +278,6 @@ function BloqueModal({ bloque, serieId, isOpen, onClose, onSave, supabase, t }) 
                         });
                 }
             } else {
-                // Crear nuevo bloque
                 const { data: newBloque, error } = await supabase
                     .from("bloques")
                     .insert({
@@ -296,7 +290,6 @@ function BloqueModal({ bloque, serieId, isOpen, onClose, onSave, supabase, t }) 
 
                 if (error) throw error;
 
-                // Crear traducción
                 if (formData.nombre_en && newBloque) {
                     await supabase
                         .from("bloques_i18n")
@@ -323,7 +316,7 @@ function BloqueModal({ bloque, serieId, isOpen, onClose, onSave, supabase, t }) 
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-lg">
                 <h2 className="text-xl font-bold mb-4">
-                    {bloque ? "Editar Bloque" : t("newBlock")}
+                    {bloque ? "Editar Bloque" : "Nuevo Bloque"}
                 </h2>
 
                 <div className="space-y-4">
@@ -349,7 +342,7 @@ function BloqueModal({ bloque, serieId, isOpen, onClose, onSave, supabase, t }) 
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium mb-1">{t("order")}</label>
+                        <label className="block text-sm font-medium mb-1">Orden</label>
                         <input
                             type="number"
                             value={formData.orden}
@@ -380,20 +373,26 @@ function BloqueModal({ bloque, serieId, isOpen, onClose, onSave, supabase, t }) 
     );
 }
 
-// Modal para lecciones
-function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase, t }) {
+// Modal para lecciones - ACTUALIZADO CON RECURSOS POR IDIOMA
+function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         titulo_es: "",
         titulo_en: "",
         numero: 1,
         is_active: true,
-        video_url: "",
-        blog_url: "",
-        estudio_url: "",
-        quiz_url: "",
+        // Recursos en español
+        video_url_es: "",
+        blog_url_es: "",
+        estudio_url_es: "",
+        quiz_url_es: "",
+        // Recursos en inglés
+        video_url_en: "",
+        blog_url_en: "",
+        estudio_url_en: "",
+        quiz_url_en: "",
         contenido_md: "",
-        quiz_min_score: 80 // Porcentaje mínimo para aprobar
+        quiz_min_score: 80
     });
 
     useEffect(() => {
@@ -403,10 +402,16 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase, t 
                 titulo_en: leccion.titulo_en || "",
                 numero: leccion.numero || 1,
                 is_active: leccion.is_active ?? true,
-                video_url: leccion.video_url || "",
-                blog_url: leccion.blog_url || "",
-                estudio_url: leccion.estudio_url || "",
-                quiz_url: leccion.quiz_url || "",
+                // Recursos en español (de la tabla principal)
+                video_url_es: leccion.video_url || "",
+                blog_url_es: leccion.blog_url || "",
+                estudio_url_es: leccion.estudio_url || "",
+                quiz_url_es: leccion.quiz_url || "",
+                // Recursos en inglés (de la tabla i18n)
+                video_url_en: leccion.video_url_en || "",
+                blog_url_en: leccion.blog_url_en || "",
+                estudio_url_en: leccion.estudio_url_en || "",
+                quiz_url_en: leccion.quiz_url_en || "",
                 contenido_md: leccion.contenido_md || "",
                 quiz_min_score: leccion.quiz_min_score || 80
             });
@@ -416,10 +421,14 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase, t 
                 titulo_en: "",
                 numero: 1,
                 is_active: true,
-                video_url: "",
-                blog_url: "",
-                estudio_url: "",
-                quiz_url: "",
+                video_url_es: "",
+                blog_url_es: "",
+                estudio_url_es: "",
+                quiz_url_es: "",
+                video_url_en: "",
+                blog_url_en: "",
+                estudio_url_en: "",
+                quiz_url_en: "",
                 contenido_md: "",
                 quiz_min_score: 80
             });
@@ -430,43 +439,62 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase, t 
         setLoading(true);
         try {
             if (leccion?.id) {
-                // Actualizar lección
+                // Actualizar lección existente
+                console.log("Actualizando lección con datos:", formData);
+
                 const { error } = await supabase
                     .from("lecciones")
                     .update({
                         titulo: formData.titulo_es,
                         numero: formData.numero,
                         is_active: formData.is_active,
-                        video_url: formData.video_url || null,
-                        blog_url: formData.blog_url || null,
-                        estudio_url: formData.estudio_url || null,
-                        quiz_url: formData.quiz_url || null,
+                        video_url: formData.video_url_es || null,
+                        blog_url: formData.blog_url_es || null,
+                        estudio_url: formData.estudio_url_es || null,
+                        quiz_url: formData.quiz_url_es || null,
                         contenido_md: formData.contenido_md || null,
                         quiz_min_score: formData.quiz_min_score
                     })
                     .eq("id", leccion.id);
 
-                if (error) throw error;
+                if (error) {
+                    console.error("Error actualizando lección:", error);
+                    throw error;
+                }
 
-                // Actualizar traducción
-                if (formData.titulo_en) {
+                // Actualizar traducción y recursos en inglés
+                if (formData.titulo_en || formData.video_url_en || formData.blog_url_en ||
+                    formData.estudio_url_en || formData.quiz_url_en) {
+
+                    // Primero eliminar registro existente
                     await supabase
                         .from("lecciones_i18n")
                         .delete()
                         .eq("leccion_id", leccion.id)
                         .eq("locale", "en");
 
-                    await supabase
+                    // Luego insertar nuevo registro con todos los campos
+                    const { error: i18nError } = await supabase
                         .from("lecciones_i18n")
                         .insert({
                             leccion_id: leccion.id,
                             locale: "en",
-                            titulo: formData.titulo_en,
+                            titulo: formData.titulo_en || null,
+                            video_url: formData.video_url_en || null,
+                            blog_url: formData.blog_url_en || null,
+                            estudio_url: formData.estudio_url_en || null,
+                            quiz_url: formData.quiz_url_en || null,
                             contenido_md: formData.contenido_md || null
                         });
+
+                    if (i18nError) {
+                        console.error("Error actualizando traducción:", i18nError);
+                    }
                 }
             } else {
                 // Crear nueva lección
+                console.log("Creando nueva lección con datos:", formData);
+
                 const { data: newLeccion, error } = await supabase
                     .from("lecciones")
                     .insert({
@@ -474,34 +502,49 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase, t 
                         titulo: formData.titulo_es,
                         numero: formData.numero,
                         is_active: formData.is_active,
-                        video_url: formData.video_url || null,
-                        blog_url: formData.blog_url || null,
-                        estudio_url: formData.estudio_url || null,
-                        quiz_url: formData.quiz_url || null,
+                        video_url: formData.video_url_es || null,
+                        blog_url: formData.blog_url_es || null,
+                        estudio_url: formData.estudio_url_es || null,
+                        quiz_url: formData.quiz_url_es || null,
                         contenido_md: formData.contenido_md || null,
                         quiz_min_score: formData.quiz_min_score
                     })
                     .select()
                     .single();
 
-                if (error) throw error;
+                if (error) {
+                    console.error("Error creando lección:", error);
+                    throw error;
+                }
 
-                // Crear traducción
-                if (formData.titulo_en && newLeccion) {
-                    await supabase
+                // Crear traducción si hay contenido en inglés
+                if ((formData.titulo_en || formData.video_url_en || formData.blog_url_en ||
+                    formData.estudio_url_en || formData.quiz_url_en) && newLeccion) {
+
+                    const { error: i18nError } = await supabase
                         .from("lecciones_i18n")
                         .insert({
                             leccion_id: newLeccion.id,
                             locale: "en",
-                            titulo: formData.titulo_en,
+                            titulo: formData.titulo_en || null,
+                            video_url: formData.video_url_en || null,
+                            blog_url: formData.blog_url_en || null,
+                            estudio_url: formData.estudio_url_en || null,
+                            quiz_url: formData.quiz_url_en || null,
                             contenido_md: formData.contenido_md || null
                         });
+
+                    if (i18nError) {
+                        console.error("Error creando traducción:", i18nError);
+                    }
                 }
             }
 
+            console.log("Guardado exitoso");
             await onSave();
             onClose();
         } catch (error) {
+            console.error("Error completo:", error);
             alert("Error al guardar: " + error.message);
         } finally {
             setLoading(false);
@@ -512,9 +555,9 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase, t 
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
                 <h2 className="text-xl font-bold mb-4">
-                    {leccion ? "Editar Lección" : t("newLesson")}
+                    {leccion ? "Editar Lección" : "Nueva Lección"}
                 </h2>
 
                 <div className="space-y-4">
@@ -544,7 +587,7 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase, t 
                     {/* Configuración básica */}
                     <div className="grid grid-cols-3 gap-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1">{t("lessonNumber")}</label>
+                            <label className="block text-sm font-medium mb-1">Número de lección</label>
                             <input
                                 type="number"
                                 value={formData.numero}
@@ -554,19 +597,19 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase, t 
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">{t("status")}</label>
+                            <label className="block text-sm font-medium mb-1">Estado</label>
                             <select
                                 value={formData.is_active}
                                 onChange={(e) => setFormData({ ...formData, is_active: e.target.value === "true" })}
                                 className="w-full px-3 py-2 border rounded-md"
                             >
-                                <option value="true">{t("active")}</option>
-                                <option value="false">{t("inactive")}</option>
+                                <option value="true">Activa</option>
+                                <option value="false">Inactiva</option>
                             </select>
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-1">
-                                {t("minScoreToPass")}
+                                % Mínimo para aprobar quiz
                             </label>
                             <input
                                 type="number"
@@ -579,76 +622,118 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase, t 
                         </div>
                     </div>
 
-                    {/* Sección de recursos */}
+                    {/* Recursos en ESPAÑOL */}
                     <div className="border-t pt-4">
-                        <h3 className="font-semibold mb-3">📚 {t("lessonResources")}</h3>
-                        <p className="text-sm text-gray-600 mb-3">
-                            {t("lessonText1")}
-                        </p>
-
-                        <div className="space-y-3">
+                        <h3 className="font-semibold mb-3 text-green-700">🇪🇸 Recursos en Español</h3>
+                        <div className="bg-green-50 p-4 rounded-lg space-y-3">
                             <div>
                                 <label className="block text-sm font-medium mb-1">
-                                    🎥 {t("videoUrl")}
+                                    🎥 URL del Video (YouTube)
                                 </label>
                                 <input
                                     type="text"
-                                    value={formData.video_url}
-                                    onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
+                                    value={formData.video_url_es}
+                                    onChange={(e) => setFormData({ ...formData, video_url_es: e.target.value })}
                                     className="w-full px-3 py-2 border rounded-md"
                                     placeholder="https://youtube.com/watch?v=..."
                                 />
-                                <p className="text-xs text-gray-500 mt-1">
-                                    {t("lessonText2")}
-                                </p>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium mb-1">
-                                    🎙️ {t("podcastUrl")}
+                                    🎙️ URL del Podcast (Audio)
                                 </label>
                                 <input
                                     type="text"
-                                    value={formData.blog_url}
-                                    onChange={(e) => setFormData({ ...formData, blog_url: e.target.value })}
+                                    value={formData.blog_url_es}
+                                    onChange={(e) => setFormData({ ...formData, blog_url_es: e.target.value })}
                                     className="w-full px-3 py-2 border rounded-md"
-                                    placeholder="URL podcast/audio"
+                                    placeholder="URL del podcast en español"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">
-                                    {t("lessonText3")}
-                                </p>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium mb-1">
-                                    📖 {t("studyUrl")}
+                                    📖 URL del Estudio Bíblico
                                 </label>
                                 <input
                                     type="text"
-                                    value={formData.estudio_url}
-                                    onChange={(e) => setFormData({ ...formData, estudio_url: e.target.value })}
+                                    value={formData.estudio_url_es}
+                                    onChange={(e) => setFormData({ ...formData, estudio_url_es: e.target.value })}
                                     className="w-full px-3 py-2 border rounded-md"
-                                    placeholder="https://sermons.church/... or URL"
+                                    placeholder="URL del estudio en español"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">
-                                    {t("lessonText4")}
-                                </p>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium mb-1">
-                                    ✅ {t("quizUrl")}
+                                    ✅ URL del Quiz/Cuestionario
                                 </label>
                                 <input
                                     type="text"
-                                    value={formData.quiz_url}
-                                    onChange={(e) => setFormData({ ...formData, quiz_url: e.target.value })}
+                                    value={formData.quiz_url_es}
+                                    onChange={(e) => setFormData({ ...formData, quiz_url_es: e.target.value })}
                                     className="w-full px-3 py-2 border rounded-md"
-                                    placeholder="URL del cuestionario or quiz"
+                                    placeholder="URL del quiz en español"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">
-                                    {t("lessonText5a")} {formData.quiz_min_score}% {t("lessonText5b")}
-                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Recursos en INGLÉS */}
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold mb-3 text-blue-700">🇺🇸 Resources in English</h3>
+                        <div className="bg-blue-50 p-4 rounded-lg space-y-3">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    🎥 Video URL (YouTube)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.video_url_en}
+                                    onChange={(e) => setFormData({ ...formData, video_url_en: e.target.value })}
+                                    className="w-full px-3 py-2 border rounded-md"
+                                    placeholder="https://youtube.com/watch?v=..."
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    🎙️ Podcast URL (Audio)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.blog_url_en}
+                                    onChange={(e) => setFormData({ ...formData, blog_url_en: e.target.value })}
+                                    className="w-full px-3 py-2 border rounded-md"
+                                    placeholder="English podcast URL"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    📖 Bible Study URL
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.estudio_url_en}
+                                    onChange={(e) => setFormData({ ...formData, estudio_url_en: e.target.value })}
+                                    className="w-full px-3 py-2 border rounded-md"
+                                    placeholder="English study URL"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    ✅ Quiz URL
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.quiz_url_en}
+                                    onChange={(e) => setFormData({ ...formData, quiz_url_en: e.target.value })}
+                                    className="w-full px-3 py-2 border rounded-md"
+                                    placeholder="English quiz URL"
+                                />
                             </div>
                         </div>
                     </div>
@@ -656,7 +741,7 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase, t 
                     {/* Notas adicionales */}
                     <div>
                         <label className="block text-sm font-medium mb-1">
-                            📝 {t("additionalNotes")}
+                            📝 Notas o contenido adicional (opcional)
                         </label>
                         <textarea
                             value={formData.contenido_md}
@@ -707,9 +792,6 @@ export default function SeriesPage() {
     const [showLeccionModal, setShowLeccionModal] = useState(false);
     const [selectedBloqueId, setSelectedBloqueId] = useState(null);
 
-    // cambio de lenguaje
-    const { t } = useLang();
-
     useEffect(() => {
         fetchSeries();
     }, []);
@@ -744,10 +826,18 @@ export default function SeriesPage() {
                             numero,
                             is_active,
                             video_url,
+                            blog_url,
+                            estudio_url,
+                            quiz_url,
                             contenido_md,
+                            quiz_min_score,
                             lecciones_i18n!left (
                                 locale,
-                                titulo
+                                titulo,
+                                video_url,
+                                blog_url,
+                                estudio_url,
+                                quiz_url
                             )
                         )
                     )
@@ -771,7 +861,11 @@ export default function SeriesPage() {
                                 const leccionEnTranslation = leccion.lecciones_i18n?.find(t => t.locale === "en");
                                 return {
                                     ...leccion,
-                                    titulo_en: leccionEnTranslation?.titulo || ""
+                                    titulo_en: leccionEnTranslation?.titulo || "",
+                                    video_url_en: leccionEnTranslation?.video_url || "",
+                                    blog_url_en: leccionEnTranslation?.blog_url || "",
+                                    estudio_url_en: leccionEnTranslation?.estudio_url || "",
+                                    quiz_url_en: leccionEnTranslation?.quiz_url || ""
                                 };
                             }).sort((a, b) => (a.numero || 0) - (b.numero || 0))
                         };
@@ -840,8 +934,8 @@ export default function SeriesPage() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-semibold">{t("seriesTitle")}</h2>
-                    <p className="text-gray-600">{t("seriesSubtitle")}</p>
+                    <h2 className="text-2xl font-semibold">Series de Estudio</h2>
+                    <p className="text-gray-600">Gestiona las series, bloques y lecciones</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
@@ -866,12 +960,12 @@ export default function SeriesPage() {
                         className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                     >
                         <Plus className="w-4 h-4" />
-                        {t("newSeries")}
+                        Nueva Serie
                     </button>
                 </div>
             </div>
 
-            {loading && <p className="text-gray-500">{t("loadingSeries")}</p>}
+            {loading && <p className="text-gray-500">Cargando series...</p>}
 
             {!loading && series.length > 0 && (
                 <div className="space-y-4">
@@ -898,13 +992,13 @@ export default function SeriesPage() {
                                         )}
                                         <div className="flex items-center gap-3 mt-1">
                                             <span className="text-xs text-gray-500">
-                                                {serie.bloques?.length || 0} {t("totalBlocks")}
+                                                {serie.bloques?.length || 0} bloques
                                             </span>
                                             <span className="text-xs text-gray-500">•</span>
                                             <span className="text-xs text-gray-500">
                                                 {serie.bloques?.reduce((total, bloque) =>
                                                     total + (bloque.lecciones?.length || 0), 0
-                                                ) || 0} {t("totalLessons")}
+                                                ) || 0} lecciones totales
                                             </span>
                                             {!serie.is_active && (
                                                 <>
@@ -939,7 +1033,7 @@ export default function SeriesPage() {
                             {expandedSeries[serie.id] && (
                                 <div className="border-t px-4 pb-4">
                                     <div className="flex justify-between items-center mt-4 mb-2">
-                                        <span className="text-sm font-semibold text-gray-700">{t("blocks")}</span>
+                                        <span className="text-sm font-semibold text-gray-700">Bloques</span>
                                         <button
                                             onClick={() => {
                                                 setEditingBloque(null);
@@ -949,12 +1043,12 @@ export default function SeriesPage() {
                                             className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
                                         >
                                             <Plus className="w-3 h-3" />
-                                            {t("addBlock")}
+                                            Agregar Bloque
                                         </button>
                                     </div>
 
                                     {(!serie.bloques || serie.bloques.length === 0) ? (
-                                        <p className="text-gray-500 py-4">{t("noBlocks")}</p>
+                                        <p className="text-gray-500 py-4">No hay bloques en esta serie</p>
                                     ) : (
                                         <div className="space-y-2">
                                             {serie.bloques.map((bloque) => (
@@ -973,7 +1067,7 @@ export default function SeriesPage() {
                                                                 {getDisplayName(bloque, "nombre")}
                                                             </h4>
                                                             <span className="text-sm text-gray-500">
-                                                                ({bloque.lecciones?.length || 0} {t("lessons")})
+                                                                ({bloque.lecciones?.length || 0} lecciones)
                                                             </span>
                                                         </div>
                                                         <div className="flex gap-1">
@@ -999,7 +1093,7 @@ export default function SeriesPage() {
                                                     {expandedBloques[bloque.id] && (
                                                         <div className="mt-3">
                                                             <div className="flex justify-between items-center mb-2">
-                                                                <span className="text-xs font-semibold text-gray-600 ml-6">{t("lessons")}</span>
+                                                                <span className="text-xs font-semibold text-gray-600 ml-6">Lecciones</span>
                                                                 <button
                                                                     onClick={() => {
                                                                         setEditingLeccion(null);
@@ -1009,12 +1103,12 @@ export default function SeriesPage() {
                                                                     className="flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
                                                                 >
                                                                     <Plus className="w-3 h-3" />
-                                                                    {t("addLesson")}
+                                                                    Agregar Lección
                                                                 </button>
                                                             </div>
 
                                                             {(!bloque.lecciones || bloque.lecciones.length === 0) ? (
-                                                                <p className="text-xs text-gray-500 ml-6">{t("noLessons")}</p>
+                                                                <p className="text-xs text-gray-500 ml-6">No hay lecciones en este bloque</p>
                                                             ) : (
                                                                 <div className="ml-6 space-y-1">
                                                                     {bloque.lecciones.map((leccion) => (
@@ -1078,7 +1172,6 @@ export default function SeriesPage() {
                 }}
                 onSave={fetchSeries}
                 supabase={supabase}
-                t={t}
             />
 
             <BloqueModal
@@ -1091,7 +1184,6 @@ export default function SeriesPage() {
                 }}
                 onSave={fetchSeries}
                 supabase={supabase}
-                t={t}
             />
 
             <LeccionModal
@@ -1104,7 +1196,6 @@ export default function SeriesPage() {
                 }}
                 onSave={fetchSeries}
                 supabase={supabase}
-                t={t}
             />
         </div>
     );
