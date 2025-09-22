@@ -17,7 +17,8 @@ import {
     X,
     Globe,
     TreePine,
-    UserPlus
+    UserPlus,
+    HelpCircle
 } from "lucide-react";
 
 const SidebarItem = ({ href, icon: Icon, children, active = false }) => (
@@ -88,6 +89,10 @@ const Sidebar = ({ isOpen, onToggle, currentPath, onLogout }) => {
 
                         <SidebarItem href="/series" icon={BookOpenText} active={currentPath === "/series"}>
                             {t("series")}
+                        </SidebarItem>
+
+                        <SidebarItem href="/quizzes" icon={HelpCircle} active={currentPath === "/quizzes"}>
+                            Quizzes
                         </SidebarItem>
 
                         <SidebarItem href="/reports" icon={BarChart3} active={currentPath === "/reports"}>
