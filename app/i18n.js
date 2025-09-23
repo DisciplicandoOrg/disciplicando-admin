@@ -515,6 +515,9 @@ const M = {
         configure: "Configurar",
         test: "Probar",
         testConnection: "Probar conexión",
+
+        quizzes: "Quizzes",
+        manageQuizzes: "Gestionar evaluaciones",
     },
 
     en: {
@@ -1028,6 +1031,9 @@ const M = {
         configure: "Configure",
         test: "Test",
         testConnection: "Test connection",
+
+        quizzes: "Quizzes",
+        manageQuizzes: "Manage assessments",
 
     },
 };

@@ -9,7 +9,7 @@ import {
     ArrowRight, Check, X, AlertCircle, Loader2,
     User, Mail, Phone, Calendar, Shield,
     TreePine, UserPlus, BarChart3, BookOpenText,
-    RefreshCw, LogOut, CheckCircle, Star, Clock, Shuffle
+    RefreshCw, LogOut, CheckCircle, Star, Clock, Shuffle, HelpCircle
 } from "lucide-react";
 
 const MetricCard = ({ title, value, subtitle, icon: Icon, color = "blue", loading = false }) => (
@@ -300,6 +300,7 @@ export default function DashboardClient() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
+                        {/* Boton del Arbol de Discipulado*/}
                         <a
                             href="/discipleship-tree"
                             className="flex items-center gap-4 p-6 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50"
@@ -311,6 +312,7 @@ export default function DashboardClient() {
                             </div>
                         </a>
 
+                        {/* Boton de Usuarios*/}
                         <a
                             href="/users"
                             className="flex items-center gap-4 p-6 border-2 border-gray-200 rounded-lg hover:border-green-700 hover:bg-green-50"
@@ -322,6 +324,7 @@ export default function DashboardClient() {
                             </div>
                         </a>
 
+                        {/* Boton para Agregar y Validar usuarios*/}
                         <a
                             href="/user-management"
                             className="group flex items-center gap-4 p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 hover:shadow-md"
@@ -335,6 +338,7 @@ export default function DashboardClient() {
                             </div>
                         </a>
 
+                        {/* Boton de Reasignar*/}
                         <a
                             href="/assignments/reassign"
                             className="group flex items-center gap-4 p-6 border-2 border-gray-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-all duration-200 hover:shadow-md"
@@ -348,6 +352,7 @@ export default function DashboardClient() {
                             </div>
                         </a>
 
+                        {/* Boton de Series*/}
                         <a
                             href="/series"
                             className="group flex items-center gap-4 p-6 border-2 border-gray-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all duration-200 hover:shadow-md"
@@ -361,6 +366,21 @@ export default function DashboardClient() {
                             </div>
                         </a>
 
+                        {/* Boton de Quizzes*/}
+                        <a
+                            href="/quizzes"
+                            className="group flex items-center gap-4 p-6 border-2 border-gray-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-all duration-200 hover:shadow-md"
+                        >
+                            <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                                <HelpCircle className="w-6 h-6 text-indigo-600" />
+                            </div>
+                            <div>
+                                <p className="font-semibold text-gray-900">{t("quizzes") || "Quizzes"}</p>
+                                <p className="text-sm text-gray-600">{t("manageQuizzes") || "Gestionar evaluaciones"}</p>
+                            </div>
+                        </a>
+
+                        {/* Boton de Reportes*/}
                         <a
                             href="/reports"
                             className="group flex items-center gap-4 p-6 border-2 border-gray-200 rounded-xl hover:border-orange-500 hover:bg-orange-50 transition-all duration-200 hover:shadow-md"

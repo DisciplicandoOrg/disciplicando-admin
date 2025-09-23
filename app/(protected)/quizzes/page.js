@@ -20,6 +20,8 @@ export default function QuizzesPage() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [editingQuiz, setEditingQuiz] = useState(null);
     const [activeTab, setActiveTab] = useState("list");
+    const [totalLecciones, setTotalLecciones] = useState(0);
+    const [isEditMode, setIsEditMode] = useState(false);
 
     // Estados para el nuevo quiz
     const [newQuiz, setNewQuiz] = useState({
@@ -36,7 +38,6 @@ export default function QuizzesPage() {
         fetchData();
     }, []);
 
-
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -44,30 +45,33 @@ export default function QuizzesPage() {
             const { data: seriesData } = await supabase
                 .from("series")
                 .select(`
-                id, 
-                nombre, 
-                orden,
-                bloques (
-                    id,
-                    nombre,
+                    id, 
+                    nombre, 
                     orden,
-                    lecciones (
+                    bloques (
                         id,
-                        numero,
-                        titulo,
-                        bloque_id
+                        nombre,
+                        orden,
+                        lecciones (
+                            id,
+                            numero,
+                            titulo,
+                            bloque_id
+                        )
                     )
-                )
-            `)
+                `)
                 .order("orden");
 
             setSeries(seriesData || []);
 
             // Crear un mapa plano de lecciones con información de serie
             const leccionesFlat = [];
+            let totalLeccionesCount = 0;
+
             seriesData?.forEach(serie => {
                 serie.bloques?.forEach(bloque => {
                     bloque.lecciones?.forEach(leccion => {
+                        totalLeccionesCount++;
                         leccionesFlat.push({
                             ...leccion,
                             serie_id: serie.id,
@@ -77,15 +81,15 @@ export default function QuizzesPage() {
                     });
                 });
             });
+
             setLecciones(leccionesFlat);
+            setTotalLecciones(totalLeccionesCount);
 
             // Cargar quizzes
             const { data: quizzesData } = await supabase
                 .from("quizzes")
                 .select("*")
                 .order("leccion_id");
-
-            console.log("Quizzes básicos:", quizzesData);
 
             if (quizzesData && quizzesData.length > 0) {
                 const quizzesWithQuestions = await Promise.all(
@@ -107,9 +111,7 @@ export default function QuizzesPage() {
                                     .from("quiz_opciones")
                                     .select("*")
                                     .eq("pregunta_id", pregunta.id)
-                                    .order("created_at"); // Ordenar por fecha de creación
-
-                                console.log(`Pregunta ${pregunta.numero_pregunta} tiene ${opciones?.length} opciones`);
+                                    .order("letra_opcion"); // Ordenar por letra (A, B, C, D)
 
                                 return {
                                     ...pregunta,
@@ -127,7 +129,6 @@ export default function QuizzesPage() {
                 );
 
                 setQuizzes(quizzesWithQuestions);
-                console.log("Quizzes completos con serie:", quizzesWithQuestions);
             } else {
                 setQuizzes([]);
             }
@@ -139,29 +140,245 @@ export default function QuizzesPage() {
         }
     };
 
-
-    const handleAddPregunta = () => {
-        setNewQuiz({
-            ...newQuiz,
-            preguntas: [
-                ...newQuiz.preguntas,
-                {
-                    enunciado: "",
-                    enunciado_en: "",
-                    numero_pregunta: newQuiz.preguntas.length + 1,
-                    opciones: [
-                        { texto: "", texto_en: "", es_correcta: false },
-                        { texto: "", texto_en: "", es_correcta: false },
-                        { texto: "", texto_en: "", es_correcta: false },
-                        { texto: "", texto_en: "", es_correcta: false }
-                    ],
-                    explicacion: "",
-                    explicacion_en: ""
+    const handleEditQuiz = async (quiz) => {
+        // Cargar el quiz completo con sus preguntas y opciones
+        const preguntasFormateadas = quiz.quiz_preguntas.map(pregunta => {
+            // Ordenar las opciones por letra_opcion para mantener el orden A, B, C, D
+            const opcionesOrdenadas = [...pregunta.quiz_opciones].sort((a, b) => {
+                // Comparar por letra_opcion si existe, sino por el orden del array
+                if (a.letra_opcion && b.letra_opcion) {
+                    return a.letra_opcion.localeCompare(b.letra_opcion);
                 }
-            ]
+                return 0;
+            });
+
+            // Encontrar la opción correcta para obtener la explicación
+            const opcionCorrecta = opcionesOrdenadas.find(op => op.es_correcta);
+
+            return {
+                id: pregunta.id, // Importante: mantener el ID para poder actualizar
+                enunciado: pregunta.enunciado || "",
+                enunciado_en: pregunta.enunciado_en || "",
+                numero_pregunta: pregunta.numero_pregunta,
+                opciones: opcionesOrdenadas.map(opcion => ({
+                    id: opcion.id, // Importante: mantener el ID de la opción
+                    texto: opcion.texto || "",
+                    texto_en: opcion.texto_en || "",
+                    es_correcta: opcion.es_correcta || false,
+                    letra_opcion: opcion.letra_opcion // Mantener la letra original
+                })),
+                explicacion: opcionCorrecta?.explicacion || "",
+                explicacion_en: opcionCorrecta?.explicacion_en || ""
+            };
         });
+
+        setEditingQuiz({
+            id: quiz.id, // Importante: mantener el ID del quiz
+            leccion_id: quiz.leccion_id.toString(),
+            serie_id: quiz.serie_id,
+            titulo: quiz.titulo || "",
+            titulo_en: quiz.titulo_en || "",
+            descripcion: quiz.descripcion || "",
+            descripcion_en: quiz.descripcion_en || "",
+            preguntas: preguntasFormateadas
+        });
+
+        setIsEditMode(true);
+        setShowEditModal(true);
     };
 
+    const handleUpdateQuiz = async () => {
+        try {
+            // Validar que hay al menos una pregunta
+            if (editingQuiz.preguntas.length === 0) {
+                alert("Debes tener al menos una pregunta");
+                return;
+            }
+
+            // Validar que cada pregunta tenga una opción correcta
+            for (let i = 0; i < editingQuiz.preguntas.length; i++) {
+                const pregunta = editingQuiz.preguntas[i];
+                const tieneCorrecta = pregunta.opciones.some(op => op.es_correcta);
+                if (!tieneCorrecta) {
+                    alert(`La pregunta ${i + 1} no tiene una opción correcta seleccionada`);
+                    return;
+                }
+            }
+
+            // 1. Actualizar el quiz principal
+            const { error: quizError } = await supabase
+                .from("quizzes")
+                .update({
+                    leccion_id: parseInt(editingQuiz.leccion_id),
+                    serie_id: parseInt(editingQuiz.serie_id),
+                    titulo: editingQuiz.titulo,
+                    titulo_en: editingQuiz.titulo_en || null,
+                    descripcion: editingQuiz.descripcion || null,
+                    descripcion_en: editingQuiz.descripcion_en || null
+                })
+                .eq("id", editingQuiz.id);
+
+            if (quizError) {
+                console.error("Error actualizando quiz:", quizError);
+                throw quizError;
+            }
+
+            // 2. Obtener las preguntas existentes en la BD
+            const { data: preguntasExistentes } = await supabase
+                .from("quiz_preguntas")
+                .select("id")
+                .eq("quiz_id", editingQuiz.id);
+
+            const idsExistentes = preguntasExistentes?.map(p => p.id) || [];
+            const idsActuales = editingQuiz.preguntas.filter(p => p.id).map(p => p.id);
+
+            // 3. Eliminar preguntas que ya no están (esto también eliminará sus opciones por CASCADE)
+            const idsParaEliminar = idsExistentes.filter(id => !idsActuales.includes(id));
+            if (idsParaEliminar.length > 0) {
+                await supabase
+                    .from("quiz_preguntas")
+                    .delete()
+                    .in("id", idsParaEliminar);
+            }
+
+            // 4. Procesar cada pregunta
+            for (const pregunta of editingQuiz.preguntas) {
+                if (pregunta.id) {
+                    // Actualizar pregunta existente
+                    const { error: preguntaError } = await supabase
+                        .from("quiz_preguntas")
+                        .update({
+                            enunciado: pregunta.enunciado,
+                            enunciado_en: pregunta.enunciado_en || null,
+                            orden: pregunta.numero_pregunta,
+                            numero_pregunta: pregunta.numero_pregunta
+                        })
+                        .eq("id", pregunta.id);
+
+                    if (preguntaError) throw preguntaError;
+
+                    // Actualizar opciones existentes
+                    for (let i = 0; i < pregunta.opciones.length; i++) {
+                        const opcion = pregunta.opciones[i];
+
+                        if (opcion.id) {
+                            // Actualizar opción existente, preservando letra_opcion
+                            const { error: opcionError } = await supabase
+                                .from("quiz_opciones")
+                                .update({
+                                    texto: opcion.texto,
+                                    texto_en: opcion.texto_en || null,
+                                    es_correcta: opcion.es_correcta || false,
+                                    letra_opcion: opcion.letra_opcion || String.fromCharCode(65 + i),
+                                    explicacion: opcion.es_correcta ? (pregunta.explicacion || null) : null,
+                                    explicacion_en: opcion.es_correcta ? (pregunta.explicacion_en || null) : null
+                                })
+                                .eq("id", opcion.id);
+
+                            if (opcionError) throw opcionError;
+                        } else {
+                            // Crear nueva opción (raro pero posible)
+                            await supabase
+                                .from("quiz_opciones")
+                                .insert({
+                                    pregunta_id: pregunta.id,
+                                    texto: opcion.texto,
+                                    texto_en: opcion.texto_en || null,
+                                    es_correcta: opcion.es_correcta || false,
+                                    letra_opcion: String.fromCharCode(65 + i),
+                                    explicacion: opcion.es_correcta ? (pregunta.explicacion || null) : null,
+                                    explicacion_en: opcion.es_correcta ? (pregunta.explicacion_en || null) : null
+                                });
+                        }
+                    }
+                } else {
+                    // Crear nueva pregunta
+                    const { data: nuevaPregunta, error: preguntaError } = await supabase
+                        .from("quiz_preguntas")
+                        .insert({
+                            quiz_id: editingQuiz.id,
+                            enunciado: pregunta.enunciado,
+                            enunciado_en: pregunta.enunciado_en || null,
+                            orden: pregunta.numero_pregunta,
+                            numero_pregunta: pregunta.numero_pregunta
+                        })
+                        .select()
+                        .single();
+
+                    if (preguntaError) throw preguntaError;
+
+                    // Crear sus opciones
+                    const opcionesToInsert = pregunta.opciones.map((opcion, i) => ({
+                        pregunta_id: nuevaPregunta.id,
+                        texto: opcion.texto,
+                        texto_en: opcion.texto_en || null,
+                        es_correcta: opcion.es_correcta || false,
+                        letra_opcion: String.fromCharCode(65 + i),
+                        explicacion: opcion.es_correcta ? (pregunta.explicacion || null) : null,
+                        explicacion_en: opcion.es_correcta ? (pregunta.explicacion_en || null) : null
+                    }));
+
+                    await supabase
+                        .from("quiz_opciones")
+                        .insert(opcionesToInsert);
+                }
+            }
+
+            alert("¡Quiz actualizado exitosamente!");
+            setShowEditModal(false);
+            setIsEditMode(false);
+            setEditingQuiz(null);
+            fetchData(); // Recargar los datos
+
+        } catch (error) {
+            console.error("Error actualizando quiz:", error);
+            alert("Error al actualizar el quiz: " + error.message);
+        }
+    };
+
+    const handleAddPregunta = () => {
+        if (isEditMode && editingQuiz) {
+            setEditingQuiz({
+                ...editingQuiz,
+                preguntas: [
+                    ...editingQuiz.preguntas,
+                    {
+                        enunciado: "",
+                        enunciado_en: "",
+                        numero_pregunta: editingQuiz.preguntas.length + 1,
+                        opciones: [
+                            { texto: "", texto_en: "", es_correcta: false },
+                            { texto: "", texto_en: "", es_correcta: false },
+                            { texto: "", texto_en: "", es_correcta: false },
+                            { texto: "", texto_en: "", es_correcta: false }
+                        ],
+                        explicacion: "",
+                        explicacion_en: ""
+                    }
+                ]
+            });
+        } else {
+            setNewQuiz({
+                ...newQuiz,
+                preguntas: [
+                    ...newQuiz.preguntas,
+                    {
+                        enunciado: "",
+                        enunciado_en: "",
+                        numero_pregunta: newQuiz.preguntas.length + 1,
+                        opciones: [
+                            { texto: "", texto_en: "", es_correcta: false },
+                            { texto: "", texto_en: "", es_correcta: false },
+                            { texto: "", texto_en: "", es_correcta: false },
+                            { texto: "", texto_en: "", es_correcta: false }
+                        ],
+                        explicacion: "",
+                        explicacion_en: ""
+                    }
+                ]
+            });
+        }
+    };
 
     const handleSaveQuiz = async () => {
         try {
@@ -180,8 +397,6 @@ export default function QuizzesPage() {
                     return;
                 }
             }
-
-            console.log("Guardando quiz:", newQuiz);
 
             // Crear el quiz principal
             const { data: quizData, error: quizError } = await supabase
@@ -202,12 +417,8 @@ export default function QuizzesPage() {
                 throw quizError;
             }
 
-            console.log("Quiz creado:", quizData);
-
             // Guardar cada pregunta con sus opciones
             for (const pregunta of newQuiz.preguntas) {
-                console.log(`Guardando pregunta ${pregunta.numero_pregunta}`);
-
                 const { data: preguntaData, error: preguntaError } = await supabase
                     .from("quiz_preguntas")
                     .insert({
@@ -225,8 +436,6 @@ export default function QuizzesPage() {
                     throw preguntaError;
                 }
 
-                console.log("Pregunta creada:", preguntaData);
-
                 // Preparar las opciones para insertar
                 const opcionesToInsert = [];
                 for (let i = 0; i < pregunta.opciones.length; i++) {
@@ -236,13 +445,11 @@ export default function QuizzesPage() {
                         texto: opcion.texto,
                         texto_en: opcion.texto_en || null,
                         es_correcta: opcion.es_correcta || false,
-                        letra_opcion: String.fromCharCode(65 + i), // Agrega las letras segun la pregunta: A, B, C, D
+                        letra_opcion: String.fromCharCode(65 + i),
                         explicacion: opcion.es_correcta ? (pregunta.explicacion || null) : null,
                         explicacion_en: opcion.es_correcta ? (pregunta.explicacion_en || null) : null
                     });
                 }
-
-                console.log("Insertando opciones:", opcionesToInsert);
 
                 const { data: opcionesData, error: opcionesError } = await supabase
                     .from("quiz_opciones")
@@ -253,13 +460,11 @@ export default function QuizzesPage() {
                     console.error("Error creando opciones:", opcionesError);
                     throw opcionesError;
                 }
-
-                console.log("Opciones creadas:", opcionesData);
             }
 
             alert("¡Quiz creado exitosamente!");
             setShowAddModal(false);
-            fetchData(); // Recargar los datos
+            fetchData();
 
             // Limpiar formulario
             setNewQuiz({
@@ -278,21 +483,25 @@ export default function QuizzesPage() {
     };
 
     const handleCloseModal = () => {
-        setShowAddModal(false);
-        // Limpiar completamente el formulario
-        setNewQuiz({
-            leccion_id: "",
-            serie_id: 1,
-            titulo: "",
-            titulo_en: "",
-            descripcion: "",
-            descripcion_en: "",
-            preguntas: []
-        });
+        if (isEditMode) {
+            setShowEditModal(false);
+            setIsEditMode(false);
+            setEditingQuiz(null);
+        } else {
+            setShowAddModal(false);
+            setNewQuiz({
+                leccion_id: "",
+                serie_id: 1,
+                titulo: "",
+                titulo_en: "",
+                descripcion: "",
+                descripcion_en: "",
+                preguntas: []
+            });
+        }
     };
 
     const handleOpenModal = () => {
-        // Asegurar que el formulario esté limpio antes de abrir
         setNewQuiz({
             leccion_id: "",
             serie_id: 1,
@@ -302,6 +511,7 @@ export default function QuizzesPage() {
             descripcion_en: "",
             preguntas: []
         });
+        setIsEditMode(false);
         setShowAddModal(true);
     };
 
@@ -361,6 +571,7 @@ export default function QuizzesPage() {
                         </div>
                     </div>
                 </div>
+
                 <div className="bg-white rounded-lg p-4 border">
                     <div className="flex items-center gap-3">
                         <FileText className="w-8 h-8 text-green-600" />
@@ -372,27 +583,25 @@ export default function QuizzesPage() {
                         </div>
                     </div>
                 </div>
+
                 <div className="bg-white rounded-lg p-4 border">
                     <div className="flex items-center gap-3">
                         <CheckCircle className="w-8 h-8 text-purple-600" />
                         <div>
                             <p className="text-2xl font-bold">
-                                {lecciones.filter(l =>
-                                    quizzes.some(q => q.leccion_id === l.numero)
-                                ).length}
+                                {[...new Set(quizzes.map(q => q.leccion_id))].length}
                             </p>
                             <p className="text-sm text-gray-600">Lecciones con Quiz</p>
                         </div>
                     </div>
                 </div>
+
                 <div className="bg-white rounded-lg p-4 border">
                     <div className="flex items-center gap-3">
                         <XCircle className="w-8 h-8 text-red-600" />
                         <div>
                             <p className="text-2xl font-bold">
-                                {lecciones.filter(l =>
-                                    !quizzes.some(q => q.leccion_id === l.numero)
-                                ).length}
+                                {totalLecciones - [...new Set(quizzes.map(q => q.leccion_id))].length}
                             </p>
                             <p className="text-sm text-gray-600">Lecciones sin Quiz</p>
                         </div>
@@ -419,8 +628,6 @@ export default function QuizzesPage() {
                             {quizzes.map((quiz) => {
                                 const stats = getQuizStats(quiz);
                                 const isExpanded = expandedQuizzes[quiz.id];
-
-                                // Buscar información de la lección para obtener la serie
                                 const leccion = lecciones.find(l => l.numero === quiz.leccion_id);
                                 const serieName = quiz.serie_nombre || "Serie " + quiz.serie_id;
 
@@ -469,6 +676,7 @@ export default function QuizzesPage() {
                                                     <Eye className="w-4 h-4" />
                                                 </button>
                                                 <button
+                                                    onClick={() => handleEditQuiz(quiz)}
                                                     className="p-2 text-gray-600 hover:bg-gray-100 rounded"
                                                     title="Editar"
                                                 >
@@ -503,7 +711,13 @@ export default function QuizzesPage() {
                                                                 )}
                                                             </div>
                                                             <div className="space-y-2">
-                                                                {pregunta.quiz_opciones?.map((opcion, opIndex) => (
+                                                                {pregunta.quiz_opciones?.sort((a, b) => {
+                                                                    // Ordenar por letra_opcion si existe
+                                                                    if (a.letra_opcion && b.letra_opcion) {
+                                                                        return a.letra_opcion.localeCompare(b.letra_opcion);
+                                                                    }
+                                                                    return 0;
+                                                                }).map((opcion, opIndex) => (
                                                                     <div
                                                                         key={opcion.id}
                                                                         className={`p-3 rounded-lg border ${opcion.es_correcta
@@ -513,7 +727,7 @@ export default function QuizzesPage() {
                                                                     >
                                                                         <div className="flex items-start gap-2">
                                                                             <span className="font-semibold text-sm">
-                                                                                {String.fromCharCode(65 + opIndex)}.
+                                                                                {opcion.letra_opcion || String.fromCharCode(65 + opIndex)}.
                                                                             </span>
                                                                             <div className="flex-1">
                                                                                 <div className="flex items-start gap-2">
@@ -555,7 +769,6 @@ export default function QuizzesPage() {
                                                     ))}
                                                 </div>
 
-                                                {/* Resumen del quiz */}
                                                 <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                                                     <p className="text-sm text-blue-900">
                                                         <strong>Total:</strong> {stats.totalPreguntas} preguntas con {stats.totalOpciones} opciones
@@ -571,12 +784,10 @@ export default function QuizzesPage() {
                             })}
                         </div>
                     )}
-
-
                 </div>
             )}
 
-            {/* Modal Agregar Quiz */}
+            {/* Modal para Agregar Quiz */}
             {showAddModal && (
                 <QuizModal
                     quiz={newQuiz}
@@ -585,6 +796,20 @@ export default function QuizzesPage() {
                     onSave={handleSaveQuiz}
                     onClose={handleCloseModal}
                     onAddPregunta={handleAddPregunta}
+                    isEdit={false}
+                />
+            )}
+
+            {/* Modal para Editar Quiz */}
+            {showEditModal && editingQuiz && (
+                <QuizModal
+                    quiz={editingQuiz}
+                    setQuiz={setEditingQuiz}
+                    lecciones={lecciones}
+                    onSave={handleUpdateQuiz}
+                    onClose={handleCloseModal}
+                    onAddPregunta={handleAddPregunta}
+                    isEdit={true}
                 />
             )}
         </div>
@@ -592,12 +817,14 @@ export default function QuizzesPage() {
 }
 
 // Modal para agregar/editar quiz
-function QuizModal({ quiz, setQuiz, lecciones, onSave, onClose, onAddPregunta }) {
+function QuizModal({ quiz, setQuiz, lecciones, onSave, onClose, onAddPregunta, isEdit }) {
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto">
             <div className="bg-white rounded-lg max-w-4xl w-full m-4 max-h-[90vh] overflow-y-auto">
                 <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-                    <h2 className="text-xl font-bold">Nuevo Quiz</h2>
+                    <h2 className="text-xl font-bold">
+                        {isEdit ? "Editar Quiz" : "Nuevo Quiz"}
+                    </h2>
                     <button
                         onClick={onClose}
                         className="text-gray-500 hover:text-gray-700"
@@ -621,6 +848,7 @@ function QuizModal({ quiz, setQuiz, lecciones, onSave, onClose, onAddPregunta })
                                     onChange={(e) => setQuiz({ ...quiz, leccion_id: e.target.value })}
                                     className="w-full px-3 py-2 border rounded-md"
                                     required
+                                    disabled={isEdit}
                                 >
                                     <option value="">Seleccionar lección...</option>
                                     {lecciones.map(leccion => (
@@ -629,6 +857,11 @@ function QuizModal({ quiz, setQuiz, lecciones, onSave, onClose, onAddPregunta })
                                         </option>
                                     ))}
                                 </select>
+                                {isEdit && (
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        No se puede cambiar la lección de un quiz existente
+                                    </p>
+                                )}
                             </div>
 
                             <div>
@@ -737,7 +970,7 @@ function QuizModal({ quiz, setQuiz, lecciones, onSave, onClose, onAddPregunta })
                             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
                         >
                             <Save className="w-4 h-4" />
-                            Guardar Quiz
+                            {isEdit ? "Actualizar Quiz" : "Guardar Quiz"}
                         </button>
                     </div>
                 </div>
