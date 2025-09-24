@@ -1,0 +1,48 @@
+{
+    "series": [
+        {
+            "id": 1,
+            "slug": "doctrinal",
+            "title": {
+                "es": "Serie Doctrinal: Fundamentos de Nuestra Fe",
+                "en": "Doctrinal Series: Our Faith Foundation"
+            },
+            "description": {
+                "es": "22 lecciones sobre las doctrinas fundamentales",
+                "en": "22 lessons on fundamental doctrines"
+            },
+            "lessons": [
+                {
+                    "id": "101",
+                    "file": "101-authority-scripture.md",
+                    "title": {
+                        "es": "La Autoridad Suprema de las Escrituras",
+                        "en": "The Supreme Authority of Scripture"
+                    }
+                },
+                {
+                    "id": "102",
+                    "file": "102-trinity.md",
+                    "title": {
+                        "es": "La Trinidad",
+                        "en": "The Trinity"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "slug": "discipleship",
+            "title": {
+                "es": "Serie de Discipulado",
+                "en": "Discipleship Series"
+            },
+            "lessons": [
+                {
+                    "id": "201",
+                    "file": "201-call-to-disciple.md"
+                }
+            ]
+        }
+    ]
+}

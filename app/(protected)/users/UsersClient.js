@@ -620,7 +620,7 @@ export default function UsersClient() {
                     console.error("Error cargando usuarios:", error);
                     alert(`Error cargando usuarios: ${error.message}`);
                 } else {
-                    console.log("Usuarios cargados:", data);
+                    // console.log("Usuarios cargados:", data);
 
                     // Analizar los roles para debugging
                     if (data && data.length > 0) {
@@ -629,12 +629,12 @@ export default function UsersClient() {
                             acc[roleValue] = (acc[roleValue] || 0) + 1;
                             return acc;
                         }, {});
-                        console.log("Análisis de roles:", roleAnalysis);
-                        console.log("Muestra de usuarios:", data.slice(0, 5).map(u => ({
-                            name: u.name,
-                            role: u.role,
-                            approved: u.approved
-                        })));
+                        // console.log("Análisis de roles:", roleAnalysis);
+                        // console.log("Muestra de usuarios:", data.slice(0, 5).map(u => ({
+                        //    name: u.name,
+                        //   role: u.role,
+                        //   approved: u.approved
+                        // })));
                     }
 
                     setUsers(data || []);

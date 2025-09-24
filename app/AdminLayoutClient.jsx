@@ -9,6 +9,7 @@ import {
     Users,
     Shuffle,
     BookOpenText,
+    BookOpen,
     BarChart3,
     Home,
     Settings,
@@ -89,6 +90,10 @@ const Sidebar = ({ isOpen, onToggle, currentPath, onLogout }) => {
 
                         <SidebarItem href="/series" icon={BookOpenText} active={currentPath === "/series"}>
                             {t("series")}
+                        </SidebarItem>
+
+                        <SidebarItem href="/bible-studies" icon={BookOpen} active={currentPath === "/bible-studies"}>
+                            {t("bible_studies")}
                         </SidebarItem>
 
                         <SidebarItem href="/quizzes" icon={HelpCircle} active={currentPath === "/quizzes"}>

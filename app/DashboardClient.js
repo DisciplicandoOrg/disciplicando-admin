@@ -7,7 +7,7 @@ import { useLang } from "@/app/i18n"; // Importar useLang
 import {
     Users, Search, ChevronRight, UserCheck, UserX,
     ArrowRight, Check, X, AlertCircle, Loader2,
-    User, Mail, Phone, Calendar, Shield,
+    User, Mail, Phone, Calendar, Shield, BookOpen,
     TreePine, UserPlus, BarChart3, BookOpenText,
     RefreshCw, LogOut, CheckCircle, Star, Clock, Shuffle, HelpCircle
 } from "lucide-react";
@@ -69,7 +69,7 @@ export default function DashboardClient() {
     const fetchData = async () => {
         try {
             setLoading(true);
-            console.log("🔄 DASHBOARD - Cargando datos...");
+            // console.log("🔄 DASHBOARD - Cargando datos...");
 
             // Obtener info del usuario actual
             const { data: { user: currentUser } } = await supabase.auth.getUser();
@@ -85,7 +85,7 @@ export default function DashboardClient() {
                 return;
             }
 
-            console.log("✅ Datos obtenidos:", usersData);
+            // console.log("✅ Datos obtenidos:", usersData);
 
             if (usersData) {
                 const newStats = {
@@ -109,7 +109,7 @@ export default function DashboardClient() {
                 };
 
                 setStats(newStats);
-                console.log("📊 Estadísticas calculadas:", newStats);
+                // console.log("📊 Estadísticas calculadas:", newStats);
             }
 
             setLastUpdated(new Date());
@@ -365,6 +365,21 @@ export default function DashboardClient() {
                                 <p className="text-sm text-gray-600">{t("manageContent")}</p>
                             </div>
                         </a>
+
+                        {/* Boton Guías de Estudio*/}
+                        <a
+                            href="/bible-studies"
+                            className="group flex items-center gap-4 p-6 border-2 border-gray-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-all duration-200 hover:shadow-md"
+                        >
+                            <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                                <BookOpen className="w-6 h-6 text-indigo-600" />
+                            </div>
+                            <div>
+                                <p className="font-semibold text-gray-900">{t("bible_studies")}</p>
+                                <p className="text-sm text-gray-600">{t("interactive_guides")}</p>
+                            </div>
+                        </a>
+
 
                         {/* Boton de Quizzes*/}
                         <a

@@ -518,6 +518,30 @@ const M = {
 
         quizzes: "Quizzes",
         manageQuizzes: "Gestionar evaluaciones",
+
+        // Estudios Biblicos
+        bible_studies: "Estudios Bíblicos",
+        interactive_guides: "Guías Interactivas",
+        bible_studies_subtitle: "Gestiona las guías de estudio interactivas para cada lección",
+        create_new_study: "Crear Nuevo Estudio",
+        total_lessons: "Total Lecciones",
+        with_study: "Con Estudio",
+        pending_studies: "Pendientes",
+        bilingual: "Bilingüe",
+        search_lesson: "Buscar lección por título o número...",
+        expand_all: "Expandir Todo",
+        collapse_all: "Colapsar Todo",
+        main_series: "Serie Principal",
+        series_word: "Serie",
+        lessons_word: "lecciones",
+        with_study_count: "con estudio",
+        no_lessons_series: "No hay lecciones en esta serie",
+        study_complete: "Completo",
+        study_external: "Externo",
+        no_study: "Sin estudio",
+        create_study: "Crear Estudio",
+        study_preview: "Vista Previa del Estudio",
+
     },
 
     en: {
@@ -1034,6 +1058,29 @@ const M = {
 
         quizzes: "Quizzes",
         manageQuizzes: "Manage assessments",
+
+        // Bible Studies
+        bible_studies: "Bible Studies",
+        interactive_guides: "Interactive Guides",
+        bible_studies_subtitle: "Manage interactive study guides for each lesson",
+        create_new_study: "Create New Study",
+        total_lessons: "Total Lessons",
+        with_study: "With Study",
+        pending_studies: "Pending",
+        bilingual: "Bilingual",
+        search_lesson: "Search lesson by title or number...",
+        expand_all: "Expand All",
+        collapse_all: "Collapse All",
+        main_series: "Main Series",
+        series_word: "Series",
+        lessons_word: "lessons",
+        with_study_count: "with study",
+        no_lessons_series: "No lessons in this series",
+        study_complete: "Complete",
+        study_external: "External",
+        no_study: "No study",
+        create_study: "Create Study",
+        study_preview: "Study Preview",
 
     },
 };
