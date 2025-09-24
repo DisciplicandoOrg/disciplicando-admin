@@ -37,13 +37,13 @@ tags: ["biblia", "autoridad", "escrituras", "fundamentos"]
 ::es
 ### INTRODUCCIÓN
 
-¡Bienvenido a esta guía de estudio! Su propósito es ayudarte a profundizar en las verdades transformadoras de 2 Timoteo 3:16-17 que exploramos en el video. Tómate un momento para orar, pidiéndole al Espíritu Santo que ilumine tu mente y tu corazón mientras abres la Palabra de Dios. Prepárate para que la Escritura te hable de manera personal y poderosa.
+¡Bienvenido a esta guía de estudio! Su propósito es ayudarte a profundizar en las verdades transformadoras de **2 Timoteo 3:16-17** que exploramos en el video. Tómate un momento para orar, pidiéndole al Espíritu Santo que ilumine tu mente y tu corazón mientras abres la Palabra de Dios. Prepárate para que la Escritura te hable de manera personal y poderosa.
 ::
 
 ::en
 ### INTRODUCTION
 
-Welcome to this study guide! Its purpose is to help you dig deeper into the life-changing truths of 2 Timothy 3:16-17 that we explore in the video. Take a moment to pray, asking the Holy Spirit to enlighten your mind and heart as you open God's Word. Prepare for Scripture to speak to you in a personal and powerful way.
+Welcome to this study guide! Its purpose is to help you dig deeper into the life-changing truths of **2 Timothy 3:16-17** that we explore in the video. Take a moment to pray, asking the Holy Spirit to enlighten your mind and heart as you open God's Word. Prepare for Scripture to speak to you in a personal and powerful way.
 ::
 
 ---
@@ -57,11 +57,11 @@ El fundamento de nuestra fe es creer que la Biblia no es un libro cualquiera, si
 
 #### 1. Lectura Interactiva (Completa los espacios usando tu Biblia):
 
-• Lee **2 Timoteo 3:16a.** "Toda la Escritura es [input:1-1:_______________] por Dios..."
+• Lee ***2 Timoteo 3:16a.*** "Toda la Escritura es [input:1-1:_______________] por Dios..."
 
-• Lee **Génesis 2:7.** Así como Dios sopló en la nariz de Adán [input:1-2:_______________] de [input:1-3:_______________], también sopló vida en su Palabra.
+• Lee ***Génesis 2:7.*** Así como Dios sopló en la nariz de Adán [input:1-2:_______________] de [input:1-3:_______________], también sopló vida en su Palabra.
 
-• Lee **2 Pedro 1:21.** "...sino que los santos hombres de Dios hablaron siendo [input:1-4:_______________] por el [input:1-5:_______________] [input:1-6:_______________]."
+• Lee ***2 Pedro 1:21.*** "...sino que los santos hombres de Dios hablaron siendo [input:1-4:_______________] por el [input:1-5:_______________] [input:1-6:_______________]."
 
 #### 2. Para Meditar y Responder:
 

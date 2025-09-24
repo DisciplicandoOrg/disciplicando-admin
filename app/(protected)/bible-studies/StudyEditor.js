@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import {
     BookOpen, Save, Eye, Globe, Plus, Trash2,
     ChevronDown, ChevronRight, Copy, FileText,
-    AlertCircle, Check, Loader2
+    AlertCircle, Check, Loader2, Bold, Italic, List,
+    Quote, Heading, Link2
 } from 'lucide-react';
 
 export default function StudyEditor({ lessonId, onClose, supabase }) {
@@ -12,7 +13,7 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
     const [saving, setSaving] = useState(false);
     const [lesson, setLesson] = useState(null);
     const [activeTab, setActiveTab] = useState('content');
-    //    const [previewMode, setPreviewMode] = useState(false);
+    const [showPreview, setShowPreview] = useState(false);
 
     // Estado del contenido del estudio
     const [studyData, setStudyData] = useState({
@@ -44,12 +45,16 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
 
     useEffect(() => {
         if (lessonId) {
+            console.log("Cargando lección con ID:", lessonId);
             loadLessonData();
         }
     }, [lessonId]);
 
     const loadLessonData = async () => {
+        setLoading(true);
         try {
+            console.log("Iniciando carga de lección:", lessonId);
+
             // Cargar datos de la lección desde Supabase
             const { data, error } = await supabase
                 .from('lecciones')
@@ -68,14 +73,29 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
                 .eq('id', lessonId)
                 .single();
 
-            if (error) throw error;
+            // AGREGAR ESTE DEBUG
+            console.log("=== DEBUG COMPLETO ===");
+            console.log("Datos cargados:", data);
+            console.log("Contenido MD existe?", data?.contenido_md ? "SÍ" : "NO");
+            console.log("Longitud del contenido:", data?.contenido_md?.length);
+            console.log("Primeros 200 caracteres:", data?.contenido_md?.substring(0, 200));
 
+            if (error) {
+                console.error("Error al cargar:", error);
+                throw error;
+            }
+
+            console.log("Datos cargados de la BD:", data);
             setLesson(data);
 
-            // Si hay contenido existente, parsearlo
-            if (data.contenido_md) {
+            // Verificar si hay contenido real y parsearlo
+            if (data?.contenido_md &&
+                data.contenido_md !== "Contenido en preparación..." &&
+                data.contenido_md.length > 30) {
+                console.log("Intentando parsear...");
                 parseExistingContent(data.contenido_md);
             } else {
+                console.log("No hay contenido para parsear, iniciando vacio");
                 // Crear estructura inicial
                 setStudyData({
                     ...studyData,
@@ -91,16 +111,83 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
                 });
             }
         } catch (error) {
-            console.error('Error cargando lección:', error);
+            console.error('Error total:', error);
+            alert('Error al cargar la lección: ' + error.message);
         } finally {
             setLoading(false);
         }
     };
 
     const parseExistingContent = (markdown) => {
-        // Aquí parsearías el markdown existente para rellenar studyData
-        // Por ahora usar datos de ejemplo
-        console.log('Parseando contenido existente:', markdown);
+        if (!markdown) return;
+
+        try {
+            // Crear backup local antes de parsear
+            localStorage.setItem(`backup_lesson_${lesson?.id}_${Date.now()}`, markdown);
+
+            const newStudyData = { /* ... estructura inicial ... */ };
+
+            // Split principal por ---
+            const parts = markdown.split('---');
+
+            // IMPORTANTE: Unir TODAS las partes después del metadata
+            // No solo parts[2], sino parts.slice(2).join('---')
+            const allSectionsContent = parts.slice(2).join('---');
+
+            // Buscar TODAS las secciones, no importa si son 4, 5 o más
+            const sectionMatches = allSectionsContent.matchAll(
+                /## section(\d+)(.*?)(?=## section|\Z)/gs
+            );
+
+            for (const match of sectionMatches) {
+                // Parsear cada sección encontrada
+            }
+
+            // Solo actualizar si encontramos al menos 1 sección
+            if (newStudyData.sections.length > 0) {
+                setStudyData(newStudyData);
+            } else {
+                alert('⚠️ No se pudieron cargar todas las secciones. Verifique el formato.');
+            }
+        } catch (error) {
+            console.error('Error parseando:', error);
+        }
+    };
+
+
+
+    // Función para insertar formato markdown
+    const insertMarkdownFormat = (fieldPath, format) => {
+        // Esta función ayuda a insertar formato markdown
+        const formats = {
+            bold: '**texto**',
+            italic: '*texto*',
+            bolditalic: '***texto***',
+            list: '\n- Punto 1\n- Punto 2\n- Punto 3',
+            numberedList: '\n1. Primero\n2. Segundo\n3. Tercero',
+            quote: '\n> Cita o texto destacado',
+            heading: '\n### Subtítulo',
+            link: '[texto del enlace](https://url.com)'
+        };
+
+        alert(`Para ${format}, usa: ${formats[format]}`);
+    };
+
+    // Función para renderizar preview de markdown
+    const renderMarkdownPreview = (markdown) => {
+        let html = markdown;
+
+        // Convertir markdown a HTML básico
+        html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        html = html.replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold mt-3">$1</h3>');
+        html = html.replace(/^- (.*$)/gim, '<li>$1</li>');
+        html = html.replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-gray-300 pl-4 italic">$1</blockquote>');
+        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 underline" target="_blank">$1</a>');
+        html = html.replace(/\n/g, '<br>');
+
+        return html;
     };
 
     const addSection = () => {
@@ -133,7 +220,7 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
 
         // Metadata
         markdown += `# Identificadores\n`;
-        markdown += `id: "${studyData.metadata.id}"\n`;
+        markdown += `id: "${studyData.metadata.id || studyData.metadata.lessonNumber}"\n`;
         markdown += `seriesId: ${studyData.metadata.seriesId}\n`;
         markdown += `lessonNumber: ${studyData.metadata.lessonNumber}\n\n`;
 
@@ -153,7 +240,7 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
         markdown += `  en: "${studyData.metadata.bibleText.en}"\n\n`;
 
         // Introducción
-        markdown += `\n# Introducción\n`;
+        markdown += `# Introducción\n`;
         markdown += `introduction:\n`;
         markdown += `  es: "${studyData.metadata.introduction.es}"\n`;
         markdown += `  en: "${studyData.metadata.introduction.en}"\n\n`;
@@ -197,29 +284,54 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
     const saveStudy = async () => {
         setSaving(true);
         try {
+
+            // BACKUP: Guardar copia del contenido actual antes de sobrescribir
+            const { data: currentData } = await supabase
+                .from('lecciones')
+                .select('contenido_md')
+                .eq('id', lessonId)
+                .single();
+
+            if (currentData?.contenido_md) {
+                console.log('BACKUP del contenido anterior:', currentData.contenido_md);
+                // Opcionalmente, guardar en localStorage como respaldo
+                localStorage.setItem(`backup_lesson_${lessonId}`, currentData.contenido_md);
+            }
+
             const markdown = generateMarkdown();
 
+            console.log("Guardando markdown:", markdown);
+            console.log("En lección ID:", lessonId);
+
             // Guardar en Supabase
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from('lecciones')
                 .update({
                     contenido_md: markdown,
                     updated_at: new Date().toISOString()
                 })
-                .eq('id', lessonId);
+                .eq('id', lessonId)
+                .select()
+                .single();
 
-            if (error) throw error;
+            if (error) {
+                console.error("Error al guardar:", error);
+                throw error;
+            }
 
-            // Guardar archivo en GitHub (esto requeriría una API)
-            // await saveToGitHub(markdown);
-
+            console.log("Guardado exitoso:", data);
             alert('Estudio guardado exitosamente');
+
         } catch (error) {
             console.error('Error guardando:', error);
             alert('Error al guardar: ' + error.message);
         } finally {
             setSaving(false);
         }
+    };
+
+    const handlePreview = () => {
+        setShowPreview(true);
     };
 
     if (loading) {
@@ -244,16 +356,8 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-
                     <button
-                        onClick={() => {
-                            // Primero guardar el contenido actual
-                            saveStudy();
-                            // Luego abrir vista previa en nueva ventana
-                            setTimeout(() => {
-                                window.open(`/api/study-viewer/${lessonId}`, '_blank');
-                            }, 1000);
-                        }}
+                        onClick={handlePreview}
                         className="flex items-center gap-2 px-3 py-2 bg-white border rounded-lg hover:bg-gray-50"
                     >
                         <Eye className="w-4 h-4" />
@@ -310,6 +414,7 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
             <div className="flex-1 overflow-y-auto p-6">
                 {activeTab === 'metadata' && (
                     <div className="space-y-6">
+                        {/* TÍTULOS */}
                         <div className="grid grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-medium mb-2">
@@ -347,9 +452,50 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
                             </div>
                         </div>
 
+                        {/* SUBTÍTULOS - NUEVO */}
+                        <div className="grid grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    Subtítulo (Español)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={studyData.metadata.subtitle.es}
+                                    onChange={(e) => setStudyData({
+                                        ...studyData,
+                                        metadata: {
+                                            ...studyData.metadata,
+                                            subtitle: { ...studyData.metadata.subtitle, es: e.target.value }
+                                        }
+                                    })}
+                                    className="w-full px-3 py-2 border rounded-lg"
+                                    placeholder="Ej: Fundamento de nuestra fe"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    Subtitle (English)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={studyData.metadata.subtitle.en}
+                                    onChange={(e) => setStudyData({
+                                        ...studyData,
+                                        metadata: {
+                                            ...studyData.metadata,
+                                            subtitle: { ...studyData.metadata.subtitle, en: e.target.value }
+                                        }
+                                    })}
+                                    className="w-full px-3 py-2 border rounded-lg"
+                                    placeholder="Ex: Foundation of our faith"
+                                />
+                            </div>
+                        </div>
+
+                        {/* REFERENCIA BÍBLICA */}
                         <div>
                             <label className="block text-sm font-medium mb-2">
-                                Referencia Bíblica
+                                Referencia Bíblica / Bible Reference
                             </label>
                             <input
                                 type="text"
@@ -359,10 +505,11 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
                                     metadata: { ...studyData.metadata, bibleVerse: e.target.value }
                                 })}
                                 className="w-full px-3 py-2 border rounded-lg"
-                                placeholder="Ej: 2 Timoteo 3:16-17"
+                                placeholder="Ej: 2 Timoteo 3:16-17 / 2 Timothy 3:16-17"
                             />
                         </div>
 
+                        {/* TEXTO BÍBLICO EN AMBOS IDIOMAS */}
                         <div className="grid grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-medium mb-2">
@@ -378,7 +525,8 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
                                         }
                                     })}
                                     className="w-full px-3 py-2 border rounded-lg"
-                                    rows="3"
+                                    rows="4"
+                                    placeholder="Pega aquí el versículo completo en español"
                                 />
                             </div>
                             <div>
@@ -395,11 +543,13 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
                                         }
                                     })}
                                     className="w-full px-3 py-2 border rounded-lg"
-                                    rows="3"
+                                    rows="4"
+                                    placeholder="Paste here the complete verse in English"
                                 />
                             </div>
                         </div>
 
+                        {/* INTRODUCCIÓN */}
                         <div className="grid grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-medium mb-2">
@@ -438,14 +588,67 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
                                 />
                             </div>
                         </div>
-
-
-
                     </div>
                 )}
 
                 {activeTab === 'content' && (
                     <div className="space-y-6">
+                        {/* Barra de herramientas de formato */}
+                        <div className="bg-gray-100 p-3 rounded-lg">
+                            <p className="text-sm font-medium mb-2">Herramientas de Formato Markdown:</p>
+                            <div className="flex gap-2 flex-wrap">
+                                <button
+                                    onClick={() => insertMarkdownFormat('', 'bold')}
+                                    className="px-3 py-1 bg-white rounded hover:bg-gray-50 flex items-center gap-1"
+                                    title="Texto en negrita: **texto**"
+                                >
+                                    <Bold className="w-4 h-4" /> Bold
+                                </button>
+                                <button
+                                    onClick={() => insertMarkdownFormat('', 'italic')}
+                                    className="px-3 py-1 bg-white rounded hover:bg-gray-50 flex items-center gap-1"
+                                    title="Texto en cursiva: *texto*"
+                                >
+                                    <Italic className="w-4 h-4" /> Italic
+                                </button>
+                                <button
+                                    onClick={() => insertMarkdownFormat('', 'bolditalic')}
+                                    className="px-3 py-1 bg-white rounded hover:bg-gray-50"
+                                    title="Negrita y cursiva: ***texto***"
+                                >
+                                    <strong><em>B+I</em></strong>
+                                </button>
+                                <button
+                                    onClick={() => insertMarkdownFormat('', 'list')}
+                                    className="px-3 py-1 bg-white rounded hover:bg-gray-50 flex items-center gap-1"
+                                    title="Lista: - item"
+                                >
+                                    <List className="w-4 h-4" /> Lista
+                                </button>
+                                <button
+                                    onClick={() => insertMarkdownFormat('', 'quote')}
+                                    className="px-3 py-1 bg-white rounded hover:bg-gray-50 flex items-center gap-1"
+                                    title="Cita: > texto"
+                                >
+                                    <Quote className="w-4 h-4" /> Cita
+                                </button>
+                                <button
+                                    onClick={() => insertMarkdownFormat('', 'heading')}
+                                    className="px-3 py-1 bg-white rounded hover:bg-gray-50 flex items-center gap-1"
+                                    title="Subtítulo: ### texto"
+                                >
+                                    <Heading className="w-4 h-4" /> Subtítulo
+                                </button>
+                                <button
+                                    onClick={() => insertMarkdownFormat('', 'link')}
+                                    className="px-3 py-1 bg-white rounded hover:bg-gray-50 flex items-center gap-1"
+                                    title="Enlace: [texto](url)"
+                                >
+                                    <Link2 className="w-4 h-4" /> Enlace
+                                </button>
+                            </div>
+                        </div>
+
                         <div className="flex justify-between items-center">
                             <h3 className="text-lg font-semibold">Secciones del Estudio</h3>
                             <button
@@ -528,9 +731,15 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
                                                         { ...section.content, es: e.target.value }
                                                     )}
                                                     className="w-full px-3 py-2 border rounded"
-                                                    rows="6"
-                                                    placeholder="Usa [input:id:placeholder] para campos de entrada"
+                                                    rows="8"
+                                                    placeholder="Usa markdown: **negrita**, *cursiva*, ***ambos***, - listas, > citas"
                                                 />
+                                                {/* Mini preview */}
+                                                <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
+                                                    <div dangerouslySetInnerHTML={{
+                                                        __html: renderMarkdownPreview(section.content.es)
+                                                    }} />
+                                                </div>
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium mb-1">
@@ -544,9 +753,15 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
                                                         { ...section.content, en: e.target.value }
                                                     )}
                                                     className="w-full px-3 py-2 border rounded"
-                                                    rows="6"
-                                                    placeholder="Use [input:id:placeholder] for input fields"
+                                                    rows="8"
+                                                    placeholder="Use markdown: **bold**, *italic*, ***both***, - lists, > quotes"
                                                 />
+                                                {/* Mini preview */}
+                                                <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
+                                                    <div dangerouslySetInnerHTML={{
+                                                        __html: renderMarkdownPreview(section.content.en)
+                                                    }} />
+                                                </div>
                                             </div>
                                         </div>
 
@@ -561,19 +776,7 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
                                                         e.target.checked
                                                     )}
                                                 />
-                                                <span className="text-sm">Incluir área de texto</span>
-                                            </label>
-                                            <label className="flex items-center gap-2">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={section.hasInputs}
-                                                    onChange={(e) => updateSection(
-                                                        section.id,
-                                                        'hasInputs',
-                                                        e.target.checked
-                                                    )}
-                                                />
-                                                <span className="text-sm">Incluir campos de entrada</span>
+                                                <span className="text-sm">Incluir área de texto para respuesta</span>
                                             </label>
                                         </div>
                                     </div>
@@ -604,6 +807,53 @@ export default function StudyEditor({ lessonId, onClose, supabase }) {
                     </div>
                 )}
             </div>
+
+            {/* Modal de Vista Previa */}
+            {showPreview && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                        <div className="flex justify-between items-center p-4 border-b">
+                            <h3 className="text-lg font-semibold">Vista Previa del Estudio</h3>
+                            <button
+                                onClick={() => setShowPreview(false)}
+                                className="text-gray-500 hover:text-gray-700"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
+                            <div className="prose max-w-none">
+                                <h1>{studyData.metadata.title.es}</h1>
+                                <h2 className="text-gray-600">{studyData.metadata.subtitle.es}</h2>
+                                <p><strong>Referencia:</strong> {studyData.metadata.bibleVerse}</p>
+                                <blockquote className="border-l-4 border-blue-500 pl-4">
+                                    {studyData.metadata.bibleText.es}
+                                </blockquote>
+                                <div className="mt-4">
+                                    <h3>Introducción</h3>
+                                    <p>{studyData.metadata.introduction.es}</p>
+                                </div>
+                                {studyData.sections.map((section, idx) => (
+                                    <div key={section.id} className="mt-6">
+                                        <h3>{idx + 1}. {section.title.es}</h3>
+                                        <div dangerouslySetInnerHTML={{
+                                            __html: renderMarkdownPreview(section.content.es)
+                                        }} />
+                                        {section.hasTextarea && (
+                                            <textarea
+                                                className="w-full mt-3 p-3 border rounded"
+                                                rows="4"
+                                                placeholder="Escribe tu respuesta aquí..."
+                                                disabled
+                                            />
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

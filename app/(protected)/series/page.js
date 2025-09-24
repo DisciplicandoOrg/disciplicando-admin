@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
-import { BookOpenText, Plus, Edit, Trash2, ChevronDown, ChevronRight, Globe, Folder, FileText } from "lucide-react";
+import { BookOpen, BookOpenText, Plus, Edit, Trash2, ChevronDown, ChevronRight, Globe, Folder, FileText } from "lucide-react";
 
 // Modal para editar serie
 function EditSerieModal({ serie, isOpen, onClose, onSave, supabase }) {
@@ -396,7 +396,15 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
     });
 
     useEffect(() => {
+
+        console.log("=== DEPURACIÓN LECCION MODAL ===");
+        console.log("Lección recibida:", leccion);
+        console.log("Contenido MD específico:", leccion?.contenido_md);
+        console.log("Longitud del contenido:", leccion?.contenido_md?.length);
+
         if (leccion) {
+            console.log("Editando lección:", leccion);
+            console.log("Contenido MD:", leccion.contenido_md);
             setFormData({
                 titulo_es: leccion.titulo || "",
                 titulo_en: leccion.titulo_en || "",
@@ -453,7 +461,8 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                         estudio_url: formData.estudio_url_es || null,
                         quiz_url: formData.quiz_url_es || null,
                         contenido_md: formData.contenido_md || null,
-                        quiz_min_score: formData.quiz_min_score
+                        quiz_min_score: formData.quiz_min_score,
+                        updated_at: new Date().toISOString()
                     })
                     .eq("id", leccion.id);
 
@@ -552,6 +561,67 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
     };
 
     if (!isOpen) return null;
+
+
+    // Función mejorada para convertir Markdown a HTML
+    const convertMarkdownToHTML = (markdown) => {
+        if (!markdown) return '';
+
+        let html = markdown;
+
+        // Escapar HTML para seguridad
+        html = html.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        // Bloques de código (debe ir primero)
+        html = html.replace(/```(.*?)```/gs, '<pre class="bg-gray-100 p-2 rounded">$1</pre>');
+        html = html.replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1 rounded">$1</code>');
+
+        // Títulos
+        html = html.replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold mt-4 mb-2">$1</h3>');
+        html = html.replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-4 mb-2">$1</h2>');
+        html = html.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-4 mb-3">$1</h1>');
+
+        // Texto en negrita y cursiva (orden importante)
+        html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>');
+        html = html.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
+
+        // Texto tachado
+        html = html.replace(/~~(.*?)~~/g, '<del>$1</del>');
+
+        // Blockquotes
+        html = html.replace(/^&gt; (.*$)/gim, '<blockquote class="border-l-4 border-gray-300 pl-4 italic my-2">$1</blockquote>');
+
+        // Listas con checkboxes
+        html = html.replace(/^- \[ \] (.*$)/gim, '<div class="flex items-start gap-2 my-1"><input type="checkbox" disabled class="mt-1"/> <span>$1</span></div>');
+        html = html.replace(/^- \[x\] (.*$)/gim, '<div class="flex items-start gap-2 my-1"><input type="checkbox" disabled checked class="mt-1"/> <span>$1</span></div>');
+
+        // Listas sin numerar
+        html = html.replace(/^- (.*$)/gim, '<li class="ml-4">$1</li>');
+
+        // Listas numeradas
+        html = html.replace(/^\d+\. (.*$)/gim, '<li class="ml-4 list-decimal">$1</li>');
+
+        // Líneas horizontales
+        html = html.replace(/^---$/gim, '<hr class="my-4 border-gray-300"/>');
+
+        // Enlaces
+        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 underline" target="_blank">$1</a>');
+
+        // Saltos de línea
+        html = html.replace(/\n/g, '<br/>');
+
+        // Envolver listas consecutivas
+        html = html.replace(/(<li class="ml-4">.*?<\/li>(<br\/>)?)+/g, (match) => {
+            return '<ul class="list-disc pl-4 my-2">' + match.replace(/<br\/>/g, '') + '</ul>';
+        });
+
+        html = html.replace(/(<li class="ml-4 list-decimal">.*?<\/li>(<br\/>)?)+/g, (match) => {
+            return '<ol class="list-decimal pl-4 my-2">' + match.replace(/<br\/>/g, '') + '</ol>';
+        });
+
+        return html;
+    };
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -676,6 +746,29 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                                     className="w-full px-3 py-2 border rounded-md"
                                     placeholder="URL del quiz en español"
                                 />
+
+                                {/* Botón para Estudio Bíblico */}
+                                {leccion?.id && (
+                                    <div className="border-t pt-4 mt-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                // Abrir el editor en nueva pestaña
+                                                window.open(`/bible-studies/editor/${leccion.id}`, '_blank');
+                                            }}
+                                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                                        >
+                                            <BookOpen className="w-5 h-5" />
+                                            {leccion?.contenido_md ? 'Editar Estudio Bíblico' : 'Crear Estudio Bíblico'}
+                                        </button>
+                                        {leccion?.contenido_md && (
+                                            <p className="text-xs text-green-600 mt-2 text-center">
+                                                ✓ Esta lección ya tiene un estudio bíblico guardado
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+
                             </div>
                         </div>
                     </div>
@@ -751,6 +844,25 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                             placeholder="Notas adicionales, instrucciones especiales, etc."
                         />
                     </div>
+
+                    {/* Vista Previa del Markdown */}
+                    {formData.contenido_md && (
+                        <div className="mt-4">
+                            <label className="block text-sm font-medium mb-2">
+                                👁️ Vista Previa
+                            </label>
+                            <div className="border rounded-md p-4 bg-gray-50 max-h-96 overflow-y-auto">
+                                <div
+                                    className="prose prose-sm max-w-none"
+
+                                    dangerouslySetInnerHTML={{
+                                        __html: convertMarkdownToHTML(formData.contenido_md)
+                                    }}
+
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex justify-end gap-2 mt-6">
@@ -862,6 +974,7 @@ export default function SeriesPage() {
                                 return {
                                     ...leccion,
                                     titulo_en: leccionEnTranslation?.titulo || "",
+
                                     video_url_en: leccionEnTranslation?.video_url || "",
                                     blog_url_en: leccionEnTranslation?.blog_url || "",
                                     estudio_url_en: leccionEnTranslation?.estudio_url || "",
@@ -874,6 +987,7 @@ export default function SeriesPage() {
             });
 
             setSeries(processedData || []);
+            console.log("Lecciones cargadas:", processedData?.[0]?.bloques?.[0]?.lecciones);
         } catch (err) {
             console.error("Error cargando series:", err);
         } finally {
@@ -1126,6 +1240,17 @@ export default function SeriesPage() {
                                                                                         Inactiva
                                                                                     </span>
                                                                                 )}
+
+                                                                                {/* Indicador de estudio bíblico - REEMPLAZAR CON ESTO */}
+                                                                                {leccion.contenido_md &&
+                                                                                    leccion.contenido_md !== "Contenido en preparación..." &&
+                                                                                    leccion.contenido_md.length > 30 && (
+                                                                                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-purple-100 text-purple-700">
+                                                                                            <BookOpen className="w-3 h-3 mr-1" />
+                                                                                            Estudio
+                                                                                        </span>
+                                                                                    )}
+
                                                                             </div>
                                                                             <div className="flex gap-1">
                                                                                 <button
