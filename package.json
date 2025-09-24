@@ -12,10 +12,12 @@
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.56.0",
     "gray-matter": "^4.0.3",
+    "html2pdf.js": "^0.12.1",
     "lucide-react": "^0.540.0",
     "next": "15.4.6",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "react-native-share": "^12.2.0",
     "remark": "^15.0.1",
     "remark-html": "^16.0.1"
   },

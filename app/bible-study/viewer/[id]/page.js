@@ -3,29 +3,65 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import {
     Download, Mail, Printer, Globe,
-    CheckCircle, BookOpen, Home, ChevronLeft
+    CheckCircle, BookOpen, ChevronLeft, FileText
 } from 'lucide-react';
 import StudyRenderer from '@/components/BibleStudy/StudyRenderer';
+import {
+    getBibleStudyContent,
+    saveBibleStudyProgress,
+    getUserStudyProgress,
+    getManualPdfUrl
+} from '@/lib/bibleStudies';
+import { createSupabaseBrowserClient } from '@/lib/supabaseClient';
+import html2pdf from 'html2pdf.js';
 
 export default function BibleStudyViewer() {
     const params = useParams();
     const searchParams = useSearchParams();
+    const supabase = createSupabaseBrowserClient();
 
-    // Detectar idioma desde URL o por defecto español
+    // Estados
     const [language, setLanguage] = useState(searchParams.get('lang') || 'es');
     const [studyData, setStudyData] = useState(null);
     const [responses, setResponses] = useState({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [progress, setProgress] = useState(0);
+    const [user, setUser] = useState(null);
+    const [manualPdfUrl, setManualPdfUrl] = useState(null);
 
+    // Cargar usuario
     useEffect(() => {
-        loadStudy();
-        loadSavedResponses();
-    }, [params.id]);
+        const loadUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setUser(user);
 
+            // Si el usuario tiene idioma preferido, usarlo
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('users')
+                    .select('preferred_language')
+                    .eq('uuid', user.id)
+                    .single();
+
+                if (profile?.preferred_language && !searchParams.get('lang')) {
+                    setLanguage(profile.preferred_language);
+                }
+            }
+        };
+
+        loadUser();
+    }, []);
+
+    // Cargar estudio
     useEffect(() => {
-        // Actualizar idioma si cambia en la URL
+        if (params.id) {
+            loadStudy();
+        }
+    }, [params.id, user]);
+
+    // Actualizar idioma desde URL
+    useEffect(() => {
         const langParam = searchParams.get('lang');
         if (langParam && langParam !== language) {
             setLanguage(langParam);
@@ -33,18 +69,59 @@ export default function BibleStudyViewer() {
     }, [searchParams]);
 
     const loadStudy = async () => {
+        setLoading(true);
         try {
-            const response = await fetch(`/api/bible-study/${params.id}`);
-            const data = await response.json();
+            // Cargar desde Supabase
+            const studyResult = await getBibleStudyContent(params.id);
 
-            console.log('Datos recibidos del API:', data); // Debug
-            console.log('Tipo de content:', typeof data.content); // Debug adicional
-            console.log('Estructura de metadata:', data.metadata); // Debug metadata
+            if (!studyResult.success) {
+                console.error('Error:', studyResult.error);
+                setLoading(false);
+                return;
+            }
 
-            setStudyData(data);
-            setLoading(false);
+            // Preparar metadata
+            const metadata = {
+                title: {
+                    es: studyResult.data.titulo || 'Estudio Bíblico',
+                    en: studyResult.data.titulo_en || 'Bible Study'
+                },
+                subtitle: {
+                    es: 'Abraza la Palabra y Transforma Tu Realidad',
+                    en: 'Embrace the Word and Transform Your Reality'
+                },
+                bibleVerse: `Lección ${studyResult.data.numero || params.id}`,
+                bibleText: {
+                    es: 'Toda la Escritura es inspirada por Dios...',
+                    en: 'All Scripture is God-breathed...'
+                }
+            };
+
+            setStudyData({
+                ...studyResult.data,
+                content: studyResult.data.contenido_md || studyResult.data.content,
+                metadata: metadata
+            });
+
+            // Cargar progreso guardado del usuario
+            if (user) {
+                const progressResult = await getUserStudyProgress(user.id, params.id);
+                if (progressResult.success && progressResult.data) {
+                    setResponses(progressResult.data.bible_study_responses || {});
+                    setProgress(progressResult.data.bible_study_progress || 0);
+                }
+            } else {
+                // Si no hay usuario, cargar desde localStorage
+                loadSavedResponses();
+            }
+
+            // Verificar si hay PDF manual
+            const pdfUrl = await getManualPdfUrl(params.id);
+            setManualPdfUrl(pdfUrl);
+
         } catch (error) {
             console.error('Error loading study:', error);
+        } finally {
             setLoading(false);
         }
     };
@@ -59,25 +136,41 @@ export default function BibleStudyViewer() {
     };
 
     const calculateProgress = (data) => {
-        const totalFields = Object.keys(data).filter(k => k.startsWith('input-') || k.startsWith('textarea-')).length;
-        const filledFields = Object.values(data).filter(v => v && v.trim() !== '').length;
+        const fields = Object.keys(data).filter(k =>
+            (k.startsWith('input-') || k.startsWith('textarea-')) &&
+            k !== 'lastUpdated'
+        );
+        const totalFields = fields.length;
+        const filledFields = fields.filter(k => data[k] && data[k].trim() !== '').length;
+
         if (totalFields > 0) {
-            setProgress(Math.round((filledFields / totalFields) * 100));
+            const newProgress = Math.round((filledFields / totalFields) * 100);
+            setProgress(newProgress);
+            return newProgress;
         }
+        return 0;
     };
 
-    const handleInputChange = (fieldId, value) => {
+    const handleInputChange = async (fieldId, value) => {
         const newResponses = {
             ...responses,
             [fieldId]: value,
             lastUpdated: new Date().toISOString()
         };
         setResponses(newResponses);
-        localStorage.setItem(`bible-study-${params.id}`, JSON.stringify(newResponses));
-        calculateProgress(newResponses);
 
-        setSaving(true);
-        setTimeout(() => setSaving(false), 1000);
+        // Calcular y actualizar progreso
+        const newProgress = calculateProgress(newResponses);
+
+        // Guardar localmente siempre
+        localStorage.setItem(`bible-study-${params.id}`, JSON.stringify(newResponses));
+
+        // Si hay usuario, guardar en Supabase
+        if (user) {
+            setSaving(true);
+            await saveBibleStudyProgress(user.id, params.id, newProgress, newResponses);
+            setTimeout(() => setSaving(false), 1000);
+        }
     };
 
     const handlePrint = () => {
@@ -85,8 +178,21 @@ export default function BibleStudyViewer() {
     };
 
     const generatePDF = async () => {
-        // Implementaremos esto en el siguiente paso
-        alert(language === 'es' ? 'Generando PDF...' : 'Generating PDF...');
+        const element = document.querySelector('.bible-study-content-wrapper');
+        if (!element) {
+            alert('No se puede generar el PDF en este momento');
+            return;
+        }
+
+        const opt = {
+            margin: 1,
+            filename: `estudio-biblico-leccion-${params.id}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(element).save();
     };
 
     const sendByEmail = () => {
@@ -180,6 +286,17 @@ export default function BibleStudyViewer() {
 
                             {/* Acciones */}
                             <div className="flex items-center gap-2">
+                                {manualPdfUrl && (
+                                    <a
+                                        href={manualPdfUrl}
+                                        download
+                                        className="p-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                                        title="PDF Manual"
+                                    >
+                                        <FileText className="w-4 h-4" />
+                                    </a>
+                                )}
+
                                 <button
                                     onClick={generatePDF}
                                     className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -223,7 +340,7 @@ export default function BibleStudyViewer() {
 
             {/* Contenido Principal */}
             <main className="max-w-4xl mx-auto px-4 py-8">
-                <div className="bg-white rounded-2xl shadow-xl p-8 print:shadow-none">
+                <div className="bg-white rounded-2xl shadow-xl p-8 print:shadow-none bible-study-content-wrapper">
                     {/* Contenido del Estudio */}
                     <StudyRenderer
                         content={studyData?.content || ''}
@@ -247,26 +364,26 @@ export default function BibleStudyViewer() {
 
             {/* Estilos para impresión */}
             <style jsx global>{`
-            @media print {
-                @page {
-                    size: letter;
-                    margin: 0.5in;
+                @media print {
+                    @page {
+                        size: letter;
+                        margin: 0.5in;
+                    }
+                    
+                    body {
+                        print-color-adjust: exact;
+                        -webkit-print-color-adjust: exact;
+                    }
+                    
+                    .print\\:hidden {
+                        display: none !important;
+                    }
+                    
+                    main {
+                        max-width: 100% !important;
+                    }
                 }
-                
-                body {
-                    print-color-adjust: exact;
-                    -webkit-print-color-adjust: exact;
-                }
-                
-                .print\\:hidden {
-                    display: none !important;
-                }
-                
-                main {
-                    max-width: 100% !important;
-                }
-            }
-        `}</style>
+            `}</style>
         </div>
     );
 }
