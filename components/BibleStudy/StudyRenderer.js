@@ -288,14 +288,22 @@ export default function StudyRenderer({ content, language, responses, onInputCha
     return (
         <div className="prose prose-lg max-w-none">
             {/* Header con título, subtítulo y referencia */}
+
             {metadata && (
                 <div className="text-center mb-8 pb-6 border-b-2 border-gray-200">
                     <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                        {metadata.title?.[language] || metadata.title}
+                        {typeof metadata.title === 'object'
+                            ? (metadata.title?.[language] || metadata.title?.es || '')
+                            : (metadata.title || '')
+                        }
                     </h1>
                     <p className="text-xl text-gray-600 mb-3">
-                        {metadata.subtitle?.[language] || metadata.subtitle}
+                        {typeof metadata.subtitle === 'object'
+                            ? (metadata.subtitle?.[language] || metadata.subtitle?.es || '')
+                            : (metadata.subtitle || '')
+                        }
                     </p>
+
                     <div className="bg-blue-50 rounded-lg px-6 py-3 inline-block mb-4">
                         <p className="text-lg text-blue-700 font-semibold">
                             {metadata.bibleVerse}
