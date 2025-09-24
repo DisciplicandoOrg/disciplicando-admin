@@ -81,20 +81,12 @@ export default function BibleStudyViewer() {
             }
 
             // Preparar metadata desde los datos reales
+            // Preparar metadata basada en el contenido real de la lección
             const metadata = {
-                title: {
-                    es: studyResult.data.titulo || 'Estudio Bíblico',
-                    en: studyResult.data.titulo_en || studyResult.data.titulo || 'Bible Study'
-                },
-                subtitle: {
-                    es: studyResult.data.subtitulo || studyResult.data.descripcion || '',
-                    en: studyResult.data.subtitulo_en || studyResult.data.descripcion_en || ''
-                },
-                bibleVerse: studyResult.data.referencia_biblica || `Lección ${studyResult.data.numero || params.id}`,
-                bibleText: {
-                    es: studyResult.data.texto_biblico || '',
-                    en: studyResult.data.texto_biblico_en || ''
-                }
+                title: studyResult.data.titulo || `Lección ${studyResult.data.numero}`,
+                subtitle: '', // Dejar vacío por ahora
+                bibleVerse: `Lección ${studyResult.data.numero || params.id}`,
+                bibleText: '' // Dejar vacío por ahora
             };
 
             setStudyData({
