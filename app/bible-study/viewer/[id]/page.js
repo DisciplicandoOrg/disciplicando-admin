@@ -80,20 +80,20 @@ export default function BibleStudyViewer() {
                 return;
             }
 
-            // Preparar metadata
+            // Preparar metadata desde los datos reales
             const metadata = {
                 title: {
                     es: studyResult.data.titulo || 'Estudio Bíblico',
-                    en: studyResult.data.titulo_en || 'Bible Study'
+                    en: studyResult.data.titulo_en || studyResult.data.titulo || 'Bible Study'
                 },
                 subtitle: {
-                    es: 'Abraza la Palabra y Transforma Tu Realidad',
-                    en: 'Embrace the Word and Transform Your Reality'
+                    es: studyResult.data.subtitulo || studyResult.data.descripcion || '',
+                    en: studyResult.data.subtitulo_en || studyResult.data.descripcion_en || ''
                 },
-                bibleVerse: `Lección ${studyResult.data.numero || params.id}`,
+                bibleVerse: studyResult.data.referencia_biblica || `Lección ${studyResult.data.numero || params.id}`,
                 bibleText: {
-                    es: 'Toda la Escritura es inspirada por Dios...',
-                    en: 'All Scripture is God-breathed...'
+                    es: studyResult.data.texto_biblico || '',
+                    en: studyResult.data.texto_biblico_en || ''
                 }
             };
 
