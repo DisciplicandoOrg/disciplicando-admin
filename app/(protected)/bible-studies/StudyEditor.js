@@ -1,857 +1,679 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-    BookOpen, Save, Eye, Globe, Plus, Trash2,
-    ChevronDown, ChevronRight, Copy, FileText,
-    AlertCircle, Check, Loader2, Bold, Italic, List,
-    Quote, Heading, Link2
+    Save, Plus, Trash2, ChevronDown, ChevronRight,
+    AlertCircle, Check, FileText, Globe, BookOpen,
+    Copy, Eye, EyeOff, RefreshCw, AlertTriangle
 } from 'lucide-react';
 
-export default function StudyEditor({ lessonId, onClose, supabase }) {
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [lesson, setLesson] = useState(null);
-    const [activeTab, setActiveTab] = useState('content');
+export default function StudyEditor({ lessonId, initialData, onSave, onCancel }) {
+    const [loading, setLoading] = useState(false);
+    const [saveStatus, setSaveStatus] = useState('');
     const [showPreview, setShowPreview] = useState(false);
+    const [originalContent, setOriginalContent] = useState('');
+    const [validationErrors, setValidationErrors] = useState([]);
 
-    // Estado del contenido del estudio
-    const [studyData, setStudyData] = useState({
+    const [formData, setFormData] = useState({
+        titulo: '',
+        titulo_en: '',
+        numero: 1,
         metadata: {
-            id: '',
-            seriesId: 1,
-            lessonNumber: 1,
-            title: { es: '', en: '' },
-            subtitle: { es: '', en: '' },
-            introduction: { es: '', en: '' },
-            bibleVerse: '',
-            bibleText: { es: '', en: '' },
-            estimatedTime: 45,
-            difficulty: 'beginner',
-            tags: []
+            tema: '',
+            tema_en: '',
+            versiculo_clave: '',
+            versiculo_clave_en: '',
+            objetivo: '',
+            objetivo_en: '',
+            duracion: '45-60 minutos'
         },
         sections: []
     });
 
-    // Plantilla de sección nueva
-    const newSectionTemplate = {
-        id: `section-${Date.now()}`,
-        type: 'content',
-        title: { es: '', en: '' },
-        content: { es: '', en: '' },
-        hasTextarea: false,
-        hasInputs: false
-    };
-
     useEffect(() => {
-        if (lessonId) {
-            console.log("Cargando lección con ID:", lessonId);
-            loadLessonData();
+        if (initialData) {
+            // Guardar contenido original para comparación
+            setOriginalContent(initialData.contenido_md || '');
+
+            // Parsear el contenido existente
+            const parsedData = parseExistingContent(initialData.contenido_md || '');
+
+            setFormData({
+                titulo: initialData.titulo || '',
+                titulo_en: initialData.titulo_en || '',
+                numero: initialData.numero || 1,
+                metadata: parsedData.metadata || {
+                    tema: '',
+                    tema_en: '',
+                    versiculo_clave: '',
+                    versiculo_clave_en: '',
+                    objetivo: '',
+                    objetivo_en: '',
+                    duracion: '45-60 minutos'
+                },
+                sections: parsedData.sections || []
+            });
         }
-    }, [lessonId]);
+    }, [initialData]);
 
-    const loadLessonData = async () => {
-        setLoading(true);
+
+    // FUNCIÓN CORREGIDA: Parsea TODAS las secciones correctamente
+    const parseExistingContent = (content) => {
+        if (!content) return { metadata: {}, sections: [] };
+
+        console.log('=== INICIANDO PARSEO ===');
+        console.log('Contenido original:', content.substring(0, 500) + '...');
+
+        const result = {
+            metadata: {},
+            sections: []
+        };
+
         try {
-            console.log("Iniciando carga de lección:", lessonId);
+            // 1. Extraer metadata YAML (entre ---)
+            const metadataMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
+            if (metadataMatch) {
+                const yamlContent = metadataMatch[1];
+                console.log('Metadata YAML encontrada:', yamlContent);
 
-            // Cargar datos de la lección desde Supabase
-            const { data, error } = await supabase
-                .from('lecciones')
-                .select(`
-                    *,
-                    lecciones_i18n!left (
-                        locale,
-                        titulo,
-                        contenido_md
-                    ),
-                    bloques (
-                        *,
-                        series (*)
-                    )
-                `)
-                .eq('id', lessonId)
-                .single();
-
-            // AGREGAR ESTE DEBUG
-            console.log("=== DEBUG COMPLETO ===");
-            console.log("Datos cargados:", data);
-            console.log("Contenido MD existe?", data?.contenido_md ? "SÍ" : "NO");
-            console.log("Longitud del contenido:", data?.contenido_md?.length);
-            console.log("Primeros 200 caracteres:", data?.contenido_md?.substring(0, 200));
-
-            if (error) {
-                console.error("Error al cargar:", error);
-                throw error;
-            }
-
-            console.log("Datos cargados de la BD:", data);
-            setLesson(data);
-
-            // Verificar si hay contenido real y parsearlo
-            if (data?.contenido_md &&
-                data.contenido_md !== "Contenido en preparación..." &&
-                data.contenido_md.length > 30) {
-                console.log("Intentando parsear...");
-                parseExistingContent(data.contenido_md);
-            } else {
-                console.log("No hay contenido para parsear, iniciando vacio");
-                // Crear estructura inicial
-                setStudyData({
-                    ...studyData,
-                    metadata: {
-                        ...studyData.metadata,
-                        id: data.numero?.toString() || '1',
-                        lessonNumber: data.numero || 1,
-                        title: {
-                            es: data.titulo || '',
-                            en: data.lecciones_i18n?.find(i => i.locale === 'en')?.titulo || ''
-                        }
+                // Parsear cada línea del YAML
+                const lines = yamlContent.split('\n');
+                lines.forEach(line => {
+                    const colonIndex = line.indexOf(':');
+                    if (colonIndex > -1) {
+                        const key = line.substring(0, colonIndex).trim();
+                        const value = line.substring(colonIndex + 1).trim();
+                        result.metadata[key] = value;
                     }
                 });
             }
-        } catch (error) {
-            console.error('Error total:', error);
-            alert('Error al cargar la lección: ' + error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
 
-    const parseExistingContent = (markdown) => {
-        if (!markdown) return;
+            // 2. Remover metadata del contenido para procesar secciones
+            const contentWithoutMetadata = content.replace(/^---\s*\n[\s\S]*?\n---\s*\n/, '');
 
-        try {
-            // Crear backup local antes de parsear
-            localStorage.setItem(`backup_lesson_${lesson?.id}_${Date.now()}`, markdown);
+            // 3. Buscar TODAS las secciones (## sectionX)
+            // Usar una expresión regular que capture todas las secciones
+            const sectionRegex = /## (section\d+|conclusion)\s*\n([\s\S]*?)(?=## section|\## conclusion|$)/gi;
+            let match;
+            let sectionCount = 0;
 
-            const newStudyData = { /* ... estructura inicial ... */ };
+            while ((match = sectionRegex.exec(contentWithoutMetadata)) !== null) {
+                sectionCount++;
+                const sectionName = match[1];
+                const sectionContent = match[2].trim();
 
-            // Split principal por ---
-            const parts = markdown.split('---');
+                console.log(`Procesando ${sectionName} (${sectionCount})`);
 
-            // IMPORTANTE: Unir TODAS las partes después del metadata
-            // No solo parts[2], sino parts.slice(2).join('---')
-            const allSectionsContent = parts.slice(2).join('---');
+                // Extraer título y contenido bilingüe
+                // Extraer título en español (no captura si empieza con [EN])
+                const titleMatch = sectionContent.match(/### (?!\[EN\])(.+)/);
+                const title = titleMatch ? titleMatch[1].trim() : '';
 
-            // Buscar TODAS las secciones, no importa si son 4, 5 o más
-            const sectionMatches = allSectionsContent.matchAll(
-                /## section(\d+)(.*?)(?=## section|\Z)/gs
-            );
+                // Extraer título en inglés
+                const titleEnMatch = sectionContent.match(/### \[EN\] (.+)/);
+                const title_en = titleEnMatch ? titleEnMatch[1].trim() : '';
 
-            for (const match of sectionMatches) {
-                // Parsear cada sección encontrada
+                // Buscar contenido en español
+                const esMatch = sectionContent.match(/::es\s*\n([\s\S]*?)(?=::en|$)/);
+                const contentEs = esMatch ? esMatch[1].trim() : '';
+
+                // Buscar contenido en inglés
+                const enMatch = sectionContent.match(/::en\s*\n([\s\S]*?)(?=::es|$)/);
+                const contentEn = enMatch ? enMatch[1].trim() : '';
+
+
+                // Agregar la sección al resultado
+                // Agregar la sección al resultado
+                result.sections.push({
+                    id: Date.now() + sectionCount, // ID único
+                    title: title,
+                    title_en: title_en,  // AGREGAR ESTA LÍNEA
+                    content_es: contentEs,
+                    content_en: contentEn,
+                    order: sectionCount
+                });
+
+                console.log(`Sección ${sectionName} procesada:`, {
+                    title: title.substring(0, 50),
+                    esLength: contentEs.length,
+                    enLength: contentEn.length
+                });
             }
 
-            // Solo actualizar si encontramos al menos 1 sección
-            if (newStudyData.sections.length > 0) {
-                setStudyData(newStudyData);
-            } else {
-                alert('⚠️ No se pudieron cargar todas las secciones. Verifique el formato.');
+            // 4. Validación importante: verificar que se capturaron todas las secciones
+            const totalSectionsInOriginal = (content.match(/## section/gi) || []).length;
+            const hasConclusion = content.includes('## conclusion');
+            const expectedSections = totalSectionsInOriginal + (hasConclusion ? 1 : 0);
+
+            console.log(`=== RESUMEN DE PARSEO ===`);
+            console.log(`Secciones esperadas: ${expectedSections}`);
+            console.log(`Secciones capturadas: ${result.sections.length}`);
+
+            if (result.sections.length < expectedSections) {
+                console.error('⚠️ ADVERTENCIA: No se capturaron todas las secciones!');
+                console.error(`Faltan ${expectedSections - result.sections.length} secciones`);
+
+                // Intentar método alternativo si falló el primero
+                const alternativeSections = parseAlternativeMethod(contentWithoutMetadata);
+                if (alternativeSections.length > result.sections.length) {
+                    console.log('Usando método alternativo de parseo');
+                    result.sections = alternativeSections;
+                }
             }
+
         } catch (error) {
-            console.error('Error parseando:', error);
+            console.error('Error parseando contenido:', error);
         }
+
+        return result;
     };
 
 
 
-    // Función para insertar formato markdown
-    const insertMarkdownFormat = (fieldPath, format) => {
-        // Esta función ayuda a insertar formato markdown
-        const formats = {
-            bold: '**texto**',
-            italic: '*texto*',
-            bolditalic: '***texto***',
-            list: '\n- Punto 1\n- Punto 2\n- Punto 3',
-            numberedList: '\n1. Primero\n2. Segundo\n3. Tercero',
-            quote: '\n> Cita o texto destacado',
-            heading: '\n### Subtítulo',
-            link: '[texto del enlace](https://url.com)'
-        };
+    // Método alternativo de parseo (más robusto)
+    const parseAlternativeMethod = (content) => {
+        const sections = [];
+        const lines = content.split('\n');
+        let currentSection = null;
+        let currentContent = [];
+        let inEs = false;
+        let inEn = false;
+        let sectionCounter = 0;
 
-        alert(`Para ${format}, usa: ${formats[format]}`);
-    };
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
 
-    // Función para renderizar preview de markdown
-    const renderMarkdownPreview = (markdown) => {
-        let html = markdown;
+            // Detectar nueva sección
+            if (line.startsWith('## section') || line.startsWith('## conclusion')) {
+                // Guardar sección anterior si existe
+                if (currentSection) {
+                    sections.push(currentSection);
+                }
 
-        // Convertir markdown a HTML básico
-        html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
-        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-        html = html.replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold mt-3">$1</h3>');
-        html = html.replace(/^- (.*$)/gim, '<li>$1</li>');
-        html = html.replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-gray-300 pl-4 italic">$1</blockquote>');
-        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 underline" target="_blank">$1</a>');
-        html = html.replace(/\n/g, '<br>');
+                sectionCounter++;
+                currentSection = {
+                    id: Date.now() + sectionCounter,
+                    title: '',
+                    content_es: '',
+                    content_en: '',
+                    order: sectionCounter
+                };
+                currentContent = [];
+                inEs = false;
+                inEn = false;
+            }
+            // Detectar título
+            else if (line.startsWith('### ') && currentSection) {
+                currentSection.title = line.replace('### ', '').trim();
+            }
+            // Detectar marcador de español
+            else if (line.trim() === '::es') {
+                inEs = true;
+                inEn = false;
+            }
+            // Detectar marcador de inglés
+            else if (line.trim() === '::en') {
+                inEn = true;
+                inEs = false;
+            }
+            // Agregar contenido a la sección actual
+            else if (currentSection) {
+                if (inEs) {
+                    currentSection.content_es += line + '\n';
+                } else if (inEn) {
+                    currentSection.content_en += line + '\n';
+                }
+            }
+        }
 
-        return html;
+        // Guardar última sección
+        if (currentSection) {
+            sections.push(currentSection);
+        }
+
+        // Limpiar contenido
+        sections.forEach(section => {
+            section.content_es = section.content_es.trim();
+            section.content_en = section.content_en.trim();
+        });
+
+        return sections;
     };
 
     const addSection = () => {
-        setStudyData({
-            ...studyData,
-            sections: [...studyData.sections, { ...newSectionTemplate, id: `section-${Date.now()}` }]
+        const newSection = {
+            id: Date.now(),
+            title: '',
+            content_es: '',
+            content_en: '',
+            order: formData.sections.length + 1
+        };
+        setFormData({ ...formData, sections: [...formData.sections, newSection] });
+    };
+
+    const removeSection = (id) => {
+        if (!confirm('¿Estás seguro de eliminar esta sección?')) return;
+
+        const updatedSections = formData.sections.filter(s => s.id !== id);
+        // Reordenar
+        updatedSections.forEach((section, index) => {
+            section.order = index + 1;
         });
+        setFormData({ ...formData, sections: updatedSections });
     };
 
-    const updateSection = (sectionId, field, value) => {
-        setStudyData({
-            ...studyData,
-            sections: studyData.sections.map(s =>
-                s.id === sectionId ? { ...s, [field]: value } : s
-            )
-        });
+    const updateSection = (id, field, value) => {
+        const updatedSections = formData.sections.map(section =>
+            section.id === id ? { ...section, [field]: value } : section
+        );
+        setFormData({ ...formData, sections: updatedSections });
     };
 
-    const deleteSection = (sectionId) => {
-        if (confirm('¿Eliminar esta sección?')) {
-            setStudyData({
-                ...studyData,
-                sections: studyData.sections.filter(s => s.id !== sectionId)
-            });
-        }
-    };
-
+    // Generar contenido Markdown
     const generateMarkdown = () => {
         let markdown = '---\n';
 
         // Metadata
-        markdown += `# Identificadores\n`;
-        markdown += `id: "${studyData.metadata.id || studyData.metadata.lessonNumber}"\n`;
-        markdown += `seriesId: ${studyData.metadata.seriesId}\n`;
-        markdown += `lessonNumber: ${studyData.metadata.lessonNumber}\n\n`;
-
-        // Títulos
-        markdown += `title:\n`;
-        markdown += `  es: "${studyData.metadata.title.es}"\n`;
-        markdown += `  en: "${studyData.metadata.title.en}"\n\n`;
-
-        markdown += `subtitle:\n`;
-        markdown += `  es: "${studyData.metadata.subtitle.es}"\n`;
-        markdown += `  en: "${studyData.metadata.subtitle.en}"\n\n`;
-
-        // Referencias bíblicas
-        markdown += `bibleVerse: "${studyData.metadata.bibleVerse}"\n`;
-        markdown += `bibleText:\n`;
-        markdown += `  es: "${studyData.metadata.bibleText.es}"\n`;
-        markdown += `  en: "${studyData.metadata.bibleText.en}"\n\n`;
-
-        // Introducción
-        markdown += `# Introducción\n`;
-        markdown += `introduction:\n`;
-        markdown += `  es: "${studyData.metadata.introduction.es}"\n`;
-        markdown += `  en: "${studyData.metadata.introduction.en}"\n\n`;
-
-        // Metadatos
-        markdown += `estimatedTime: ${studyData.metadata.estimatedTime}\n`;
-        markdown += `difficulty: "${studyData.metadata.difficulty}"\n`;
-        markdown += `tags: [${studyData.metadata.tags.map(t => `"${t}"`).join(', ')}]\n`;
-        markdown += `---\n\n`;
-
-        // Secciones
-        studyData.sections.forEach((section, idx) => {
-            markdown += `## section${idx + 1}\n\n`;
-
-            // Contenido en español
-            markdown += `::es\n`;
-            markdown += `### ${section.title.es}\n\n`;
-            markdown += section.content.es + '\n';
-
-            if (section.hasTextarea) {
-                markdown += `\n[textarea:section${idx + 1}]\n`;
+        Object.entries(formData.metadata).forEach(([key, value]) => {
+            if (value) {
+                markdown += `${key}: ${value}\n`;
             }
-            markdown += `::\n\n`;
+        });
 
-            // Contenido en inglés
-            markdown += `::en\n`;
-            markdown += `### ${section.title.en}\n\n`;
-            markdown += section.content.en + '\n';
+        markdown += '---\n\n';
 
-            if (section.hasTextarea) {
-                markdown += `\n[textarea:section${idx + 1}]\n`;
+        // Secciones con títulos bilingües
+        formData.sections.forEach((section, index) => {
+            const sectionName = section.title?.toLowerCase().includes('conclus')
+                ? 'conclusion'
+                : `section${index + 1}`;
+
+            markdown += `## ${sectionName}\n\n`;
+
+            // Guardar ambos títulos si existen
+            if (section.title) {
+                markdown += `### ${section.title}\n`;
             }
-            markdown += `::\n\n`;
+            if (section.title_en) {
+                markdown += `### [EN] ${section.title_en}\n`;
+            }
 
-            markdown += `---\n\n`;
+            if (section.title || section.title_en) {
+                markdown += '\n';
+            }
+
+            if (section.content_es) {
+                markdown += `::es\n${section.content_es}\n\n`;
+            }
+
+            if (section.content_en) {
+                markdown += `::en\n${section.content_en}\n\n`;
+            }
         });
 
         return markdown;
     };
 
-    const saveStudy = async () => {
-        setSaving(true);
-        try {
 
-            // BACKUP: Guardar copia del contenido actual antes de sobrescribir
-            const { data: currentData } = await supabase
-                .from('lecciones')
-                .select('contenido_md')
-                .eq('id', lessonId)
-                .single();
+    // Validar antes de guardar
+    const validateBeforeSave = () => {
+        const errors = [];
 
-            if (currentData?.contenido_md) {
-                console.log('BACKUP del contenido anterior:', currentData.contenido_md);
-                // Opcionalmente, guardar en localStorage como respaldo
-                localStorage.setItem(`backup_lesson_${lessonId}`, currentData.contenido_md);
+        // Validar que hay al menos una sección
+        if (formData.sections.length === 0) {
+            errors.push('Debe haber al menos una sección');
+        }
+
+        // Validar que cada sección tiene contenido
+        formData.sections.forEach((section, index) => {
+            if (!section.title) {
+                errors.push(`Sección ${index + 1}: Falta título`);
             }
+            if (!section.content_es && !section.content_en) {
+                errors.push(`Sección ${index + 1}: Falta contenido`);
+            }
+        });
 
+        // Comparar con contenido original
+        const newContent = generateMarkdown();
+        const originalSectionCount = (originalContent.match(/## section/gi) || []).length;
+        const newSectionCount = formData.sections.length;
+
+        if (originalContent && newSectionCount < originalSectionCount) {
+            errors.push(`⚠️ ADVERTENCIA: El contenido original tenía ${originalSectionCount} secciones, ahora solo hay ${newSectionCount}`);
+        }
+
+        setValidationErrors(errors);
+        return errors.length === 0;
+    };
+
+    const handleSave = async () => {
+        // Validar antes de guardar
+        if (!validateBeforeSave()) {
+            const proceed = confirm(
+                'Hay problemas de validación:\n\n' +
+                validationErrors.join('\n') +
+                '\n\n¿Deseas continuar de todos modos?'
+            );
+            if (!proceed) return;
+        }
+
+        setLoading(true);
+        setSaveStatus('saving');
+
+        try {
             const markdown = generateMarkdown();
 
-            console.log("Guardando markdown:", markdown);
-            console.log("En lección ID:", lessonId);
+            // Mostrar resumen antes de guardar
+            const summary = `
+                RESUMEN DE GUARDADO:
+                - Secciones a guardar: ${formData.sections.length}
+                - Caracteres totales: ${markdown.length}
+                - Títulos de secciones: ${formData.sections.map(s => s.title).join(', ')}
+            `;
 
-            // Guardar en Supabase
-            const { data, error } = await supabase
-                .from('lecciones')
-                .update({
-                    contenido_md: markdown,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', lessonId)
-                .select()
-                .single();
+            console.log(summary);
 
-            if (error) {
-                console.error("Error al guardar:", error);
-                throw error;
+            if (!confirm(summary + '\n\n¿Confirmar guardado?')) {
+                setLoading(false);
+                setSaveStatus('');
+                return;
             }
 
-            console.log("Guardado exitoso:", data);
-            alert('Estudio guardado exitosamente');
+            await onSave({
+                titulo: formData.titulo,
+                titulo_en: formData.titulo_en,
+                numero: formData.numero,
+                contenido_md: markdown
+            });
 
+            setSaveStatus('saved');
+            setTimeout(() => setSaveStatus(''), 3000);
         } catch (error) {
             console.error('Error guardando:', error);
+            setSaveStatus('error');
             alert('Error al guardar: ' + error.message);
         } finally {
-            setSaving(false);
+            setLoading(false);
         }
     };
 
-    const handlePreview = () => {
-        setShowPreview(true);
-    };
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center p-12">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-            </div>
-        );
-    }
-
     return (
-        <div className="max-h-[90vh] overflow-hidden flex flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
-                <div className="flex items-center gap-3">
-                    <BookOpen className="w-6 h-6 text-blue-600" />
+        <div className="max-w-6xl mx-auto space-y-6">
+            {/* Header con validación */}
+            <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex justify-between items-start mb-4">
                     <div>
-                        <h2 className="text-xl font-bold">Editor de Estudio Bíblico</h2>
-                        <p className="text-sm text-gray-600">
-                            Lección {lesson?.numero}: {lesson?.titulo}
+                        <h2 className="text-2xl font-bold">Editor de Estudio Bíblico</h2>
+                        <p className="text-gray-600 mt-1">
+                            Lección {formData.numero}: {formData.titulo || 'Sin título'}
                         </p>
                     </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setShowPreview(!showPreview)}
+                            className="px-3 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                        >
+                            {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                        <button
+                            onClick={onCancel}
+                            className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            onClick={handleSave}
+                            disabled={loading}
+                            className={`px-4 py-2 rounded text-white flex items-center gap-2 ${loading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+                                }`}
+                        >
+                            {loading ? (
+                                <RefreshCw className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <Save className="w-4 h-4" />
+                            )}
+                            {loading ? 'Guardando...' : 'Guardar'}
+                        </button>
+                    </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={handlePreview}
-                        className="flex items-center gap-2 px-3 py-2 bg-white border rounded-lg hover:bg-gray-50"
-                    >
-                        <Eye className="w-4 h-4" />
-                        Vista Previa
-                    </button>
 
-                    <button
-                        onClick={saveStudy}
-                        disabled={saving}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                    >
-                        {saving ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                            <Save className="w-4 h-4" />
-                        )}
-                        Guardar
-                    </button>
-                </div>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex border-b">
-                <button
-                    onClick={() => setActiveTab('metadata')}
-                    className={`px-4 py-2 font-medium ${activeTab === 'metadata'
-                        ? 'border-b-2 border-blue-600 text-blue-600'
-                        : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                >
-                    Información General
-                </button>
-                <button
-                    onClick={() => setActiveTab('content')}
-                    className={`px-4 py-2 font-medium ${activeTab === 'content'
-                        ? 'border-b-2 border-blue-600 text-blue-600'
-                        : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                >
-                    Contenido
-                </button>
-                <button
-                    onClick={() => setActiveTab('markdown')}
-                    className={`px-4 py-2 font-medium ${activeTab === 'markdown'
-                        ? 'border-b-2 border-blue-600 text-blue-600'
-                        : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                >
-                    Markdown
-                </button>
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
-                {activeTab === 'metadata' && (
-                    <div className="space-y-6">
-                        {/* TÍTULOS */}
-                        <div className="grid grid-cols-2 gap-6">
+                {/* Alertas de validación */}
+                {validationErrors.length > 0 && (
+                    <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
+                        <div className="flex items-start gap-2">
+                            <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
                             <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Título (Español)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={studyData.metadata.title.es}
-                                    onChange={(e) => setStudyData({
-                                        ...studyData,
-                                        metadata: {
-                                            ...studyData.metadata,
-                                            title: { ...studyData.metadata.title, es: e.target.value }
-                                        }
-                                    })}
-                                    className="w-full px-3 py-2 border rounded-lg"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Title (English)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={studyData.metadata.title.en}
-                                    onChange={(e) => setStudyData({
-                                        ...studyData,
-                                        metadata: {
-                                            ...studyData.metadata,
-                                            title: { ...studyData.metadata.title, en: e.target.value }
-                                        }
-                                    })}
-                                    className="w-full px-3 py-2 border rounded-lg"
-                                />
-                            </div>
-                        </div>
-
-                        {/* SUBTÍTULOS - NUEVO */}
-                        <div className="grid grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Subtítulo (Español)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={studyData.metadata.subtitle.es}
-                                    onChange={(e) => setStudyData({
-                                        ...studyData,
-                                        metadata: {
-                                            ...studyData.metadata,
-                                            subtitle: { ...studyData.metadata.subtitle, es: e.target.value }
-                                        }
-                                    })}
-                                    className="w-full px-3 py-2 border rounded-lg"
-                                    placeholder="Ej: Fundamento de nuestra fe"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Subtitle (English)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={studyData.metadata.subtitle.en}
-                                    onChange={(e) => setStudyData({
-                                        ...studyData,
-                                        metadata: {
-                                            ...studyData.metadata,
-                                            subtitle: { ...studyData.metadata.subtitle, en: e.target.value }
-                                        }
-                                    })}
-                                    className="w-full px-3 py-2 border rounded-lg"
-                                    placeholder="Ex: Foundation of our faith"
-                                />
-                            </div>
-                        </div>
-
-                        {/* REFERENCIA BÍBLICA */}
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Referencia Bíblica / Bible Reference
-                            </label>
-                            <input
-                                type="text"
-                                value={studyData.metadata.bibleVerse}
-                                onChange={(e) => setStudyData({
-                                    ...studyData,
-                                    metadata: { ...studyData.metadata, bibleVerse: e.target.value }
-                                })}
-                                className="w-full px-3 py-2 border rounded-lg"
-                                placeholder="Ej: 2 Timoteo 3:16-17 / 2 Timothy 3:16-17"
-                            />
-                        </div>
-
-                        {/* TEXTO BÍBLICO EN AMBOS IDIOMAS */}
-                        <div className="grid grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Texto Bíblico (Español)
-                                </label>
-                                <textarea
-                                    value={studyData.metadata.bibleText.es}
-                                    onChange={(e) => setStudyData({
-                                        ...studyData,
-                                        metadata: {
-                                            ...studyData.metadata,
-                                            bibleText: { ...studyData.metadata.bibleText, es: e.target.value }
-                                        }
-                                    })}
-                                    className="w-full px-3 py-2 border rounded-lg"
-                                    rows="4"
-                                    placeholder="Pega aquí el versículo completo en español"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Bible Text (English)
-                                </label>
-                                <textarea
-                                    value={studyData.metadata.bibleText.en}
-                                    onChange={(e) => setStudyData({
-                                        ...studyData,
-                                        metadata: {
-                                            ...studyData.metadata,
-                                            bibleText: { ...studyData.metadata.bibleText, en: e.target.value }
-                                        }
-                                    })}
-                                    className="w-full px-3 py-2 border rounded-lg"
-                                    rows="4"
-                                    placeholder="Paste here the complete verse in English"
-                                />
-                            </div>
-                        </div>
-
-                        {/* INTRODUCCIÓN */}
-                        <div className="grid grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Introducción (Español)
-                                </label>
-                                <textarea
-                                    value={studyData.metadata.introduction.es}
-                                    onChange={(e) => setStudyData({
-                                        ...studyData,
-                                        metadata: {
-                                            ...studyData.metadata,
-                                            introduction: { ...studyData.metadata.introduction, es: e.target.value }
-                                        }
-                                    })}
-                                    className="w-full px-3 py-2 border rounded-lg"
-                                    rows="4"
-                                    placeholder="Ej: ¡Bienvenido a este tiempo de estudio personal! El objetivo de esta guía..."
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Introduction (English)
-                                </label>
-                                <textarea
-                                    value={studyData.metadata.introduction.en}
-                                    onChange={(e) => setStudyData({
-                                        ...studyData,
-                                        metadata: {
-                                            ...studyData.metadata,
-                                            introduction: { ...studyData.metadata.introduction, en: e.target.value }
-                                        }
-                                    })}
-                                    className="w-full px-3 py-2 border rounded-lg"
-                                    rows="4"
-                                    placeholder="Ex: Welcome to this time of personal study! The goal of this guide..."
-                                />
+                                <p className="font-medium text-yellow-900">Problemas detectados:</p>
+                                <ul className="mt-1 text-sm text-yellow-800">
+                                    {validationErrors.map((error, index) => (
+                                        <li key={index}>• {error}</li>
+                                    ))}
+                                </ul>
                             </div>
                         </div>
                     </div>
                 )}
 
-                {activeTab === 'content' && (
-                    <div className="space-y-6">
-                        {/* Barra de herramientas de formato */}
-                        <div className="bg-gray-100 p-3 rounded-lg">
-                            <p className="text-sm font-medium mb-2">Herramientas de Formato Markdown:</p>
-                            <div className="flex gap-2 flex-wrap">
-                                <button
-                                    onClick={() => insertMarkdownFormat('', 'bold')}
-                                    className="px-3 py-1 bg-white rounded hover:bg-gray-50 flex items-center gap-1"
-                                    title="Texto en negrita: **texto**"
-                                >
-                                    <Bold className="w-4 h-4" /> Bold
-                                </button>
-                                <button
-                                    onClick={() => insertMarkdownFormat('', 'italic')}
-                                    className="px-3 py-1 bg-white rounded hover:bg-gray-50 flex items-center gap-1"
-                                    title="Texto en cursiva: *texto*"
-                                >
-                                    <Italic className="w-4 h-4" /> Italic
-                                </button>
-                                <button
-                                    onClick={() => insertMarkdownFormat('', 'bolditalic')}
-                                    className="px-3 py-1 bg-white rounded hover:bg-gray-50"
-                                    title="Negrita y cursiva: ***texto***"
-                                >
-                                    <strong><em>B+I</em></strong>
-                                </button>
-                                <button
-                                    onClick={() => insertMarkdownFormat('', 'list')}
-                                    className="px-3 py-1 bg-white rounded hover:bg-gray-50 flex items-center gap-1"
-                                    title="Lista: - item"
-                                >
-                                    <List className="w-4 h-4" /> Lista
-                                </button>
-                                <button
-                                    onClick={() => insertMarkdownFormat('', 'quote')}
-                                    className="px-3 py-1 bg-white rounded hover:bg-gray-50 flex items-center gap-1"
-                                    title="Cita: > texto"
-                                >
-                                    <Quote className="w-4 h-4" /> Cita
-                                </button>
-                                <button
-                                    onClick={() => insertMarkdownFormat('', 'heading')}
-                                    className="px-3 py-1 bg-white rounded hover:bg-gray-50 flex items-center gap-1"
-                                    title="Subtítulo: ### texto"
-                                >
-                                    <Heading className="w-4 h-4" /> Subtítulo
-                                </button>
-                                <button
-                                    onClick={() => insertMarkdownFormat('', 'link')}
-                                    className="px-3 py-1 bg-white rounded hover:bg-gray-50 flex items-center gap-1"
-                                    title="Enlace: [texto](url)"
-                                >
-                                    <Link2 className="w-4 h-4" /> Enlace
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="flex justify-between items-center">
-                            <h3 className="text-lg font-semibold">Secciones del Estudio</h3>
-                            <button
-                                onClick={addSection}
-                                className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                            >
-                                <Plus className="w-4 h-4" />
-                                Agregar Sección
-                            </button>
-                        </div>
-
-                        {studyData.sections.length === 0 ? (
-                            <div className="text-center py-12 bg-gray-50 rounded-lg">
-                                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                                <p className="text-gray-600">No hay secciones todavía</p>
-                                <button
-                                    onClick={addSection}
-                                    className="mt-3 text-blue-600 hover:text-blue-700"
-                                >
-                                    Agregar primera sección
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {studyData.sections.map((section, idx) => (
-                                    <div key={section.id} className="border rounded-lg p-4 bg-white">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <h4 className="font-medium">Sección {idx + 1}</h4>
-                                            <button
-                                                onClick={() => deleteSection(section.id)}
-                                                className="text-red-600 hover:text-red-700"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-sm font-medium mb-1">
-                                                    Título (Español)
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    value={section.title.es}
-                                                    onChange={(e) => updateSection(
-                                                        section.id,
-                                                        'title',
-                                                        { ...section.title, es: e.target.value }
-                                                    )}
-                                                    className="w-full px-3 py-2 border rounded"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium mb-1">
-                                                    Title (English)
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    value={section.title.en}
-                                                    onChange={(e) => updateSection(
-                                                        section.id,
-                                                        'title',
-                                                        { ...section.title, en: e.target.value }
-                                                    )}
-                                                    className="w-full px-3 py-2 border rounded"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4 mt-4">
-                                            <div>
-                                                <label className="block text-sm font-medium mb-1">
-                                                    Contenido (Español)
-                                                </label>
-                                                <textarea
-                                                    value={section.content.es}
-                                                    onChange={(e) => updateSection(
-                                                        section.id,
-                                                        'content',
-                                                        { ...section.content, es: e.target.value }
-                                                    )}
-                                                    className="w-full px-3 py-2 border rounded"
-                                                    rows="8"
-                                                    placeholder="Usa markdown: **negrita**, *cursiva*, ***ambos***, - listas, > citas"
-                                                />
-                                                {/* Mini preview */}
-                                                <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
-                                                    <div dangerouslySetInnerHTML={{
-                                                        __html: renderMarkdownPreview(section.content.es)
-                                                    }} />
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium mb-1">
-                                                    Content (English)
-                                                </label>
-                                                <textarea
-                                                    value={section.content.en}
-                                                    onChange={(e) => updateSection(
-                                                        section.id,
-                                                        'content',
-                                                        { ...section.content, en: e.target.value }
-                                                    )}
-                                                    className="w-full px-3 py-2 border rounded"
-                                                    rows="8"
-                                                    placeholder="Use markdown: **bold**, *italic*, ***both***, - lists, > quotes"
-                                                />
-                                                {/* Mini preview */}
-                                                <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
-                                                    <div dangerouslySetInnerHTML={{
-                                                        __html: renderMarkdownPreview(section.content.en)
-                                                    }} />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-4 mt-3">
-                                            <label className="flex items-center gap-2">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={section.hasTextarea}
-                                                    onChange={(e) => updateSection(
-                                                        section.id,
-                                                        'hasTextarea',
-                                                        e.target.checked
-                                                    )}
-                                                />
-                                                <span className="text-sm">Incluir área de texto para respuesta</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                {/* Estado de guardado */}
+                {saveStatus === 'saved' && (
+                    <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded flex items-center gap-2">
+                        <Check className="w-5 h-5 text-green-600" />
+                        <span className="text-green-800">Guardado exitosamente</span>
                     </div>
                 )}
+            </div>
 
-                {activeTab === 'markdown' && (
+            {/* Información básica */}
+            <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4">Información Básica</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold">Vista Markdown</h3>
-                            <button
-                                onClick={() => {
-                                    navigator.clipboard.writeText(generateMarkdown());
-                                    alert('Copiado al portapapeles');
-                                }}
-                                className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-                            >
-                                <Copy className="w-4 h-4" />
-                                Copiar
-                            </button>
-                        </div>
-                        <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto">
-                            <code>{generateMarkdown()}</code>
-                        </pre>
+                        <label className="block text-sm font-medium mb-1">Número de Lección</label>
+                        <input
+                            type="number"
+                            value={formData.numero}
+                            onChange={(e) => setFormData({ ...formData, numero: parseInt(e.target.value) })}
+                            className="w-full px-3 py-2 border rounded"
+                        />
                     </div>
-                )}
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Título (Español)</label>
+                        <input
+                            type="text"
+                            value={formData.titulo}
+                            onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+                            className="w-full px-3 py-2 border rounded"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Title (English)</label>
+                        <input
+                            type="text"
+                            value={formData.titulo_en}
+                            onChange={(e) => setFormData({ ...formData, titulo_en: e.target.value })}
+                            className="w-full px-3 py-2 border rounded"
+                        />
+                    </div>
+                </div>
             </div>
 
-            {/* Modal de Vista Previa */}
-            {showPreview && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
-                        <div className="flex justify-between items-center p-4 border-b">
-                            <h3 className="text-lg font-semibold">Vista Previa del Estudio</h3>
-                            <button
-                                onClick={() => setShowPreview(false)}
-                                className="text-gray-500 hover:text-gray-700"
-                            >
-                                ✕
-                            </button>
-                        </div>
-                        <div className="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
-                            <div className="prose max-w-none">
-                                <h1>{studyData.metadata.title.es}</h1>
-                                <h2 className="text-gray-600">{studyData.metadata.subtitle.es}</h2>
-                                <p><strong>Referencia:</strong> {studyData.metadata.bibleVerse}</p>
-                                <blockquote className="border-l-4 border-blue-500 pl-4">
-                                    {studyData.metadata.bibleText.es}
-                                </blockquote>
-                                <div className="mt-4">
-                                    <h3>Introducción</h3>
-                                    <p>{studyData.metadata.introduction.es}</p>
-                                </div>
-                                {studyData.sections.map((section, idx) => (
-                                    <div key={section.id} className="mt-6">
-                                        <h3>{idx + 1}. {section.title.es}</h3>
-                                        <div dangerouslySetInnerHTML={{
-                                            __html: renderMarkdownPreview(section.content.es)
-                                        }} />
-                                        {section.hasTextarea && (
-                                            <textarea
-                                                className="w-full mt-3 p-3 border rounded"
-                                                rows="4"
-                                                placeholder="Escribe tu respuesta aquí..."
-                                                disabled
-                                            />
+            {/* Metadata */}
+            <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4">Metadata del Estudio</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Tema (Español)</label>
+                        <input
+                            type="text"
+                            value={formData.metadata.tema}
+                            onChange={(e) => setFormData({
+                                ...formData,
+                                metadata: { ...formData.metadata, tema: e.target.value }
+                            })}
+                            className="w-full px-3 py-2 border rounded"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Theme (English)</label>
+                        <input
+                            type="text"
+                            value={formData.metadata.tema_en}
+                            onChange={(e) => setFormData({
+                                ...formData,
+                                metadata: { ...formData.metadata, tema_en: e.target.value }
+                            })}
+                            className="w-full px-3 py-2 border rounded"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Versículo Clave (Español)</label>
+                        <input
+                            type="text"
+                            value={formData.metadata.versiculo_clave}
+                            onChange={(e) => setFormData({
+                                ...formData,
+                                metadata: { ...formData.metadata, versiculo_clave: e.target.value }
+                            })}
+                            className="w-full px-3 py-2 border rounded"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Key Verse (English)</label>
+                        <input
+                            type="text"
+                            value={formData.metadata.versiculo_clave_en}
+                            onChange={(e) => setFormData({
+                                ...formData,
+                                metadata: { ...formData.metadata, versiculo_clave_en: e.target.value }
+                            })}
+                            className="w-full px-3 py-2 border rounded"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Secciones */}
+            <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">
+                        Secciones del Estudio ({formData.sections.length})
+                    </h3>
+                    <button
+                        onClick={addSection}
+                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Agregar Sección
+                    </button>
+                </div>
+
+                {formData.sections.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                        <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                        <p>No hay secciones. Haz clic en "Agregar Sección" para comenzar.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {formData.sections.map((section, index) => (
+                            <div key={section.id} className="border rounded-lg p-4">
+                                <div className="flex justify-between items-start mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-medium">
+                                            Sección {index + 1}
+                                        </span>
+                                        {section.title && (
+                                            <span className="text-gray-600">
+                                                - {section.title}
+                                            </span>
                                         )}
                                     </div>
-                                ))}
+                                    <button
+                                        onClick={() => removeSection(section.id)}
+                                        className="text-red-600 hover:text-red-800"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+
+
+                                <div className="space-y-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">
+                                                Título de la Sección (Español)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={section.title}
+                                                onChange={(e) => updateSection(section.id, 'title', e.target.value)}
+                                                className="w-full px-3 py-2 border rounded"
+                                                placeholder="Ej: Introducción, Desarrollo..."
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">
+                                                Section Title (English)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={section.title_en || ''}
+                                                onChange={(e) => updateSection(section.id, 'title_en', e.target.value)}
+                                                className="w-full px-3 py-2 border rounded"
+                                                placeholder="Ex: Introduction, Development..."
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">
+                                                Contenido (Español)
+                                            </label>
+                                            <textarea
+                                                value={section.content_es}
+                                                onChange={(e) => updateSection(section.id, 'content_es', e.target.value)}
+                                                className="w-full px-3 py-2 border rounded"
+                                                rows="8"
+                                                placeholder="Contenido en español..."
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                {section.content_es.length} caracteres
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">
+                                                Content (English)
+                                            </label>
+                                            <textarea
+                                                value={section.content_en}
+                                                onChange={(e) => updateSection(section.id, 'content_en', e.target.value)}
+                                                className="w-full px-3 py-2 border rounded"
+                                                rows="8"
+                                                placeholder="Content in English..."
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                {section.content_en.length} characters
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
                             </div>
-                        </div>
+                        ))}
                     </div>
+                )}
+            </div>
+
+            {/* Vista previa */}
+            {showPreview && (
+                <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="text-lg font-semibold mb-4">Vista Previa del Markdown</h3>
+                    <pre className="bg-gray-100 p-4 rounded overflow-x-auto text-sm">
+                        {generateMarkdown()}
+                    </pre>
                 </div>
             )}
         </div>
