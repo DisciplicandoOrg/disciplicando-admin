@@ -74,20 +74,45 @@ export default function BibleStudyViewer() {
             // Cargar desde Supabase
             const studyResult = await getBibleStudyContent(params.id);
 
+            // Agregar este console.log para ver qué datos llegan
+            console.log('Datos del estudio:', studyResult.data);
+
             if (!studyResult.success) {
                 console.error('Error:', studyResult.error);
                 setLoading(false);
                 return;
             }
 
+            // Extraer metadata del contenido si existe
+            let extractedTitle = studyResult.data.titulo;
+            let extractedVerse = studyResult.data.referencia_biblica;
+            let extractedText = studyResult.data.texto_biblico;
+
+            // Si el contenido tiene metadata, usarla
+            if (studyResult.data.contenido_md) {
+                const lines = studyResult.data.contenido_md.split('\n');
+                lines.forEach(line => {
+                    if (line.includes('titulo_estudio:')) {
+                        extractedTitle = line.split(':')[1].trim();
+                    }
+                    if (line.includes('versiculo_clave:')) {
+                        extractedVerse = line.split(':')[1].trim();
+                    }
+                    if (line.includes('texto_biblico:')) {
+                        extractedText = line.split(':')[1].trim();
+                    }
+                });
+            }
+
             // Preparar metadata desde los datos reales
             // Preparar metadata basada en el contenido real de la lección
             const metadata = {
-                title: studyResult.data.titulo || `Lección ${studyResult.data.numero}`,
-                subtitle: '', // Dejar vacío por ahora
-                bibleVerse: `Lección ${studyResult.data.numero || params.id}`,
-                bibleText: '' // Dejar vacío por ahora
+                title: extractedTitle || 'Estudio Bíblico',
+                numero: studyResult.data.numero,
+                bibleVerse: extractedVerse || '',
+                bibleText: extractedText || ''
             };
+
 
             setStudyData({
                 ...studyResult.data,

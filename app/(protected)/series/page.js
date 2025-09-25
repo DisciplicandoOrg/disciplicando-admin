@@ -392,7 +392,11 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
         estudio_url_en: "",
         quiz_url_en: "",
         contenido_md: "",
-        quiz_min_score: 80
+        quiz_min_score: 80,
+
+        referencia_biblica: "",
+        texto_biblico: "",
+        texto_biblico_en: ""
     });
 
     useEffect(() => {
@@ -462,6 +466,11 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                         quiz_url: formData.quiz_url_es || null,
                         contenido_md: formData.contenido_md || null,
                         quiz_min_score: formData.quiz_min_score,
+
+                        referencia_biblica: formData.referencia_biblica || null,
+                        texto_biblico: formData.texto_biblico || null,
+                        texto_biblico_en: formData.texto_biblico_en || null,
+
                         updated_at: new Date().toISOString()
                     })
                     .eq("id", leccion.id);
@@ -650,6 +659,48 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                                 value={formData.titulo_en}
                                 onChange={(e) => setFormData({ ...formData, titulo_en: e.target.value })}
                                 className="w-full px-3 py-2 border rounded-md"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Referencia Bíblica */}
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                            📖 Referencia Bíblica (ej: Mateo 3:16-17)
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.referencia_biblica}
+                            onChange={(e) => setFormData({ ...formData, referencia_biblica: e.target.value })}
+                            className="w-full px-3 py-2 border rounded-md"
+                            placeholder="Mateo 3:16-17"
+                        />
+                    </div>
+
+                    {/* Texto Bíblico */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">
+                                🇪🇸 Texto Bíblico (Español)
+                            </label>
+                            <textarea
+                                value={formData.texto_biblico}
+                                onChange={(e) => setFormData({ ...formData, texto_biblico: e.target.value })}
+                                className="w-full px-3 py-2 border rounded-md"
+                                rows="3"
+                                placeholder="Y Jesús, después que fue bautizado..."
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">
+                                🇺🇸 Bible Text (English)
+                            </label>
+                            <textarea
+                                value={formData.texto_biblico_en}
+                                onChange={(e) => setFormData({ ...formData, texto_biblico_en: e.target.value })}
+                                className="w-full px-3 py-2 border rounded-md"
+                                rows="3"
+                                placeholder="After Jesus was baptized..."
                             />
                         </div>
                     </div>

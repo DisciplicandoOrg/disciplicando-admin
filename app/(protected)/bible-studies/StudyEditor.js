@@ -42,13 +42,13 @@ export default function StudyEditor({ lessonId, initialData, onSave, onCancel })
                 titulo: initialData.titulo || '',
                 titulo_en: initialData.titulo_en || '',
                 numero: initialData.numero || 1,
-                metadata: parsedData.metadata || {
-                    tema: '',
-                    tema_en: '',
+                metadata: {
+                    titulo_estudio: '',  // Título del estudio (diferente al título de la lección)
+                    titulo_estudio_en: '',
                     versiculo_clave: '',
                     versiculo_clave_en: '',
-                    objetivo: '',
-                    objetivo_en: '',
+                    texto_biblico: '',  // NUEVO: Texto bíblico
+                    texto_biblico_en: '',  // NUEVO: Texto bíblico en inglés
                     duracion: '45-60 minutos'
                 },
                 sections: parsedData.sections || []
@@ -498,60 +498,117 @@ export default function StudyEditor({ lessonId, initialData, onSave, onCancel })
                 </div>
             </div>
 
+
+            {/* Metadata */}
             {/* Metadata */}
             <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold mb-4">Metadata del Estudio</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Tema (Español)</label>
-                        <input
-                            type="text"
-                            value={formData.metadata.tema}
-                            onChange={(e) => setFormData({
-                                ...formData,
-                                metadata: { ...formData.metadata, tema: e.target.value }
-                            })}
-                            className="w-full px-3 py-2 border rounded"
-                        />
+                <div className="space-y-4">
+                    {/* Título del Estudio Bíblico */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">
+                                📖 Título del Estudio (Español)
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.metadata.titulo_estudio}
+                                onChange={(e) => setFormData({
+                                    ...formData,
+                                    metadata: { ...formData.metadata, titulo_estudio: e.target.value }
+                                })}
+                                className="w-full px-3 py-2 border rounded"
+                                placeholder="Abraza La Verdad, Vive En Comunidad Trinitaria"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">
+                                📖 Study Title (English)
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.metadata.titulo_estudio_en}
+                                onChange={(e) => setFormData({
+                                    ...formData,
+                                    metadata: { ...formData.metadata, titulo_estudio_en: e.target.value }
+                                })}
+                                className="w-full px-3 py-2 border rounded"
+                                placeholder="Embrace The Truth, Live In Trinitarian Community"
+                            />
+                        </div>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Theme (English)</label>
-                        <input
-                            type="text"
-                            value={formData.metadata.tema_en}
-                            onChange={(e) => setFormData({
-                                ...formData,
-                                metadata: { ...formData.metadata, tema_en: e.target.value }
-                            })}
-                            className="w-full px-3 py-2 border rounded"
-                        />
+
+                    {/* Versículo Clave */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">
+                                📕 Versículo Clave (Español)
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.metadata.versiculo_clave}
+                                onChange={(e) => setFormData({
+                                    ...formData,
+                                    metadata: { ...formData.metadata, versiculo_clave: e.target.value }
+                                })}
+                                className="w-full px-3 py-2 border rounded"
+                                placeholder="Mateo 3:16-17; 28:19"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">
+                                📕 Key Verse (English)
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.metadata.versiculo_clave_en}
+                                onChange={(e) => setFormData({
+                                    ...formData,
+                                    metadata: { ...formData.metadata, versiculo_clave_en: e.target.value }
+                                })}
+                                className="w-full px-3 py-2 border rounded"
+                                placeholder="Matthew 3:16-17; 28:19"
+                            />
+                        </div>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Versículo Clave (Español)</label>
-                        <input
-                            type="text"
-                            value={formData.metadata.versiculo_clave}
-                            onChange={(e) => setFormData({
-                                ...formData,
-                                metadata: { ...formData.metadata, versiculo_clave: e.target.value }
-                            })}
-                            className="w-full px-3 py-2 border rounded"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Key Verse (English)</label>
-                        <input
-                            type="text"
-                            value={formData.metadata.versiculo_clave_en}
-                            onChange={(e) => setFormData({
-                                ...formData,
-                                metadata: { ...formData.metadata, versiculo_clave_en: e.target.value }
-                            })}
-                            className="w-full px-3 py-2 border rounded"
-                        />
+
+                    {/* Texto Bíblico */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">
+                                ✝️ Texto Bíblico (Español)
+                            </label>
+                            <textarea
+                                value={formData.metadata.texto_biblico}
+                                onChange={(e) => setFormData({
+                                    ...formData,
+                                    metadata: { ...formData.metadata, texto_biblico: e.target.value }
+                                })}
+                                className="w-full px-3 py-2 border rounded"
+                                rows="3"
+                                placeholder="Y Jesús, después que fue bautizado, subió luego del agua..."
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">
+                                ✝️ Bible Text (English)
+                            </label>
+                            <textarea
+                                value={formData.metadata.texto_biblico_en}
+                                onChange={(e) => setFormData({
+                                    ...formData,
+                                    metadata: { ...formData.metadata, texto_biblico_en: e.target.value }
+                                })}
+                                className="w-full px-3 py-2 border rounded"
+                                rows="3"
+                                placeholder="As soon as Jesus was baptized, he went up out of the water..."
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
+
+
 
             {/* Secciones */}
             <div className="bg-white rounded-lg shadow p-6">

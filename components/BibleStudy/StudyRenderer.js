@@ -7,23 +7,12 @@ export default function StudyRenderer({ content, language, responses, onInputCha
     const [editingField, setEditingField] = useState(null);
     const inputRefs = useRef({});
 
-    // Procesar el contenido markdown
+    // Procesar el contenido según el formato del editor
     const processContent = (rawContent) => {
-        if (!rawContent) {
-            console.error('No content provided');
-            return [];
-        }
-
-        // Asegurar que sea string y reemplazar los \n escapados con saltos de línea reales
-        let contentToProcess = typeof rawContent === 'string' ? rawContent : String(rawContent);
-
-        // Si el contenido tiene \n escapados, reemplazarlos con saltos de línea reales
-        if (contentToProcess.includes('\\n')) {
-            contentToProcess = contentToProcess.replace(/\\n/g, '\n');
-        }
+        if (!rawContent) return [];
 
         const sections = [];
-        const lines = contentToProcess.split('\n');
+        const lines = rawContent.split('\n');
         let currentSection = null;
         let currentLang = null;
         let buffer = [];
@@ -42,7 +31,7 @@ export default function StudyRenderer({ content, language, responses, onInputCha
                 continue;
             }
 
-            // Detectar inicio de sección
+            // Detectar secciones
             if (line.startsWith('## ')) {
                 if (buffer.length > 0 && currentSection) {
                     currentSection.content = buffer.join('\n');
@@ -63,14 +52,9 @@ export default function StudyRenderer({ content, language, responses, onInputCha
                 continue;
             }
 
-            // Si estamos en el idioma correcto o no hay marcador de idioma
+            // Si estamos en el idioma correcto o no hay marcador
             if (!currentLang || currentLang === language) {
                 buffer.push(line);
-            }
-
-            // Si encontramos otro marcador de idioma, resetear
-            if (line.startsWith('::') && line !== `::${language}`) {
-                currentLang = null;
             }
         }
 
@@ -83,7 +67,7 @@ export default function StudyRenderer({ content, language, responses, onInputCha
         return sections;
     };
 
-    // Renderizar una línea con inputs inline
+    // Renderizar campos con inputs inline
     const renderLineWithInputs = (text, sectionId) => {
         const parts = [];
         let lastIndex = 0;
@@ -91,7 +75,6 @@ export default function StudyRenderer({ content, language, responses, onInputCha
         let match;
 
         while ((match = regex.exec(text)) !== null) {
-            // Agregar texto antes del input
             if (match.index > lastIndex) {
                 parts.push(
                     <span key={`text-${lastIndex}`}>
@@ -114,9 +97,7 @@ export default function StudyRenderer({ content, language, responses, onInputCha
                             onChange={(e) => onInputChange(fieldId, e.target.value)}
                             onBlur={() => setEditingField(null)}
                             onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    setEditingField(null);
-                                }
+                                if (e.key === 'Enter') setEditingField(null);
                             }}
                             placeholder={placeholder}
                             className="px-3 py-1 border-2 border-blue-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px]"
@@ -126,9 +107,7 @@ export default function StudyRenderer({ content, language, responses, onInputCha
                         <button
                             onClick={() => {
                                 setEditingField(fieldId);
-                                setTimeout(() => {
-                                    inputRefs.current[fieldId]?.focus();
-                                }, 50);
+                                setTimeout(() => inputRefs.current[fieldId]?.focus(), 50);
                             }}
                             className="group relative px-3 py-1 border-b-2 border-dashed border-gray-400 hover:border-blue-500 transition-colors min-w-[150px] inline-flex items-center gap-1"
                         >
@@ -144,7 +123,6 @@ export default function StudyRenderer({ content, language, responses, onInputCha
             lastIndex = regex.lastIndex;
         }
 
-        // Agregar texto restante
         if (lastIndex < text.length) {
             parts.push(
                 <span key={`text-${lastIndex}`}>
@@ -160,43 +138,22 @@ export default function StudyRenderer({ content, language, responses, onInputCha
     const renderProcessedContent = (text, sectionId) => {
         const lines = text.split('\n');
         const elements = [];
-        let currentList = [];
-        let isInList = false;
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
 
             // Headers
-            if (line.startsWith('#### ')) {
+            if (line.startsWith('### ')) {
                 elements.push(
-                    <h4 key={`h4-${i}`} className="text-lg font-semibold mt-6 mb-3 text-gray-800">
-                        {line.replace('#### ', '')}
-                    </h4>
-                );
-            } else if (line.startsWith('### ')) {
-                elements.push(
-                    <h3 key={`h3-${i}`} className="text-xl font-bold mt-8 mb-4 text-gray-900 border-b-2 border-gray-200 pb-2">
+                    <h3 key={`h3-${i}`} className="text-xl font-bold mt-8 mb-4 text-gray-900">
                         {line.replace('### ', '')}
                     </h3>
-                );
-            } else if (line.startsWith('## ')) {
-                elements.push(
-                    <h2 key={`h2-${i}`} className="text-2xl font-bold mt-8 mb-4 text-blue-900">
-                        {line.replace('## ', '')}
-                    </h2>
-                );
-            } else if (line.startsWith('# ')) {
-                elements.push(
-                    <h1 key={`h1-${i}`} className="text-3xl font-bold mt-8 mb-6 text-blue-900">
-                        {line.replace('# ', '')}
-                    </h1>
                 );
             }
             // Bold text
             else if (line.includes('**')) {
-                const processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>');
+                const processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>');
 
-                // Check for inputs in this line
                 if (line.includes('[input:')) {
                     elements.push(
                         <p key={`p-${i}`} className="mb-4 text-gray-700 leading-relaxed">
@@ -230,44 +187,13 @@ export default function StudyRenderer({ content, language, responses, onInputCha
                             <textarea
                                 value={value}
                                 onChange={(e) => onInputChange(fieldId, e.target.value)}
-                                className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none resize-none transition-colors hover:border-gray-300"
+                                className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
                                 rows="5"
                                 placeholder={language === 'es' ? 'Escribe tu respuesta aquí...' : 'Write your answer here...'}
                             />
-                            <div className="flex justify-between mt-2">
-                                <span className="text-xs text-gray-500">
-                                    {value.length > 0 && `${value.length} caracteres`}
-                                </span>
-                                {value.length > 0 && (
-                                    <span className="text-xs text-green-600 flex items-center gap-1">
-                                        <Check className="w-3 h-3" />
-                                        Guardado
-                                    </span>
-                                )}
-                            </div>
                         </div>
                     );
                 }
-            }
-            // Prayer notes special placeholder
-            else if (line.includes('[prayer-notes]')) {
-                const fieldId = 'prayer-notes';
-                const value = responses[fieldId] || '';
-
-                elements.push(
-                    <div key={fieldId} className="my-6 bg-blue-50 p-6 rounded-lg">
-                        <h4 className="text-lg font-semibold mb-3 text-blue-900">
-                            {language === 'es' ? '📝 Notas de Oración' : '📝 Prayer Notes'}
-                        </h4>
-                        <textarea
-                            value={value}
-                            onChange={(e) => onInputChange(fieldId, e.target.value)}
-                            className="w-full p-4 border-2 border-blue-200 rounded-lg focus:border-blue-500 focus:outline-none resize-none bg-white"
-                            rows="8"
-                            placeholder={language === 'es' ? 'Escribe aquí tus peticiones, agradecimientos y reflexiones...' : 'Write your requests, thanksgiving and reflections here...'}
-                        />
-                    </div>
-                );
             }
             // Regular paragraphs
             else if (line.trim()) {
@@ -282,92 +208,82 @@ export default function StudyRenderer({ content, language, responses, onInputCha
         return elements;
     };
 
-    // Procesar y renderizar secciones
     const sections = processContent(content);
 
     return (
         <div className="prose prose-lg max-w-none">
-            {/* Header con título, subtítulo y referencia */}
-
+            {/* Header estructurado según tu especificación */}
             {metadata && (
                 <div className="text-center mb-8 pb-6 border-b-2 border-gray-200">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                        {typeof metadata.title === 'object'
-                            ? (metadata.title?.[language] || metadata.title?.es || '')
-                            : (metadata.title || '')
-                        }
-                    </h1>
-                    <p className="text-xl text-gray-600 mb-3">
-                        {typeof metadata.subtitle === 'object'
-                            ? (metadata.subtitle?.[language] || metadata.subtitle?.es || '')
-                            : (metadata.subtitle || '')
-                        }
-                    </p>
-
-                    <div className="bg-blue-50 rounded-lg px-6 py-3 inline-block mb-4">
-                        <p className="text-lg text-blue-700 font-semibold">
-                            {metadata.bibleVerse}
-                        </p>
-                        {metadata.bibleText && (
-                            <p className="text-sm text-blue-600 italic mt-1">
-                                "{metadata.bibleText[language] || metadata.bibleText}"
-                            </p>
-                        )}
-                    </div>
-                    <p className="text-sm text-gray-500 uppercase tracking-wider">
+                    {/* 1. Guía de estudio bíblico */}
+                    <p className="text-sm text-gray-500 uppercase tracking-wider mb-4">
                         {language === 'es' ? 'Guía de Estudio Bíblico' : 'Bible Study Guide'}
                     </p>
+
+                    {/* 2. Número de lección */}
+                    <div className="text-blue-600 font-medium mb-3">
+                        {language === 'es' ? 'Lección' : 'Lesson'} {metadata.numero || '2'}
+                    </div>
+
+                    {/* 3. Título del estudio */}
+                    <h1 className="text-2xl font-bold text-gray-900 mb-4">
+                        {metadata.title}
+                    </h1>
+
+                    {/* 4. Referencia bíblica */}
+                    {metadata.bibleVerse && (
+                        <p className="text-lg font-bold italic text-gray-800 mb-3">
+                            {metadata.bibleVerse}
+                        </p>
+                    )}
+
+                    {/* 5. Texto bíblico */}
+                    {metadata.bibleText && (
+                        <div className="bg-blue-50 rounded-lg px-6 py-4 inline-block max-w-3xl">
+                            <p className="text-gray-700 italic">
+                                "{metadata.bibleText}"
+                            </p>
+                            {metadata.bibleVerse && (
+                                <p className="text-sm text-gray-600 mt-2 text-right">
+                                    — {metadata.bibleVerse}
+                                </p>
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
 
-            {sections.map((section, idx) => (
-                <div key={`section-${idx}`} className="mb-8">
-                    {renderProcessedContent(section.content, section.id)}
-
-                    {/* Agregar textareas automáticas después de preguntas de reflexión */}
-                    {(section.content.includes('**Observación:**') ||
-                        section.content.includes('**Observation:**')) &&
-                        !section.content.includes('[textarea:') && (
-                            <div className="my-6">
-                                <textarea
-                                    value={responses[`textarea-${section.id}-observation`] || ''}
-                                    onChange={(e) => onInputChange(`textarea-${section.id}-observation`, e.target.value)}
-                                    className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
-                                    rows="4"
-                                    placeholder={language === 'es' ? 'Escribe tu observación...' : 'Write your observation...'}
-                                />
-                            </div>
+            {/* Secciones del estudio */}
+            <div className="space-y-8">
+                {sections.map((section, idx) => (
+                    <div key={`section-${idx}`} className="section">
+                        {/* Título de sección si existe */}
+                        {section.id && section.id !== '1' && (
+                            <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">
+                                {section.id}
+                            </h2>
                         )}
 
-                    {(section.content.includes('**Interpretación:**') ||
-                        section.content.includes('**Interpretation:**')) &&
-                        !section.content.includes('[textarea:') && (
-                            <div className="my-6">
-                                <textarea
-                                    value={responses[`textarea-${section.id}-interpretation`] || ''}
-                                    onChange={(e) => onInputChange(`textarea-${section.id}-interpretation`, e.target.value)}
-                                    className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
-                                    rows="4"
-                                    placeholder={language === 'es' ? 'Escribe tu interpretación...' : 'Write your interpretation...'}
-                                />
-                            </div>
-                        )}
+                        {/* Contenido de la sección */}
+                        {renderProcessedContent(section.content, section.id)}
+                    </div>
+                ))}
+            </div>
 
-                    {(section.content.includes('**Aplicación:**') ||
-                        section.content.includes('**Application:**')) &&
-                        !section.content.includes('[textarea:') && (
-                            <div className="my-6">
-                                <textarea
-                                    value={responses[`textarea-${section.id}-application`] || ''}
-                                    onChange={(e) => onInputChange(`textarea-${section.id}-application`, e.target.value)}
-                                    className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
-                                    rows="4"
-                                    placeholder={language === 'es' ? 'Escribe tu aplicación personal...' : 'Write your personal application...'}
-                                />
-                            </div>
-                        )}
+            {/* Conclusión si no está en las secciones */}
+            {!sections.find(s => s.id?.toLowerCase().includes('conclusión') || s.id?.toLowerCase().includes('conclusion')) && (
+                <div className="mt-12 pt-6 border-t">
+                    <h2 className="text-xl font-bold text-gray-800 mb-4">
+                        {language === 'es' ? 'Conclusión' : 'Conclusion'}
+                    </h2>
+                    <p className="text-gray-600 italic text-center">
+                        {language === 'es'
+                            ? 'Completa el estudio con oración y reflexión personal.'
+                            : 'Complete the study with prayer and personal reflection.'
+                        }
+                    </p>
                 </div>
-            ))}
+            )}
         </div>
     );
 }
