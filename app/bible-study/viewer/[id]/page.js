@@ -371,8 +371,8 @@ export default function BibleStudyViewer() {
                     <div className="mt-12 pt-6 border-t text-center text-gray-500 print:hidden">
                         <p className="text-sm">
                             {language === 'es'
-                                ? '© 2024 Disciplicando - Transformando vidas a través de la Palabra'
-                                : '© 2024 Disciplicando - Transforming lives through the Word'
+                                ? '© 2025 Disciplicando - Transformando vidas a través de la Palabra'
+                                : '© 2025 Disciplicando - Transforming lives through the Word'
                             }
                         </p>
                     </div>

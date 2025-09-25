@@ -3,72 +3,121 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Edit3, Check } from 'lucide-react';
 
-export default function StudyRenderer({ content, language, responses, onInputChange, metadata }) {
+export default function StudyRenderer({ content, language = 'es', responses, onInputChange }) {
     const [editingField, setEditingField] = useState(null);
+    const [parsedData, setParsedData] = useState({ metadata: {}, sections: [] });
     const inputRefs = useRef({});
 
-    // Procesar el contenido según el formato del editor
-    const processContent = (rawContent) => {
-        if (!rawContent) return [];
+    useEffect(() => {
+        if (content) {
+            const parsed = parseMarkdownContent(content);
+            setParsedData(parsed);
+        }
+    }, [content, language]);
 
-        const sections = [];
-        const lines = rawContent.split('\n');
-        let currentSection = null;
-        let currentLang = null;
-        let buffer = [];
+    // Parsear el contenido markdown
+    const parseMarkdownContent = (rawContent) => {
+        if (!rawContent) return { metadata: {}, sections: [] };
 
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
+        const result = {
+            metadata: {},
+            sections: []
+        };
 
-            // Detectar separadores
-            if (line === '---') {
-                if (buffer.length > 0 && currentSection) {
-                    currentSection.content = buffer.join('\n');
-                    sections.push(currentSection);
-                    buffer = [];
-                    currentSection = null;
+        try {
+            // 1. Extraer y parsear metadata YAML
+            const metadataMatch = rawContent.match(/^---\s*\n([\s\S]*?)\n---/);
+            if (metadataMatch) {
+                const yamlContent = metadataMatch[1];
+                const lines = yamlContent.split('\n');
+
+                lines.forEach(line => {
+                    const colonIndex = line.indexOf(':');
+                    if (colonIndex > -1) {
+                        const key = line.substring(0, colonIndex).trim();
+                        let value = line.substring(colonIndex + 1).trim();
+                        // Quitar comillas si existen
+                        value = value.replace(/^["']|["']$/g, '');
+                        result.metadata[key] = value;
+                    }
+                });
+            }
+
+            // 2. Remover metadata del contenido
+            const contentWithoutMetadata = rawContent.replace(/^---[\s\S]*?---\n+/, '');
+
+            // 3. Procesar secciones
+            const sectionBlocks = contentWithoutMetadata.split(/^## /m).filter(s => s.trim());
+
+            sectionBlocks.forEach(block => {
+                const lines = block.split('\n');
+                const sectionId = lines[0].trim(); // section1, section2, conclusion, etc.
+
+                let sectionTitle = '';
+                let sectionContent = '';
+                let currentLang = null;
+                let contentBuffer = [];
+                let skipNextLine = false;
+
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i];
+
+                    // Detectar títulos de sección
+                    if (line.startsWith('### ')) {
+                        if (language === 'es' && !line.includes('[EN]')) {
+                            sectionTitle = line.replace('### ', '').trim();
+                            skipNextLine = false;
+                        } else if (language === 'en' && line.includes('[EN]')) {
+                            sectionTitle = line.replace('### [EN] ', '').trim();
+                            skipNextLine = false;
+                        }
+                        continue;
+                    }
+
+                    // Detectar marcadores de idioma
+                    if (line.trim() === `::${language}`) {
+                        currentLang = language;
+                        contentBuffer = [];
+                        continue;
+                    } else if (line.trim() === '::es' || line.trim() === '::en') {
+                        // Si encontramos otro idioma, guardar el buffer actual y cambiar
+                        if (currentLang === language && contentBuffer.length > 0) {
+                            sectionContent = contentBuffer.join('\n').trim();
+                        }
+                        currentLang = line.trim().replace('::', '');
+                        contentBuffer = [];
+                        continue;
+                    }
+
+                    // Acumular contenido solo del idioma actual
+                    if (currentLang === language) {
+                        contentBuffer.push(line);
+                    }
                 }
-                continue;
-            }
 
-            // Detectar secciones
-            if (line.startsWith('## ')) {
-                if (buffer.length > 0 && currentSection) {
-                    currentSection.content = buffer.join('\n');
-                    sections.push(currentSection);
-                    buffer = [];
+                // Guardar el último buffer si es del idioma correcto
+                if (currentLang === language && contentBuffer.length > 0) {
+                    sectionContent = contentBuffer.join('\n').trim();
                 }
-                currentSection = {
-                    id: line.replace('## ', '').trim(),
-                    type: 'section',
-                    content: ''
-                };
-                continue;
-            }
 
-            // Detectar marcadores de idioma
-            if (line.startsWith('::')) {
-                currentLang = line.replace('::', '').trim();
-                continue;
-            }
+                if (sectionTitle || sectionContent) {
+                    result.sections.push({
+                        id: sectionId,
+                        title: sectionTitle,
+                        content: sectionContent
+                    });
+                }
+            });
 
-            // Si estamos en el idioma correcto o no hay marcador
-            if (!currentLang || currentLang === language) {
-                buffer.push(line);
-            }
+        } catch (error) {
+            console.error('Error parseando contenido:', error);
         }
 
-        // Agregar última sección
-        if (buffer.length > 0 && currentSection) {
-            currentSection.content = buffer.join('\n');
-            sections.push(currentSection);
-        }
-
-        return sections;
+        return result;
     };
 
     // Renderizar campos con inputs inline
-    const renderLineWithInputs = (text, sectionId) => {
+    const renderLineWithInputs = (text) => {
         const parts = [];
         let lastIndex = 0;
         const regex = /\[input:([^:]+):([^\]]+)\]/g;
@@ -85,7 +134,7 @@ export default function StudyRenderer({ content, language, responses, onInputCha
 
             const fieldId = `input-${match[1]}`;
             const placeholder = match[2];
-            const value = responses[fieldId] || '';
+            const value = responses?.[fieldId] || '';
 
             parts.push(
                 <span key={fieldId} className="inline-block mx-1">
@@ -94,7 +143,7 @@ export default function StudyRenderer({ content, language, responses, onInputCha
                             ref={el => inputRefs.current[fieldId] = el}
                             type="text"
                             value={value}
-                            onChange={(e) => onInputChange(fieldId, e.target.value)}
+                            onChange={(e) => onInputChange?.(fieldId, e.target.value)}
                             onBlur={() => setEditingField(null)}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') setEditingField(null);
@@ -135,19 +184,43 @@ export default function StudyRenderer({ content, language, responses, onInputCha
     };
 
     // Renderizar contenido procesado
-    const renderProcessedContent = (text, sectionId) => {
+    const renderProcessedContent = (text) => {
+        if (!text) return null;
+
         const lines = text.split('\n');
         const elements = [];
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
 
-            // Headers
+            // Headers (h3)
             if (line.startsWith('### ')) {
                 elements.push(
-                    <h3 key={`h3-${i}`} className="text-xl font-bold mt-8 mb-4 text-gray-900">
+                    <h3 key={`h3-${i}`} className="text-xl font-bold mt-6 mb-3 text-gray-900">
                         {line.replace('### ', '')}
                     </h3>
+                );
+            }
+            // Subheaders (h4)
+            else if (line.startsWith('#### ')) {
+                elements.push(
+                    <h4 key={`h4-${i}`} className="text-lg font-semibold mt-4 mb-2 text-gray-800">
+                        {line.replace('#### ', '')}
+                    </h4>
+                );
+            }
+            // Indented bullets (detectar espacios antes del •)
+            else if (line.trim().startsWith('•')) {
+                const indentLevel = (line.match(/^(\s*)/)?.[1]?.length || 0) / 2; // Cada 2 espacios = 1 nivel
+                const content = line.trim().substring(1).trim();
+
+                elements.push(
+                    <p key={`bullet-${i}`}
+                        className={`mb-2 text-gray-700 leading-relaxed flex items-start`}
+                        style={{ paddingLeft: `${indentLevel * 1.5}rem` }}>
+                        <span className="mr-2">•</span>
+                        <span>{renderLineWithInputs(content)}</span>
+                    </p>
                 );
             }
             // Bold text
@@ -157,7 +230,7 @@ export default function StudyRenderer({ content, language, responses, onInputCha
                 if (line.includes('[input:')) {
                     elements.push(
                         <p key={`p-${i}`} className="mb-4 text-gray-700 leading-relaxed">
-                            {renderLineWithInputs(line.replace(/\*\*(.*?)\*\*/g, '$1'), sectionId)}
+                            {renderLineWithInputs(line.replace(/\*\*(.*?)\*\*/g, '$1'))}
                         </p>
                     );
                 } else {
@@ -171,7 +244,7 @@ export default function StudyRenderer({ content, language, responses, onInputCha
             else if (line.includes('[input:')) {
                 elements.push(
                     <p key={`input-line-${i}`} className="mb-4 text-gray-700 leading-relaxed">
-                        {renderLineWithInputs(line, sectionId)}
+                        {renderLineWithInputs(line)}
                     </p>
                 );
             }
@@ -180,13 +253,13 @@ export default function StudyRenderer({ content, language, responses, onInputCha
                 const match = line.match(/\[textarea:([^\]]+)\]/);
                 if (match) {
                     const fieldId = `textarea-${match[1]}`;
-                    const value = responses[fieldId] || '';
+                    const value = responses?.[fieldId] || '';
 
                     elements.push(
                         <div key={fieldId} className="my-6">
                             <textarea
                                 value={value}
-                                onChange={(e) => onInputChange(fieldId, e.target.value)}
+                                onChange={(e) => onInputChange?.(fieldId, e.target.value)}
                                 className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
                                 rows="5"
                                 placeholder={language === 'es' ? 'Escribe tu respuesta aquí...' : 'Write your answer here...'}
@@ -208,12 +281,25 @@ export default function StudyRenderer({ content, language, responses, onInputCha
         return elements;
     };
 
-    const sections = processContent(content);
+    const { metadata, sections } = parsedData;
+
+    // Obtener los textos según el idioma
+    const getMetadataValue = (key) => {
+        if (language === 'es') {
+            return metadata[key] || metadata[`${key}_es`] || '';
+        } else {
+            return metadata[`${key}_en`] || metadata[`${key}_english`] || metadata[key] || '';
+        }
+    };
+
+    const studyTitle = language === 'es' ? metadata.titulo_estudio : metadata.study_title;
+    const bibleReference = language === 'es' ? metadata.referencia_biblica : metadata.bible_reference;
+    const bibleText = language === 'es' ? metadata.texto_biblico : metadata.bible_text;
 
     return (
         <div className="prose prose-lg max-w-none">
-            {/* Header estructurado según tu especificación */}
-            {metadata && (
+            {/* Header estructurado */}
+            {metadata && Object.keys(metadata).length > 0 && (
                 <div className="text-center mb-8 pb-6 border-b-2 border-gray-200">
                     {/* 1. Guía de estudio bíblico */}
                     <p className="text-sm text-gray-500 uppercase tracking-wider mb-4">
@@ -221,33 +307,32 @@ export default function StudyRenderer({ content, language, responses, onInputCha
                     </p>
 
                     {/* 2. Número de lección */}
-                    <div className="text-blue-600 font-medium mb-3">
-                        {language === 'es' ? 'Lección' : 'Lesson'} {metadata.numero || '2'}
-                    </div>
+                    {metadata.numero && (
+                        <div className="text-blue-600 font-medium mb-3">
+                            {language === 'es' ? 'Lección' : 'Lesson'} {metadata.numero}
+                        </div>
+                    )}
 
                     {/* 3. Título del estudio */}
-                    <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                        {metadata.title}
-                    </h1>
+                    {studyTitle && (
+                        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+                            {studyTitle}
+                        </h1>
+                    )}
 
                     {/* 4. Referencia bíblica */}
-                    {metadata.bibleVerse && (
-                        <p className="text-lg font-bold italic text-gray-800 mb-3">
-                            {metadata.bibleVerse}
+                    {bibleReference && (
+                        <p className="text-lg font-medium italic text-gray-800 mb-3">
+                            {bibleReference}
                         </p>
                     )}
 
                     {/* 5. Texto bíblico */}
-                    {metadata.bibleText && (
+                    {bibleText && (
                         <div className="bg-blue-50 rounded-lg px-6 py-4 inline-block max-w-3xl">
                             <p className="text-gray-700 italic">
-                                "{metadata.bibleText}"
+                                «{bibleText}»
                             </p>
-                            {metadata.bibleVerse && (
-                                <p className="text-sm text-gray-600 mt-2 text-right">
-                                    — {metadata.bibleVerse}
-                                </p>
-                            )}
                         </div>
                     )}
                 </div>
@@ -255,33 +340,45 @@ export default function StudyRenderer({ content, language, responses, onInputCha
 
             {/* Secciones del estudio */}
             <div className="space-y-8">
-                {sections.map((section, idx) => (
-                    <div key={`section-${idx}`} className="section">
-                        {/* Título de sección si existe */}
-                        {section.id && section.id !== '1' && (
-                            <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">
-                                {section.id}
-                            </h2>
-                        )}
+                {sections.map((section, idx) => {
+                    // Determinar si es sección de oración
+                    const isPrayerSection = section.id === 'prayer' ||
+                        section.title?.toUpperCase().includes('ORACIÓN') ||
+                        section.title?.toUpperCase().includes('PRAYER');
 
-                        {/* Contenido de la sección */}
-                        {renderProcessedContent(section.content, section.id)}
-                    </div>
-                ))}
+                    // No mostrar título para secciones de oración
+                    if (isPrayerSection) {
+                        return (
+                            <div key={`section-${idx}`} className="section prayer-section mt-8 p-6 bg-gray-50 rounded-lg">
+                                <div className="section-content">
+                                    {renderProcessedContent(section.content)}
+                                </div>
+                            </div>
+                        );
+                    }
+
+                    return (
+                        <div key={`section-${idx}`} className="section">
+                            {/* Título de sección si existe */}
+                            {section.title && (
+                                <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">
+                                    {section.title}
+                                </h2>
+                            )}
+
+                            {/* Contenido de la sección */}
+                            <div className="section-content">
+                                {renderProcessedContent(section.content)}
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
 
-            {/* Conclusión si no está en las secciones */}
-            {!sections.find(s => s.id?.toLowerCase().includes('conclusión') || s.id?.toLowerCase().includes('conclusion')) && (
-                <div className="mt-12 pt-6 border-t">
-                    <h2 className="text-xl font-bold text-gray-800 mb-4">
-                        {language === 'es' ? 'Conclusión' : 'Conclusion'}
-                    </h2>
-                    <p className="text-gray-600 italic text-center">
-                        {language === 'es'
-                            ? 'Completa el estudio con oración y reflexión personal.'
-                            : 'Complete the study with prayer and personal reflection.'
-                        }
-                    </p>
+            {/* Mensaje si no hay contenido */}
+            {(!sections || sections.length === 0) && (
+                <div className="text-center py-12 text-gray-500">
+                    <p>No hay contenido disponible para mostrar.</p>
                 </div>
             )}
         </div>

@@ -1,9 +1,7 @@
 "use client";
-
 import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
 import { BookOpen, BookOpenText, Plus, Edit, Trash2, ChevronDown, ChevronRight, Globe, Folder, FileText } from "lucide-react";
-
 // Modal para editar serie
 function EditSerieModal({ serie, isOpen, onClose, onSave, supabase }) {
     const [loading, setLoading] = useState(false);
@@ -97,6 +95,7 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase }) {
 
                 if (serieError) throw serieError;
 
+                // Crear traducción al inglés si hay contenido
                 if ((formData.nombre_en || formData.descripcion_en) && newSerie) {
                     await supabase
                         .from("series_i18n")
@@ -221,8 +220,8 @@ function EditSerieModal({ serie, isOpen, onClose, onSave, supabase }) {
             </div>
         </div>
     );
-}
 
+}
 // Modal para bloques
 function BloqueModal({ bloque, serieId, isOpen, onClose, onSave, supabase }) {
     const [loading, setLoading] = useState(false);
@@ -371,8 +370,8 @@ function BloqueModal({ bloque, serieId, isOpen, onClose, onSave, supabase }) {
             </div>
         </div>
     );
-}
 
+}
 // Modal para lecciones - ACTUALIZADO CON RECURSOS POR IDIOMA
 function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) {
     const [loading, setLoading] = useState(false);
@@ -381,45 +380,29 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
         titulo_en: "",
         numero: 1,
         is_active: true,
-        // Recursos en español
         video_url_es: "",
         blog_url_es: "",
         estudio_url_es: "",
         quiz_url_es: "",
-        // Recursos en inglés
         video_url_en: "",
         blog_url_en: "",
         estudio_url_en: "",
         quiz_url_en: "",
         contenido_md: "",
-        quiz_min_score: 80,
-
-        referencia_biblica: "",
-        texto_biblico: "",
-        texto_biblico_en: ""
+        quiz_min_score: 80
     });
 
     useEffect(() => {
-
-        console.log("=== DEPURACIÓN LECCION MODAL ===");
-        console.log("Lección recibida:", leccion);
-        console.log("Contenido MD específico:", leccion?.contenido_md);
-        console.log("Longitud del contenido:", leccion?.contenido_md?.length);
-
         if (leccion) {
-            console.log("Editando lección:", leccion);
-            console.log("Contenido MD:", leccion.contenido_md);
             setFormData({
                 titulo_es: leccion.titulo || "",
                 titulo_en: leccion.titulo_en || "",
                 numero: leccion.numero || 1,
                 is_active: leccion.is_active ?? true,
-                // Recursos en español (de la tabla principal)
                 video_url_es: leccion.video_url || "",
                 blog_url_es: leccion.blog_url || "",
                 estudio_url_es: leccion.estudio_url || "",
                 quiz_url_es: leccion.quiz_url || "",
-                // Recursos en inglés (de la tabla i18n)
                 video_url_en: leccion.video_url_en || "",
                 blog_url_en: leccion.blog_url_en || "",
                 estudio_url_en: leccion.estudio_url_en || "",
@@ -451,9 +434,7 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
         setLoading(true);
         try {
             if (leccion?.id) {
-                // Actualizar lección existente
-                console.log("Actualizando lección con datos:", formData);
-
+                // Actualizar lección existente - SIN campos que no existen
                 const { error } = await supabase
                     .from("lecciones")
                     .update({
@@ -466,32 +447,22 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                         quiz_url: formData.quiz_url_es || null,
                         contenido_md: formData.contenido_md || null,
                         quiz_min_score: formData.quiz_min_score,
-
-                        referencia_biblica: formData.referencia_biblica || null,
-                        texto_biblico: formData.texto_biblico || null,
-                        texto_biblico_en: formData.texto_biblico_en || null,
-
                         updated_at: new Date().toISOString()
                     })
                     .eq("id", leccion.id);
 
-                if (error) {
-                    console.error("Error actualizando lección:", error);
-                    throw error;
-                }
+                if (error) throw error;
 
                 // Actualizar traducción y recursos en inglés
                 if (formData.titulo_en || formData.video_url_en || formData.blog_url_en ||
                     formData.estudio_url_en || formData.quiz_url_en) {
 
-                    // Primero eliminar registro existente
                     await supabase
                         .from("lecciones_i18n")
                         .delete()
                         .eq("leccion_id", leccion.id)
                         .eq("locale", "en");
 
-                    // Luego insertar nuevo registro con todos los campos
                     const { error: i18nError } = await supabase
                         .from("lecciones_i18n")
                         .insert({
@@ -505,14 +476,10 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                             contenido_md: formData.contenido_md || null
                         });
 
-                    if (i18nError) {
-                        console.error("Error actualizando traducción:", i18nError);
-                    }
+                    if (i18nError) console.error("Error actualizando traducción:", i18nError);
                 }
             } else {
-                // Crear nueva lección
-                console.log("Creando nueva lección con datos:", formData);
-
+                // Crear nueva lección - SIN campos que no existen
                 const { data: newLeccion, error } = await supabase
                     .from("lecciones")
                     .insert({
@@ -530,10 +497,7 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                     .select()
                     .single();
 
-                if (error) {
-                    console.error("Error creando lección:", error);
-                    throw error;
-                }
+                if (error) throw error;
 
                 // Crear traducción si hay contenido en inglés
                 if ((formData.titulo_en || formData.video_url_en || formData.blog_url_en ||
@@ -552,13 +516,10 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                             contenido_md: formData.contenido_md || null
                         });
 
-                    if (i18nError) {
-                        console.error("Error creando traducción:", i18nError);
-                    }
+                    if (i18nError) console.error("Error creando traducción:", i18nError);
                 }
             }
 
-            console.log("Guardado exitoso");
             await onSave();
             onClose();
         } catch (error) {
@@ -570,67 +531,6 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
     };
 
     if (!isOpen) return null;
-
-
-    // Función mejorada para convertir Markdown a HTML
-    const convertMarkdownToHTML = (markdown) => {
-        if (!markdown) return '';
-
-        let html = markdown;
-
-        // Escapar HTML para seguridad
-        html = html.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-        // Bloques de código (debe ir primero)
-        html = html.replace(/```(.*?)```/gs, '<pre class="bg-gray-100 p-2 rounded">$1</pre>');
-        html = html.replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1 rounded">$1</code>');
-
-        // Títulos
-        html = html.replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold mt-4 mb-2">$1</h3>');
-        html = html.replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-4 mb-2">$1</h2>');
-        html = html.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-4 mb-3">$1</h1>');
-
-        // Texto en negrita y cursiva (orden importante)
-        html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
-        html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>');
-        html = html.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
-
-        // Texto tachado
-        html = html.replace(/~~(.*?)~~/g, '<del>$1</del>');
-
-        // Blockquotes
-        html = html.replace(/^&gt; (.*$)/gim, '<blockquote class="border-l-4 border-gray-300 pl-4 italic my-2">$1</blockquote>');
-
-        // Listas con checkboxes
-        html = html.replace(/^- \[ \] (.*$)/gim, '<div class="flex items-start gap-2 my-1"><input type="checkbox" disabled class="mt-1"/> <span>$1</span></div>');
-        html = html.replace(/^- \[x\] (.*$)/gim, '<div class="flex items-start gap-2 my-1"><input type="checkbox" disabled checked class="mt-1"/> <span>$1</span></div>');
-
-        // Listas sin numerar
-        html = html.replace(/^- (.*$)/gim, '<li class="ml-4">$1</li>');
-
-        // Listas numeradas
-        html = html.replace(/^\d+\. (.*$)/gim, '<li class="ml-4 list-decimal">$1</li>');
-
-        // Líneas horizontales
-        html = html.replace(/^---$/gim, '<hr class="my-4 border-gray-300"/>');
-
-        // Enlaces
-        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 underline" target="_blank">$1</a>');
-
-        // Saltos de línea
-        html = html.replace(/\n/g, '<br/>');
-
-        // Envolver listas consecutivas
-        html = html.replace(/(<li class="ml-4">.*?<\/li>(<br\/>)?)+/g, (match) => {
-            return '<ul class="list-disc pl-4 my-2">' + match.replace(/<br\/>/g, '') + '</ul>';
-        });
-
-        html = html.replace(/(<li class="ml-4 list-decimal">.*?<\/li>(<br\/>)?)+/g, (match) => {
-            return '<ol class="list-decimal pl-4 my-2">' + match.replace(/<br\/>/g, '') + '</ol>';
-        });
-
-        return html;
-    };
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -659,48 +559,6 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                                 value={formData.titulo_en}
                                 onChange={(e) => setFormData({ ...formData, titulo_en: e.target.value })}
                                 className="w-full px-3 py-2 border rounded-md"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Referencia Bíblica */}
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            📖 Referencia Bíblica (ej: Mateo 3:16-17)
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.referencia_biblica}
-                            onChange={(e) => setFormData({ ...formData, referencia_biblica: e.target.value })}
-                            className="w-full px-3 py-2 border rounded-md"
-                            placeholder="Mateo 3:16-17"
-                        />
-                    </div>
-
-                    {/* Texto Bíblico */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                🇪🇸 Texto Bíblico (Español)
-                            </label>
-                            <textarea
-                                value={formData.texto_biblico}
-                                onChange={(e) => setFormData({ ...formData, texto_biblico: e.target.value })}
-                                className="w-full px-3 py-2 border rounded-md"
-                                rows="3"
-                                placeholder="Y Jesús, después que fue bautizado..."
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                🇺🇸 Bible Text (English)
-                            </label>
-                            <textarea
-                                value={formData.texto_biblico_en}
-                                onChange={(e) => setFormData({ ...formData, texto_biblico_en: e.target.value })}
-                                className="w-full px-3 py-2 border rounded-md"
-                                rows="3"
-                                placeholder="After Jesus was baptized..."
                             />
                         </div>
                     </div>
@@ -804,7 +662,6 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                // Abrir el editor en nueva pestaña
                                                 window.open(`/bible-studies/editor/${leccion.id}`, '_blank');
                                             }}
                                             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
@@ -814,12 +671,11 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                                         </button>
                                         {leccion?.contenido_md && (
                                             <p className="text-xs text-green-600 mt-2 text-center">
-                                                ✓ Esta lección ya tiene un estudio bíblico guardado
+                                                ✔ Esta lección ya tiene un estudio bíblico guardado
                                             </p>
                                         )}
                                     </div>
                                 )}
-
                             </div>
                         </div>
                     </div>
@@ -881,39 +737,6 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
                             </div>
                         </div>
                     </div>
-
-                    {/* Notas adicionales */}
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            📝 Notas o contenido adicional (opcional)
-                        </label>
-                        <textarea
-                            value={formData.contenido_md}
-                            onChange={(e) => setFormData({ ...formData, contenido_md: e.target.value })}
-                            className="w-full px-3 py-2 border rounded-md"
-                            rows="3"
-                            placeholder="Notas adicionales, instrucciones especiales, etc."
-                        />
-                    </div>
-
-                    {/* Vista Previa del Markdown */}
-                    {formData.contenido_md && (
-                        <div className="mt-4">
-                            <label className="block text-sm font-medium mb-2">
-                                👁️ Vista Previa
-                            </label>
-                            <div className="border rounded-md p-4 bg-gray-50 max-h-96 overflow-y-auto">
-                                <div
-                                    className="prose prose-sm max-w-none"
-
-                                    dangerouslySetInnerHTML={{
-                                        __html: convertMarkdownToHTML(formData.contenido_md)
-                                    }}
-
-                                />
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 <div className="flex justify-end gap-2 mt-6">
@@ -934,8 +757,8 @@ function LeccionModal({ leccion, bloqueId, isOpen, onClose, onSave, supabase }) 
             </div>
         </div>
     );
-}
 
+}
 // Componente principal
 export default function SeriesPage() {
     const supabase = useMemo(() => getSupabaseBrowserClient(), []);
@@ -965,46 +788,46 @@ export default function SeriesPage() {
             const { data, error } = await supabase
                 .from("series")
                 .select(`
+                id,
+                nombre,
+                descripcion,
+                orden,
+                is_active,
+                series_i18n!left (
+                    locale,
+                    nombre,
+                    descripcion
+                ),
+                bloques (
                     id,
                     nombre,
-                    descripcion,
                     orden,
-                    is_active,
-                    series_i18n!left (
+                    bloques_i18n!left (
                         locale,
-                        nombre,
-                        descripcion
+                        nombre
                     ),
-                    bloques (
+                    lecciones (
                         id,
-                        nombre,
-                        orden,
-                        bloques_i18n!left (
+                        titulo,
+                        numero,
+                        is_active,
+                        video_url,
+                        blog_url,
+                        estudio_url,
+                        quiz_url,
+                        contenido_md,
+                        quiz_min_score,
+                        lecciones_i18n!left (
                             locale,
-                            nombre
-                        ),
-                        lecciones (
-                            id,
                             titulo,
-                            numero,
-                            is_active,
                             video_url,
                             blog_url,
                             estudio_url,
-                            quiz_url,
-                            contenido_md,
-                            quiz_min_score,
-                            lecciones_i18n!left (
-                                locale,
-                                titulo,
-                                video_url,
-                                blog_url,
-                                estudio_url,
-                                quiz_url
-                            )
+                            quiz_url
                         )
                     )
-                `)
+                )
+            `)
                 .order("orden", { ascending: true });
 
             if (error) throw error;
@@ -1025,7 +848,6 @@ export default function SeriesPage() {
                                 return {
                                     ...leccion,
                                     titulo_en: leccionEnTranslation?.titulo || "",
-
                                     video_url_en: leccionEnTranslation?.video_url || "",
                                     blog_url_en: leccionEnTranslation?.blog_url || "",
                                     estudio_url_en: leccionEnTranslation?.estudio_url || "",
@@ -1038,7 +860,6 @@ export default function SeriesPage() {
             });
 
             setSeries(processedData || []);
-            console.log("Lecciones cargadas:", processedData?.[0]?.bloques?.[0]?.lecciones);
         } catch (err) {
             console.error("Error cargando series:", err);
         } finally {
@@ -1291,8 +1112,6 @@ export default function SeriesPage() {
                                                                                         Inactiva
                                                                                     </span>
                                                                                 )}
-
-                                                                                {/* Indicador de estudio bíblico - REEMPLAZAR CON ESTO */}
                                                                                 {leccion.contenido_md &&
                                                                                     leccion.contenido_md !== "Contenido en preparación..." &&
                                                                                     leccion.contenido_md.length > 30 && (
@@ -1301,7 +1120,6 @@ export default function SeriesPage() {
                                                                                             Estudio
                                                                                         </span>
                                                                                     )}
-
                                                                             </div>
                                                                             <div className="flex gap-1">
                                                                                 <button
@@ -1375,4 +1193,5 @@ export default function SeriesPage() {
             />
         </div>
     );
+
 }

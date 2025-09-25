@@ -2,164 +2,282 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-    Save, Plus, Trash2, ChevronDown, ChevronRight,
-    AlertCircle, Check, FileText, Globe, BookOpen,
-    Copy, Eye, EyeOff, RefreshCw, AlertTriangle
+    Save, Plus, Trash2, Eye, EyeOff, RefreshCw,
+    AlertTriangle, BookOpen, Globe, FileText, ChevronDown, ChevronRight
 } from 'lucide-react';
 
 export default function StudyEditor({ lessonId, initialData, onSave, onCancel }) {
     const [loading, setLoading] = useState(false);
     const [saveStatus, setSaveStatus] = useState('');
     const [showPreview, setShowPreview] = useState(false);
-    const [originalContent, setOriginalContent] = useState('');
     const [validationErrors, setValidationErrors] = useState([]);
+    const [expandedSections, setExpandedSections] = useState({});
 
     const [formData, setFormData] = useState({
-        titulo: '',
-        titulo_en: '',
+        // Título de la LECCIÓN (no del estudio)
+        titulo_leccion: '',
+        titulo_leccion_en: '',
         numero: 1,
+
+        // Metadata del ESTUDIO BÍBLICO
         metadata: {
-            tema: '',
-            tema_en: '',
-            versiculo_clave: '',
-            versiculo_clave_en: '',
-            objetivo: '',
-            objetivo_en: '',
-            duracion: '45-60 minutos'
+            // Título del ESTUDIO (puede ser diferente al de la lección)
+            titulo_estudio: '',
+            titulo_estudio_en: '',
+            // Referencia bíblica
+            referencia_biblica: '',
+            referencia_biblica_en: '',
+            // Texto bíblico (puede ser parcial)
+            texto_biblico: '',
+            texto_biblico_en: '',
         },
+
+        // Secciones dinámicas
         sections: []
     });
 
     useEffect(() => {
         if (initialData) {
-            // Guardar contenido original para comparación
-            setOriginalContent(initialData.contenido_md || '');
-
-            // Parsear el contenido existente
             const parsedData = parseExistingContent(initialData.contenido_md || '');
 
+            // Asegurar que siempre haya introducción y conclusión
+            let sections = parsedData.sections || [];
+
+            // Verificar si hay introducción
+            const hasIntro = sections.some(s => s.isIntroduction);
+            if (!hasIntro) {
+                sections.unshift({
+                    id: Date.now() - 1,
+                    title_es: 'INTRODUCCIÓN',
+                    title_en: 'INTRODUCTION',
+                    content_es: '',
+                    content_en: '',
+                    order: 0,
+                    isIntroduction: true
+                });
+            }
+
+            // Verificar si hay conclusión
+            const hasConclusion = sections.some(s => s.isConclusion);
+            if (!hasConclusion) {
+                sections.push({
+                    id: Date.now() + 999,
+                    title_es: 'CONCLUSIÓN',
+                    title_en: 'CONCLUSION',
+                    content_es: '',
+                    content_en: '',
+                    order: sections.length + 1,
+                    isConclusion: true
+                });
+            }
+
+            // Reordenar
+            sections.forEach((s, i) => s.order = i + 1);
+
             setFormData({
-                titulo: initialData.titulo || '',
-                titulo_en: initialData.titulo_en || '',
+                titulo_leccion: initialData.titulo || '',
+                titulo_leccion_en: initialData.titulo_en || '',
                 numero: initialData.numero || 1,
-                metadata: {
-                    titulo_estudio: '',  // Título del estudio (diferente al título de la lección)
+                metadata: parsedData.metadata || {
+                    titulo_estudio: '',
                     titulo_estudio_en: '',
-                    versiculo_clave: '',
-                    versiculo_clave_en: '',
-                    texto_biblico: '',  // NUEVO: Texto bíblico
-                    texto_biblico_en: '',  // NUEVO: Texto bíblico en inglés
-                    duracion: '45-60 minutos'
+                    referencia_biblica: '',
+                    referencia_biblica_en: '',
+                    texto_biblico: '',
+                    texto_biblico_en: '',
                 },
-                sections: parsedData.sections || []
+                sections: parsedData.sections || getDefaultSections()
             });
+
+            // Expandir todas las secciones por defecto
+            const expanded = {};
+            parsedData.sections?.forEach((_, index) => {
+                expanded[index] = true;
+            });
+            setExpandedSections(expanded);
         }
     }, [initialData]);
 
 
-    // FUNCIÓN CORREGIDA: Parsea TODAS las secciones correctamente
+
+    // Secciones por defecto (4 secciones típicas)
+    const getDefaultSections = () => [
+        {
+            id: Date.now() + 1,
+            title_es: 'INTRODUCCIÓN',
+            title_en: 'INTRODUCTION',
+            content_es: '',
+            content_en: '',
+            order: 1,
+            isIntroduction: true
+        },
+        {
+            id: Date.now() + 2,
+            title_es: '',
+            title_en: '',
+            content_es: '',
+            content_en: '',
+            order: 2
+        },
+        {
+            id: Date.now() + 3,
+            title_es: '',
+            title_en: '',
+            content_es: '',
+            content_en: '',
+            order: 3
+        },
+        {
+            id: Date.now() + 4,
+            title_es: '',
+            title_en: '',
+            content_es: '',
+            content_en: '',
+            order: 4
+        },
+        {
+            id: Date.now() + 5,
+            title_es: 'CONCLUSIÓN',
+            title_en: 'CONCLUSION',
+            content_es: '',
+            content_en: '',
+            order: 5,
+            isConclusion: true
+        }
+    ];
+
+
+    // Reemplaza la función parseExistingContent en StudyEditor.js con esta versión:
+
     const parseExistingContent = (content) => {
         if (!content) return { metadata: {}, sections: [] };
 
-        console.log('=== INICIANDO PARSEO ===');
-        console.log('Contenido original:', content.substring(0, 500) + '...');
-
         const result = {
-            metadata: {},
+            metadata: {
+                titulo_estudio: '',
+                titulo_estudio_en: '',
+                referencia_biblica: '',
+                referencia_biblica_en: '',
+                texto_biblico: '',
+                texto_biblico_en: '',
+            },
             sections: []
         };
 
         try {
-            // 1. Extraer metadata YAML (entre ---)
+            // 1. Extraer metadata YAML
             const metadataMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
             if (metadataMatch) {
                 const yamlContent = metadataMatch[1];
-                console.log('Metadata YAML encontrada:', yamlContent);
-
-                // Parsear cada línea del YAML
                 const lines = yamlContent.split('\n');
+
                 lines.forEach(line => {
                     const colonIndex = line.indexOf(':');
                     if (colonIndex > -1) {
                         const key = line.substring(0, colonIndex).trim();
-                        const value = line.substring(colonIndex + 1).trim();
-                        result.metadata[key] = value;
+                        let value = line.substring(colonIndex + 1).trim();
+                        // Quitar comillas si existen
+                        value = value.replace(/^["']|["']$/g, '');
+
+                        // Mapear los campos correctamente
+                        switch (key) {
+                            case 'titulo_estudio':
+                                result.metadata.titulo_estudio = value;
+                                break;
+                            case 'study_title':
+                                result.metadata.titulo_estudio_en = value;
+                                break;
+                            case 'referencia_biblica':
+                                result.metadata.referencia_biblica = value;
+                                break;
+                            case 'bible_reference':
+                                result.metadata.referencia_biblica_en = value;
+                                break;
+                            case 'texto_biblico':
+                                result.metadata.texto_biblico = value;
+                                break;
+                            case 'bible_text':
+                                result.metadata.texto_biblico_en = value;
+                                break;
+                        }
                     }
                 });
             }
 
-            // 2. Remover metadata del contenido para procesar secciones
+            // 2. Procesar secciones
             const contentWithoutMetadata = content.replace(/^---\s*\n[\s\S]*?\n---\s*\n/, '');
 
-            // 3. Buscar TODAS las secciones (## sectionX)
-            // Usar una expresión regular que capture todas las secciones
-            const sectionRegex = /## (section\d+|conclusion)\s*\n([\s\S]*?)(?=## section|\## conclusion|$)/gi;
-            let match;
-            let sectionCount = 0;
+            // Buscar secciones
+            const sections = contentWithoutMetadata.split(/^## /m).filter(s => s.trim());
 
-            while ((match = sectionRegex.exec(contentWithoutMetadata)) !== null) {
-                sectionCount++;
-                const sectionName = match[1];
-                const sectionContent = match[2].trim();
+            sections.forEach((sectionContent, index) => {
+                const lines = sectionContent.split('\n');
+                const sectionName = lines[0].trim(); // section1, section2, conclusion, etc.
 
-                console.log(`Procesando ${sectionName} (${sectionCount})`);
+                let titleEs = '';
+                let titleEn = '';
+                let contentEs = '';
+                let contentEn = '';
+                let currentLang = null;
+                let contentBuffer = [];
 
-                // Extraer título y contenido bilingüe
-                // Extraer título en español (no captura si empieza con [EN])
-                const titleMatch = sectionContent.match(/### (?!\[EN\])(.+)/);
-                const title = titleMatch ? titleMatch[1].trim() : '';
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i];
 
-                // Extraer título en inglés
-                const titleEnMatch = sectionContent.match(/### \[EN\] (.+)/);
-                const title_en = titleEnMatch ? titleEnMatch[1].trim() : '';
+                    // Detectar título en español (sin [EN])
+                    if (line.startsWith('### ') && !line.includes('[EN]')) {
+                        titleEs = line.replace('### ', '').trim();
+                    }
+                    // Detectar título en inglés
+                    else if (line.includes('### [EN] ')) {
+                        titleEn = line.replace('### [EN] ', '').trim();
+                    }
+                    // Detectar marcador de idioma
+                    else if (line.trim() === '::es') {
+                        if (currentLang === 'en' && contentBuffer.length > 0) {
+                            contentEn = contentBuffer.join('\n').trim();
+                        }
+                        currentLang = 'es';
+                        contentBuffer = [];
+                    }
+                    else if (line.trim() === '::en') {
+                        if (currentLang === 'es' && contentBuffer.length > 0) {
+                            contentEs = contentBuffer.join('\n').trim();
+                        }
+                        currentLang = 'en';
+                        contentBuffer = [];
+                    }
+                    // Acumular contenido
+                    else if (currentLang) {
+                        contentBuffer.push(line);
+                    }
+                }
 
-                // Buscar contenido en español
-                const esMatch = sectionContent.match(/::es\s*\n([\s\S]*?)(?=::en|$)/);
-                const contentEs = esMatch ? esMatch[1].trim() : '';
+                // Guardar último buffer
+                if (currentLang && contentBuffer.length > 0) {
+                    if (currentLang === 'es') contentEs = contentBuffer.join('\n').trim();
+                    if (currentLang === 'en') contentEn = contentBuffer.join('\n').trim();
+                }
 
-                // Buscar contenido en inglés
-                const enMatch = sectionContent.match(/::en\s*\n([\s\S]*?)(?=::es|$)/);
-                const contentEn = enMatch ? enMatch[1].trim() : '';
+                // Determinar tipo de sección
+                const isIntroduction = titleEs.toUpperCase().includes('INTRODUCCIÓN') ||
+                    titleEn.toUpperCase().includes('INTRODUCTION') ||
+                    sectionName === 'section1';
+                const isConclusion = titleEs.toUpperCase().includes('CONCLUSIÓN') ||
+                    titleEn.toUpperCase().includes('CONCLUSION') ||
+                    sectionName === 'conclusion';
 
-
-                // Agregar la sección al resultado
-                // Agregar la sección al resultado
                 result.sections.push({
-                    id: Date.now() + sectionCount, // ID único
-                    title: title,
-                    title_en: title_en,  // AGREGAR ESTA LÍNEA
+                    id: Date.now() + index,
+                    title_es: titleEs,
+                    title_en: titleEn,
                     content_es: contentEs,
                     content_en: contentEn,
-                    order: sectionCount
+                    order: index + 1,
+                    isIntroduction,
+                    isConclusion
                 });
-
-                console.log(`Sección ${sectionName} procesada:`, {
-                    title: title.substring(0, 50),
-                    esLength: contentEs.length,
-                    enLength: contentEn.length
-                });
-            }
-
-            // 4. Validación importante: verificar que se capturaron todas las secciones
-            const totalSectionsInOriginal = (content.match(/## section/gi) || []).length;
-            const hasConclusion = content.includes('## conclusion');
-            const expectedSections = totalSectionsInOriginal + (hasConclusion ? 1 : 0);
-
-            console.log(`=== RESUMEN DE PARSEO ===`);
-            console.log(`Secciones esperadas: ${expectedSections}`);
-            console.log(`Secciones capturadas: ${result.sections.length}`);
-
-            if (result.sections.length < expectedSections) {
-                console.error('⚠️ ADVERTENCIA: No se capturaron todas las secciones!');
-                console.error(`Faltan ${expectedSections - result.sections.length} secciones`);
-
-                // Intentar método alternativo si falló el primero
-                const alternativeSections = parseAlternativeMethod(contentWithoutMetadata);
-                if (alternativeSections.length > result.sections.length) {
-                    console.log('Usando método alternativo de parseo');
-                    result.sections = alternativeSections;
-                }
-            }
+            });
 
         } catch (error) {
             console.error('Error parseando contenido:', error);
@@ -170,92 +288,45 @@ export default function StudyEditor({ lessonId, initialData, onSave, onCancel })
 
 
 
-    // Método alternativo de parseo (más robusto)
-    const parseAlternativeMethod = (content) => {
-        const sections = [];
-        const lines = content.split('\n');
-        let currentSection = null;
-        let currentContent = [];
-        let inEs = false;
-        let inEn = false;
-        let sectionCounter = 0;
-
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-
-            // Detectar nueva sección
-            if (line.startsWith('## section') || line.startsWith('## conclusion')) {
-                // Guardar sección anterior si existe
-                if (currentSection) {
-                    sections.push(currentSection);
-                }
-
-                sectionCounter++;
-                currentSection = {
-                    id: Date.now() + sectionCounter,
-                    title: '',
-                    content_es: '',
-                    content_en: '',
-                    order: sectionCounter
-                };
-                currentContent = [];
-                inEs = false;
-                inEn = false;
-            }
-            // Detectar título
-            else if (line.startsWith('### ') && currentSection) {
-                currentSection.title = line.replace('### ', '').trim();
-            }
-            // Detectar marcador de español
-            else if (line.trim() === '::es') {
-                inEs = true;
-                inEn = false;
-            }
-            // Detectar marcador de inglés
-            else if (line.trim() === '::en') {
-                inEn = true;
-                inEs = false;
-            }
-            // Agregar contenido a la sección actual
-            else if (currentSection) {
-                if (inEs) {
-                    currentSection.content_es += line + '\n';
-                } else if (inEn) {
-                    currentSection.content_en += line + '\n';
-                }
-            }
-        }
-
-        // Guardar última sección
-        if (currentSection) {
-            sections.push(currentSection);
-        }
-
-        // Limpiar contenido
-        sections.forEach(section => {
-            section.content_es = section.content_es.trim();
-            section.content_en = section.content_en.trim();
-        });
-
-        return sections;
-    };
-
     const addSection = () => {
+        const currentSections = [...formData.sections];
+        // Encontrar la posición antes de la conclusión
+        const conclusionIndex = currentSections.findIndex(s => s.isConclusion);
+        const insertIndex = conclusionIndex > -1 ? conclusionIndex : currentSections.length;
+
         const newSection = {
             id: Date.now(),
-            title: '',
+            title_es: '',
+            title_en: '',
             content_es: '',
             content_en: '',
-            order: formData.sections.length + 1
+            order: insertIndex + 1,
+            isIntroduction: false,
+            isConclusion: false
         };
-        setFormData({ ...formData, sections: [...formData.sections, newSection] });
+
+        // Insertar antes de la conclusión
+        currentSections.splice(insertIndex, 0, newSection);
+
+        // Reordenar
+        currentSections.forEach((section, index) => {
+            section.order = index + 1;
+        });
+
+        setFormData({ ...formData, sections: currentSections });
+        setExpandedSections({ ...expandedSections, [insertIndex]: true });
     };
 
     const removeSection = (id) => {
+        const section = formData.sections.find(s => s.id === id);
+        if (section?.isIntroduction || section?.isConclusion) {
+            alert('No se puede eliminar la introducción o conclusión');
+            return;
+        }
+
         if (!confirm('¿Estás seguro de eliminar esta sección?')) return;
 
         const updatedSections = formData.sections.filter(s => s.id !== id);
-        // Reordenar
         updatedSections.forEach((section, index) => {
             section.order = index + 1;
         });
@@ -269,43 +340,53 @@ export default function StudyEditor({ lessonId, initialData, onSave, onCancel })
         setFormData({ ...formData, sections: updatedSections });
     };
 
-    // Generar contenido Markdown
+    const toggleSection = (index) => {
+        setExpandedSections(prev => ({
+            ...prev,
+            [index]: !prev[index]
+        }));
+    };
+
     const generateMarkdown = () => {
+        const { metadata, sections } = formData;
+
+        // Generar YAML header
         let markdown = '---\n';
-
-        // Metadata
-        Object.entries(formData.metadata).forEach(([key, value]) => {
-            if (value) {
-                markdown += `${key}: ${value}\n`;
-            }
-        });
-
+        markdown += `titulo_leccion: "${formData.titulo_leccion || ''}"\n`;
+        markdown += `lesson_title: "${formData.titulo_leccion_en || ''}"\n`;
+        markdown += `numero: ${formData.numero}\n`;
+        markdown += `titulo_estudio: "${metadata.titulo_estudio || ''}"\n`;
+        markdown += `study_title: "${metadata.titulo_estudio_en || ''}"\n`;
+        markdown += `referencia_biblica: "${metadata.referencia_biblica || ''}"\n`;
+        markdown += `bible_reference: "${metadata.referencia_biblica_en || ''}"\n`;
+        markdown += `texto_biblico: "${metadata.texto_biblico || ''}"\n`;
+        markdown += `bible_text: "${metadata.texto_biblico_en || ''}"\n`;
         markdown += '---\n\n';
 
-        // Secciones con títulos bilingües
-        formData.sections.forEach((section, index) => {
-            const sectionName = section.title?.toLowerCase().includes('conclus')
-                ? 'conclusion'
-                : `section${index + 1}`;
+        // Generar secciones
+        sections.forEach((section, index) => {
+            const sectionName = section.isConclusion ? 'conclusion' : `section${index + 1}`;
 
             markdown += `## ${sectionName}\n\n`;
 
-            // Guardar ambos títulos si existen
-            if (section.title) {
-                markdown += `### ${section.title}\n`;
+            // Títulos bilingües
+            if (section.title_es) {
+                markdown += `### ${section.title_es}\n`;
             }
             if (section.title_en) {
                 markdown += `### [EN] ${section.title_en}\n`;
             }
 
-            if (section.title || section.title_en) {
+            if (section.title_es || section.title_en) {
                 markdown += '\n';
             }
 
+            // Contenido en español
             if (section.content_es) {
                 markdown += `::es\n${section.content_es}\n\n`;
             }
 
+            // Contenido en inglés
             if (section.content_en) {
                 markdown += `::en\n${section.content_en}\n\n`;
             }
@@ -314,33 +395,26 @@ export default function StudyEditor({ lessonId, initialData, onSave, onCancel })
         return markdown;
     };
 
-
-    // Validar antes de guardar
     const validateBeforeSave = () => {
         const errors = [];
 
-        // Validar que hay al menos una sección
-        if (formData.sections.length === 0) {
-            errors.push('Debe haber al menos una sección');
+        if (!formData.metadata.titulo_estudio && !formData.metadata.titulo_estudio_en) {
+            errors.push('Debe incluir al menos el título del estudio en un idioma');
         }
 
-        // Validar que cada sección tiene contenido
-        formData.sections.forEach((section, index) => {
-            if (!section.title) {
-                errors.push(`Sección ${index + 1}: Falta título`);
-            }
-            if (!section.content_es && !section.content_en) {
-                errors.push(`Sección ${index + 1}: Falta contenido`);
-            }
-        });
+        if (!formData.metadata.referencia_biblica && !formData.metadata.referencia_biblica_en) {
+            errors.push('Debe incluir la referencia bíblica');
+        }
 
-        // Comparar con contenido original
-        const newContent = generateMarkdown();
-        const originalSectionCount = (originalContent.match(/## section/gi) || []).length;
-        const newSectionCount = formData.sections.length;
+        // Validar que introducción y conclusión tienen contenido
+        const intro = formData.sections.find(s => s.isIntroduction);
+        if (!intro?.content_es && !intro?.content_en) {
+            errors.push('La introducción debe tener contenido');
+        }
 
-        if (originalContent && newSectionCount < originalSectionCount) {
-            errors.push(`⚠️ ADVERTENCIA: El contenido original tenía ${originalSectionCount} secciones, ahora solo hay ${newSectionCount}`);
+        const conclusion = formData.sections.find(s => s.isConclusion);
+        if (!conclusion?.content_es && !conclusion?.content_en) {
+            errors.push('La conclusión debe tener contenido');
         }
 
         setValidationErrors(errors);
@@ -348,14 +422,9 @@ export default function StudyEditor({ lessonId, initialData, onSave, onCancel })
     };
 
     const handleSave = async () => {
-        // Validar antes de guardar
         if (!validateBeforeSave()) {
-            const proceed = confirm(
-                'Hay problemas de validación:\n\n' +
-                validationErrors.join('\n') +
-                '\n\n¿Deseas continuar de todos modos?'
-            );
-            if (!proceed) return;
+            alert('Por favor corrige los errores de validación');
+            return;
         }
 
         setLoading(true);
@@ -364,27 +433,14 @@ export default function StudyEditor({ lessonId, initialData, onSave, onCancel })
         try {
             const markdown = generateMarkdown();
 
-            // Mostrar resumen antes de guardar
-            const summary = `
-                RESUMEN DE GUARDADO:
-                - Secciones a guardar: ${formData.sections.length}
-                - Caracteres totales: ${markdown.length}
-                - Títulos de secciones: ${formData.sections.map(s => s.title).join(', ')}
-            `;
-
-            console.log(summary);
-
-            if (!confirm(summary + '\n\n¿Confirmar guardado?')) {
-                setLoading(false);
-                setSaveStatus('');
-                return;
-            }
-
             await onSave({
-                titulo: formData.titulo,
-                titulo_en: formData.titulo_en,
+                titulo: formData.titulo_leccion,
+                titulo_en: formData.titulo_leccion_en,
                 numero: formData.numero,
-                contenido_md: markdown
+                contenido_md: markdown,
+                // También guardar estos campos por separado si es necesario
+                referencia_biblica: formData.metadata.referencia_biblica,
+                texto_biblico: formData.metadata.texto_biblico
             });
 
             setSaveStatus('saved');
@@ -399,22 +455,26 @@ export default function StudyEditor({ lessonId, initialData, onSave, onCancel })
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-6">
-            {/* Header con validación */}
+        <div className="max-w-6xl mx-auto space-y-6 p-6">
+            {/* Header */}
             <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex justify-between items-start mb-4">
                     <div>
-                        <h2 className="text-2xl font-bold">Editor de Estudio Bíblico</h2>
+                        <h2 className="text-2xl font-bold flex items-center gap-2">
+                            <BookOpen className="w-6 h-6 text-blue-600" />
+                            Editor de Estudio Bíblico
+                        </h2>
                         <p className="text-gray-600 mt-1">
-                            Lección {formData.numero}: {formData.titulo || 'Sin título'}
+                            Lección {formData.numero}: {formData.titulo_leccion || 'Sin título'}
                         </p>
                     </div>
                     <div className="flex gap-2">
                         <button
                             onClick={() => setShowPreview(!showPreview)}
-                            className="px-3 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                            className="px-3 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 flex items-center gap-2"
                         >
                             {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            {showPreview ? 'Ocultar' : 'Vista'} Previa
                         </button>
                         <button
                             onClick={onCancel}
@@ -444,7 +504,7 @@ export default function StudyEditor({ lessonId, initialData, onSave, onCancel })
                         <div className="flex items-start gap-2">
                             <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
                             <div>
-                                <p className="font-medium text-yellow-900">Problemas detectados:</p>
+                                <p className="font-medium text-yellow-900">Errores de validación:</p>
                                 <ul className="mt-1 text-sm text-yellow-800">
                                     {validationErrors.map((error, index) => (
                                         <li key={index}>• {error}</li>
@@ -454,163 +514,168 @@ export default function StudyEditor({ lessonId, initialData, onSave, onCancel })
                         </div>
                     </div>
                 )}
-
-                {/* Estado de guardado */}
-                {saveStatus === 'saved' && (
-                    <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded flex items-center gap-2">
-                        <Check className="w-5 h-5 text-green-600" />
-                        <span className="text-green-800">Guardado exitosamente</span>
-                    </div>
-                )}
             </div>
 
-            {/* Información básica */}
+            {/* Información de la LECCIÓN */}
             <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">Información Básica</h3>
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-gray-600" />
+                    Información de la Lección
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label className="block text-sm font-medium mb-1">Número de Lección</label>
+                        <label className="block text-sm font-medium mb-1">Número</label>
                         <input
                             type="number"
                             value={formData.numero}
-                            onChange={(e) => setFormData({ ...formData, numero: parseInt(e.target.value) })}
-                            className="w-full px-3 py-2 border rounded"
+                            onChange={(e) => setFormData({ ...formData, numero: parseInt(e.target.value) || 1 })}
+                            className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-1">Título (Español)</label>
+                        <label className="block text-sm font-medium mb-1">
+                            Título de la Lección (Español)
+                        </label>
                         <input
                             type="text"
-                            value={formData.titulo}
-                            onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
-                            className="w-full px-3 py-2 border rounded"
+                            value={formData.titulo_leccion}
+                            onChange={(e) => setFormData({ ...formData, titulo_leccion: e.target.value })}
+                            className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Ej: La Trinidad: Un Solo Dios..."
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-1">Title (English)</label>
+                        <label className="block text-sm font-medium mb-1">
+                            Lesson Title (English)
+                        </label>
                         <input
                             type="text"
-                            value={formData.titulo_en}
-                            onChange={(e) => setFormData({ ...formData, titulo_en: e.target.value })}
-                            className="w-full px-3 py-2 border rounded"
+                            value={formData.titulo_leccion_en}
+                            onChange={(e) => setFormData({ ...formData, titulo_leccion_en: e.target.value })}
+                            className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Ex: The Trinity: One God..."
                         />
                     </div>
                 </div>
             </div>
 
+            {/* ENCABEZADO DEL ESTUDIO BÍBLICO */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-blue-600" />
+                    Encabezado del Estudio Bíblico
+                </h3>
 
-            {/* Metadata */}
-            {/* Metadata */}
-            <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">Metadata del Estudio</h3>
-                <div className="space-y-4">
-                    {/* Título del Estudio Bíblico */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                📖 Título del Estudio (Español)
-                            </label>
-                            <input
-                                type="text"
-                                value={formData.metadata.titulo_estudio}
-                                onChange={(e) => setFormData({
-                                    ...formData,
-                                    metadata: { ...formData.metadata, titulo_estudio: e.target.value }
-                                })}
-                                className="w-full px-3 py-2 border rounded"
-                                placeholder="Abraza La Verdad, Vive En Comunidad Trinitaria"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                📖 Study Title (English)
-                            </label>
-                            <input
-                                type="text"
-                                value={formData.metadata.titulo_estudio_en}
-                                onChange={(e) => setFormData({
-                                    ...formData,
-                                    metadata: { ...formData.metadata, titulo_estudio_en: e.target.value }
-                                })}
-                                className="w-full px-3 py-2 border rounded"
-                                placeholder="Embrace The Truth, Live In Trinitarian Community"
-                            />
-                        </div>
+                {/* Títulos del Estudio */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                            📖 Título del Estudio (Español)
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.metadata.titulo_estudio}
+                            onChange={(e) => setFormData({
+                                ...formData,
+                                metadata: { ...formData.metadata, titulo_estudio: e.target.value }
+                            })}
+                            className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="ABRAZA LA VERDAD, VIVE EN COMUNIDAD TRINITARIA"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                            Este título aparecerá en el estudio (puede ser diferente al de la lección)
+                        </p>
                     </div>
-
-                    {/* Versículo Clave */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                📕 Versículo Clave (Español)
-                            </label>
-                            <input
-                                type="text"
-                                value={formData.metadata.versiculo_clave}
-                                onChange={(e) => setFormData({
-                                    ...formData,
-                                    metadata: { ...formData.metadata, versiculo_clave: e.target.value }
-                                })}
-                                className="w-full px-3 py-2 border rounded"
-                                placeholder="Mateo 3:16-17; 28:19"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                📕 Key Verse (English)
-                            </label>
-                            <input
-                                type="text"
-                                value={formData.metadata.versiculo_clave_en}
-                                onChange={(e) => setFormData({
-                                    ...formData,
-                                    metadata: { ...formData.metadata, versiculo_clave_en: e.target.value }
-                                })}
-                                className="w-full px-3 py-2 border rounded"
-                                placeholder="Matthew 3:16-17; 28:19"
-                            />
-                        </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                            📖 Study Title (English)
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.metadata.titulo_estudio_en}
+                            onChange={(e) => setFormData({
+                                ...formData,
+                                metadata: { ...formData.metadata, titulo_estudio_en: e.target.value }
+                            })}
+                            className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="EMBRACE THE TRUTH, LIVE IN TRINITARIAN COMMUNITY"
+                        />
                     </div>
+                </div>
 
-                    {/* Texto Bíblico */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                ✝️ Texto Bíblico (Español)
-                            </label>
-                            <textarea
-                                value={formData.metadata.texto_biblico}
-                                onChange={(e) => setFormData({
-                                    ...formData,
-                                    metadata: { ...formData.metadata, texto_biblico: e.target.value }
-                                })}
-                                className="w-full px-3 py-2 border rounded"
-                                rows="3"
-                                placeholder="Y Jesús, después que fue bautizado, subió luego del agua..."
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                ✝️ Bible Text (English)
-                            </label>
-                            <textarea
-                                value={formData.metadata.texto_biblico_en}
-                                onChange={(e) => setFormData({
-                                    ...formData,
-                                    metadata: { ...formData.metadata, texto_biblico_en: e.target.value }
-                                })}
-                                className="w-full px-3 py-2 border rounded"
-                                rows="3"
-                                placeholder="As soon as Jesus was baptized, he went up out of the water..."
-                            />
-                        </div>
+                {/* Referencias Bíblicas */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                            📕 Referencia Bíblica (Español)
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.metadata.referencia_biblica}
+                            onChange={(e) => setFormData({
+                                ...formData,
+                                metadata: { ...formData.metadata, referencia_biblica: e.target.value }
+                            })}
+                            className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Mateo 3:16-17; 28:19"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                            📕 Bible Reference (English)
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.metadata.referencia_biblica_en}
+                            onChange={(e) => setFormData({
+                                ...formData,
+                                metadata: { ...formData.metadata, referencia_biblica_en: e.target.value }
+                            })}
+                            className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Matthew 3:16-17; 28:19"
+                        />
+                    </div>
+                </div>
+
+                {/* Textos Bíblicos */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                            ✝️ Texto Bíblico (Español)
+                        </label>
+                        <textarea
+                            value={formData.metadata.texto_biblico}
+                            onChange={(e) => setFormData({
+                                ...formData,
+                                metadata: { ...formData.metadata, texto_biblico: e.target.value }
+                            })}
+                            className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            rows="4"
+                            placeholder="Y Jesús, después que fue bautizado, subió luego del agua..."
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                            Puede ser una porción del texto completo si es muy largo
+                        </p>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                            ✝️ Bible Text (English)
+                        </label>
+                        <textarea
+                            value={formData.metadata.texto_biblico_en}
+                            onChange={(e) => setFormData({
+                                ...formData,
+                                metadata: { ...formData.metadata, texto_biblico_en: e.target.value }
+                            })}
+                            className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            rows="4"
+                            placeholder="After Jesus was baptized, He went up immediately from the water..."
+                        />
                     </div>
                 </div>
             </div>
 
-
-
-            {/* Secciones */}
+            {/* SECCIONES DEL ESTUDIO */}
             <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold">
@@ -625,74 +690,94 @@ export default function StudyEditor({ lessonId, initialData, onSave, onCancel })
                     </button>
                 </div>
 
-                {formData.sections.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                        <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                        <p>No hay secciones. Haz clic en "Agregar Sección" para comenzar.</p>
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {formData.sections.map((section, index) => (
-                            <div key={section.id} className="border rounded-lg p-4">
-                                <div className="flex justify-between items-start mb-3">
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-medium">
-                                            Sección {index + 1}
+                <div className="space-y-4">
+                    {formData.sections.map((section, index) => (
+                        <div key={section.id} className="border rounded-lg overflow-hidden">
+                            <div
+                                className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 ${section.isIntroduction ? 'bg-green-50' :
+                                    section.isConclusion ? 'bg-blue-50' : 'bg-white'
+                                    }`}
+                                onClick={() => toggleSection(index)}
+                            >
+                                <div className="flex items-center gap-3">
+                                    {expandedSections[index] ?
+                                        <ChevronDown className="w-5 h-5" /> :
+                                        <ChevronRight className="w-5 h-5" />
+                                    }
+                                    <span className="font-medium">
+                                        {section.isIntroduction ? '📝 Introducción' :
+                                            section.isConclusion ? '🎯 Conclusión' :
+                                                `📚 Sección ${index}`}
+                                    </span>
+                                    {(section.title_es || section.title_en) && (
+                                        <span className="text-gray-600">
+                                            - {section.title_es || section.title_en}
                                         </span>
-                                        {section.title && (
-                                            <span className="text-gray-600">
-                                                - {section.title}
-                                            </span>
-                                        )}
-                                    </div>
+                                    )}
+                                </div>
+                                {!section.isIntroduction && !section.isConclusion && (
                                     <button
-                                        onClick={() => removeSection(section.id)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            removeSection(section.id);
+                                        }}
                                         className="text-red-600 hover:text-red-800"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
-                                </div>
+                                )}
+                            </div>
 
+                            {expandedSections[index] && (
+                                <div className="p-4 border-t space-y-4">
+                                    {/* Títulos de la sección */}
+                                    {!section.isIntroduction && !section.isConclusion && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-sm font-medium mb-1">
+                                                    Título de Sección (Español)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={section.title_es}
+                                                    onChange={(e) => updateSection(section.id, 'title_es', e.target.value)}
+                                                    className="w-full px-3 py-2 border rounded"
+                                                    placeholder="Ej: LA VOZ DEL PADRE – TU AFIRMACIÓN"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium mb-1">
+                                                    Section Title (English)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={section.title_en || ''}
+                                                    onChange={(e) => updateSection(section.id, 'title_en', e.target.value)}
+                                                    className="w-full px-3 py-2 border rounded"
+                                                    placeholder="Ex: THE FATHER'S VOICE – YOUR AFFIRMATION"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
 
-                                <div className="space-y-3">
+                                    {/* Contenidos bilingües */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
                                             <label className="block text-sm font-medium mb-1">
-                                                Título de la Sección (Español)
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={section.title}
-                                                onChange={(e) => updateSection(section.id, 'title', e.target.value)}
-                                                className="w-full px-3 py-2 border rounded"
-                                                placeholder="Ej: Introducción, Desarrollo..."
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1">
-                                                Section Title (English)
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={section.title_en || ''}
-                                                onChange={(e) => updateSection(section.id, 'title_en', e.target.value)}
-                                                className="w-full px-3 py-2 border rounded"
-                                                placeholder="Ex: Introduction, Development..."
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1">
+                                                <Globe className="w-4 h-4 inline mr-1" />
                                                 Contenido (Español)
                                             </label>
                                             <textarea
                                                 value={section.content_es}
                                                 onChange={(e) => updateSection(section.id, 'content_es', e.target.value)}
-                                                className="w-full px-3 py-2 border rounded"
-                                                rows="8"
-                                                placeholder="Contenido en español..."
+                                                className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                rows="10"
+                                                placeholder={section.isIntroduction ?
+                                                    "¡Hola! Este estudio está diseñado para ayudarte..." :
+                                                    section.isConclusion ?
+                                                        "REFLEXIÓN FINAL: La Trinidad es el ecosistema divino..." :
+                                                        "Contenido de la sección..."
+                                                }
                                             />
                                             <p className="text-xs text-gray-500 mt-1">
                                                 {section.content_es.length} caracteres
@@ -700,14 +785,20 @@ export default function StudyEditor({ lessonId, initialData, onSave, onCancel })
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium mb-1">
+                                                <Globe className="w-4 h-4 inline mr-1" />
                                                 Content (English)
                                             </label>
                                             <textarea
                                                 value={section.content_en}
                                                 onChange={(e) => updateSection(section.id, 'content_en', e.target.value)}
-                                                className="w-full px-3 py-2 border rounded"
-                                                rows="8"
-                                                placeholder="Content in English..."
+                                                className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                rows="10"
+                                                placeholder={section.isIntroduction ?
+                                                    "Hello! This study is designed to help you..." :
+                                                    section.isConclusion ?
+                                                        "FINAL THOUGHT: The Trinity is the divine ecosystem..." :
+                                                        "Section content..."
+                                                }
                                             />
                                             <p className="text-xs text-gray-500 mt-1">
                                                 {section.content_en.length} characters
@@ -715,20 +806,17 @@ export default function StudyEditor({ lessonId, initialData, onSave, onCancel })
                                         </div>
                                     </div>
                                 </div>
-
-
-
-                            </div>
-                        ))}
-                    </div>
-                )}
+                            )}
+                        </div>
+                    ))}
+                </div>
             </div>
 
             {/* Vista previa */}
             {showPreview && (
                 <div className="bg-white rounded-lg shadow p-6">
                     <h3 className="text-lg font-semibold mb-4">Vista Previa del Markdown</h3>
-                    <pre className="bg-gray-100 p-4 rounded overflow-x-auto text-sm">
+                    <pre className="bg-gray-100 p-4 rounded overflow-x-auto text-sm whitespace-pre-wrap">
                         {generateMarkdown()}
                     </pre>
                 </div>
