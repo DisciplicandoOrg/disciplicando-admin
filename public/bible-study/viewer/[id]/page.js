@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
 import StudyRenderer from '@/app/components/bible-studies/StudyRenderer';
 
 export default function PublicStudyViewer({ params }) {
@@ -9,6 +8,7 @@ export default function PublicStudyViewer({ params }) {
     const [content, setContent] = useState('');
     const [language, setLanguage] = useState('es');
     const [error, setError] = useState(null);
+    const [lessonTitle, setLessonTitle] = useState('');
 
     useEffect(() => {
         fetchStudy();
@@ -16,41 +16,63 @@ export default function PublicStudyViewer({ params }) {
 
     const fetchStudy = async () => {
         try {
-            const supabase = createSupabaseBrowserClient();
+            // Usar la API pública en lugar de acceso directo a Supabase
+            const response = await fetch(`/api/public/study/${params.id}`);
+            const data = await response.json();
 
-            // Buscar el estudio por ID - sin requerir autenticación
-            const { data, error } = await supabase
-                .from('lecciones')
-                .select('contenido_md, titulo, numero')
-                .eq('id', params.id)
-                .single();
+            if (!response.ok) {
+                throw new Error(data.error || 'Error cargando estudio');
+            }
 
-            if (error) throw error;
-
-            if (data && data.contenido_md) {
+            if (data.contenido_md) {
                 setContent(data.contenido_md);
+                setLessonTitle(data.titulo || '');
             } else {
-                setError('Estudio no encontrado');
+                setError('Estudio no disponible');
             }
         } catch (err) {
             console.error('Error:', err);
-            setError('Error cargando el estudio');
+            setError(err.message || 'Error cargando el estudio');
         } finally {
             setLoading(false);
         }
     };
 
-    if (loading) return <div className="p-8 text-center">Cargando...</div>;
-    if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Cargando estudio bíblico...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-xl text-red-600">{error}</p>
+                    <p className="mt-4 text-gray-600">
+                        Por favor, verifica el enlace o contacta al administrador.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-4xl mx-auto p-6">
-                {/* Selector de idioma */}
-                <div className="mb-6 flex justify-end">
+                {/* Header con selector de idioma */}
+                <div className="mb-6 flex justify-between items-center">
+                    <h1 className="text-xl font-semibold text-gray-700">
+                        {lessonTitle}
+                    </h1>
                     <button
                         onClick={() => setLanguage(language === 'es' ? 'en' : 'es')}
-                        className="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50"
+                        className="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50 transition-colors"
                     >
                         {language === 'es' ? '🇺🇸 English' : '🇪🇸 Español'}
                     </button>
@@ -64,6 +86,11 @@ export default function PublicStudyViewer({ params }) {
                         responses={{}}
                         onInputChange={() => { }}
                     />
+                </div>
+
+                {/* Footer */}
+                <div className="mt-8 text-center text-sm text-gray-500">
+                    <p>© 2025 Disciplicando - Transformando vidas a través de la Palabra</p>
                 </div>
             </div>
         </div>
