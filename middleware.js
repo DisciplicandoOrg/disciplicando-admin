@@ -35,7 +35,17 @@ export async function middleware(request) {
 
     // Rutas públicas que NO requieren autenticación
     const publicRoutes = ['/login', '/403']
-    const isPublicRoute = publicRoutes.includes(pathname)
+
+    // Rutas que empiezan con estos prefijos tampoco requieren auth
+    const publicPrefixes = [
+        '/public',           // Para el viewer público
+        '/api/public',       // Para APIs públicas
+        '/study-viewer'      // Ruta alternativa si prefieres
+    ]
+
+    // Verificar si es ruta pública
+    const isPublicRoute = publicRoutes.includes(pathname) ||
+        publicPrefixes.some(prefix => pathname.startsWith(prefix))
 
     // Si es una ruta pública, permitir el acceso
     if (isPublicRoute) {
