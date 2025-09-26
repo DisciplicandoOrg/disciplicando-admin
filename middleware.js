@@ -40,7 +40,7 @@ export async function middleware(request) {
     const publicPrefixes = [
         '/public',           // Para el viewer público
         '/api/public',       // Para APIs públicas
-        '/study-viewer'      // Ruta alternativa si prefieres
+        '/study'      // Ruta alternativa si prefieres
     ]
 
     // Verificar si es ruta pública
