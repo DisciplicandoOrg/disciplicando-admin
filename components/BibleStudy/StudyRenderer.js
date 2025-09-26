@@ -51,25 +51,45 @@ export default function StudyRenderer({ content, language = 'es', responses, onI
 
             sectionBlocks.forEach(block => {
                 const lines = block.split('\n');
-                const sectionId = lines[0].trim(); // section1, section2, conclusion, etc.
+                const sectionId = lines[0].trim();
 
                 let sectionTitle = '';
                 let sectionContent = '';
                 let currentLang = null;
                 let contentBuffer = [];
-                let skipNextLine = false;
+
+                // Manejar especialmente conclusion y prayer
+                const isConclusion = sectionId === 'conclusion';
+                const isPrayer = sectionId === 'prayer';
 
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i];
 
-                    // Detectar títulos de sección
-                    if (line.startsWith('### ')) {
+                    // Para conclusión, buscar el título correcto según el idioma
+                    if (isConclusion && line.startsWith('### ')) {
                         if (language === 'es' && !line.includes('[EN]')) {
                             sectionTitle = line.replace('### ', '').trim();
-                            skipNextLine = false;
                         } else if (language === 'en' && line.includes('[EN]')) {
                             sectionTitle = line.replace('### [EN] ', '').trim();
-                            skipNextLine = false;
+                        }
+                        continue;
+                    }
+
+                    // Para prayer, el título está dentro del contenido
+                    if (isPrayer && line.startsWith('### ')) {
+                        // Este es parte del contenido, no el título de la sección
+                        if (currentLang === language) {
+                            contentBuffer.push(line);
+                        }
+                        continue;
+                    }
+
+                    // Para otras secciones
+                    if (!isConclusion && !isPrayer && line.startsWith('### ')) {
+                        if (language === 'es' && !line.includes('[EN]')) {
+                            sectionTitle = line.replace('### ', '').trim();
+                        } else if (language === 'en' && line.includes('[EN]')) {
+                            sectionTitle = line.replace('### [EN] ', '').trim();
                         }
                         continue;
                     }
@@ -80,7 +100,6 @@ export default function StudyRenderer({ content, language = 'es', responses, onI
                         contentBuffer = [];
                         continue;
                     } else if (line.trim() === '::es' || line.trim() === '::en') {
-                        // Si encontramos otro idioma, guardar el buffer actual y cambiar
                         if (currentLang === language && contentBuffer.length > 0) {
                             sectionContent = contentBuffer.join('\n').trim();
                         }
@@ -104,7 +123,9 @@ export default function StudyRenderer({ content, language = 'es', responses, onI
                     result.sections.push({
                         id: sectionId,
                         title: sectionTitle,
-                        content: sectionContent
+                        content: sectionContent,
+                        isConclusion,
+                        isPrayer
                     });
                 }
             });
@@ -116,7 +137,7 @@ export default function StudyRenderer({ content, language = 'es', responses, onI
         return result;
     };
 
-    // Renderizar campos con inputs inline
+    // Renderizar campos con inputs inline - MEJORADO
     const renderLineWithInputs = (text) => {
         const parts = [];
         let lastIndex = 0;
@@ -125,9 +146,11 @@ export default function StudyRenderer({ content, language = 'es', responses, onI
 
         while ((match = regex.exec(text)) !== null) {
             if (match.index > lastIndex) {
+                // Procesar el texto antes del input con formato
+                const beforeText = text.substring(lastIndex, match.index);
                 parts.push(
                     <span key={`text-${lastIndex}`}>
-                        {text.substring(lastIndex, match.index)}
+                        {processFormattedText(beforeText)}
                     </span>
                 );
             }
@@ -173,14 +196,42 @@ export default function StudyRenderer({ content, language = 'es', responses, onI
         }
 
         if (lastIndex < text.length) {
+            // Procesar el texto después del último input con formato
+            const afterText = text.substring(lastIndex);
             parts.push(
                 <span key={`text-${lastIndex}`}>
-                    {text.substring(lastIndex)}
+                    {processFormattedText(afterText)}
                 </span>
             );
         }
 
-        return parts.length > 0 ? parts : text;
+        return parts.length > 0 ? parts : processFormattedText(text);
+    };
+
+    // Procesar formato de texto completo (mejorado para manejar todos los casos)
+    const processFormattedText = (text) => {
+        if (!text) return text;
+
+        let processedText = text;
+
+        // Orden importante: procesar de más específico a menos específico
+
+        // 1. Procesar italic + bold (***texto***)
+        processedText = processedText.replace(/\*\*\*(.*?)\*\*\*/g, '<em><strong>$1</strong></em>');
+
+        // 2. Procesar solo bold (**texto**)  
+        processedText = processedText.replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>');
+
+        // 3. Procesar solo italic (*texto*) - mejorado para manejar casos con espacios
+        processedText = processedText.replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
+
+        // 4. Procesar subrayado (_texto_)
+        processedText = processedText.replace(/_([^_]+?)_/g, '<u>$1</u>');
+
+        // 5. Procesar tachado (~~texto~~)
+        processedText = processedText.replace(/~~(.*?)~~/g, '<del>$1</del>');
+
+        return <span dangerouslySetInnerHTML={{ __html: processedText }} />;
     };
 
     // Renderizar contenido procesado
@@ -189,12 +240,16 @@ export default function StudyRenderer({ content, language = 'es', responses, onI
 
         const lines = text.split('\n');
         const elements = [];
+        let inPrayerSection = false;
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
 
-            // Headers (h3)
+            // Headers (h3) - Para títulos como "Oración:"
             if (line.startsWith('### ')) {
+                if (line.includes('Oración:') || line.includes('Prayer:')) {
+                    inPrayerSection = true;
+                }
                 elements.push(
                     <h3 key={`h3-${i}`} className="text-xl font-bold mt-6 mb-3 text-gray-900">
                         {line.replace('### ', '')}
@@ -209,34 +264,30 @@ export default function StudyRenderer({ content, language = 'es', responses, onI
                     </h4>
                 );
             }
-            // Indented bullets (detectar espacios antes del •)
-            else if (line.trim().startsWith('•')) {
-                const indentLevel = (line.match(/^(\s*)/)?.[1]?.length || 0) / 2; // Cada 2 espacios = 1 nivel
-                const content = line.trim().substring(1).trim();
+            // Bullets con diferentes caracteres y niveles de indentación
+            else if (line.match(/^\s*[•·▪▫◦‣⁃-]\s/)) {
+                const leadingSpaces = line.match(/^(\s*)/)?.[1]?.length || 0;
+                const indentLevel = Math.floor(leadingSpaces / 2);
+                const bulletMatch = line.match(/^\s*([•·▪▫◦‣⁃-])\s(.*)$/);
 
-                elements.push(
-                    <p key={`bullet-${i}`}
-                        className={`mb-2 text-gray-700 leading-relaxed flex items-start`}
-                        style={{ paddingLeft: `${indentLevel * 1.5}rem` }}>
-                        <span className="mr-2">•</span>
-                        <span>{renderLineWithInputs(content)}</span>
-                    </p>
-                );
-            }
-            // Bold text
-            else if (line.includes('**')) {
-                const processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>');
+                if (bulletMatch) {
+                    const bullet = bulletMatch[1];
+                    const content = bulletMatch[2];
 
-                if (line.includes('[input:')) {
+                    // Determinar el estilo del bullet según el nivel
+                    let bulletStyle = '•';
+                    if (indentLevel === 1) bulletStyle = '◦';
+                    if (indentLevel >= 2) bulletStyle = '▪';
+
                     elements.push(
-                        <p key={`p-${i}`} className="mb-4 text-gray-700 leading-relaxed">
-                            {renderLineWithInputs(line.replace(/\*\*(.*?)\*\*/g, '$1'))}
+                        <p key={`bullet-${i}`}
+                            className={`mb-2 text-gray-700 leading-relaxed flex items-start`}
+                            style={{ paddingLeft: `${indentLevel * 1.5}rem` }}>
+                            <span className="mr-2">{bulletStyle}</span>
+                            <span>
+                                {renderLineWithInputs(content)}
+                            </span>
                         </p>
-                    );
-                } else {
-                    elements.push(
-                        <p key={`p-${i}`} className="mb-4 text-gray-700 leading-relaxed"
-                            dangerouslySetInnerHTML={{ __html: processedLine }} />
                     );
                 }
             }
@@ -248,12 +299,22 @@ export default function StudyRenderer({ content, language = 'es', responses, onI
                     </p>
                 );
             }
-            // Textarea placeholders
+            // Textarea placeholders - MEJORADO con placeholder personalizado
             else if (line.includes('[textarea:')) {
                 const match = line.match(/\[textarea:([^\]]+)\]/);
                 if (match) {
                     const fieldId = `textarea-${match[1]}`;
+                    const fieldName = match[1];
                     const value = responses?.[fieldId] || '';
+
+                    // Placeholder personalizado para oración
+                    let placeholder = language === 'es' ? 'Escribe tu respuesta aquí...' : 'Write your answer here...';
+
+                    if (inPrayerSection || fieldName.toLowerCase().includes('prayer') || fieldName.toLowerCase().includes('oracion')) {
+                        placeholder = language === 'es'
+                            ? 'Escribe tus peticiones, respuestas, preguntas, y lo que quieras decirle al Señor en oración...'
+                            : 'Write your requests, responses, questions, and whatever you want to tell the Lord in prayer...';
+                    }
 
                     elements.push(
                         <div key={fieldId} className="my-6">
@@ -262,17 +323,17 @@ export default function StudyRenderer({ content, language = 'es', responses, onI
                                 onChange={(e) => onInputChange?.(fieldId, e.target.value)}
                                 className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
                                 rows="5"
-                                placeholder={language === 'es' ? 'Escribe tu respuesta aquí...' : 'Write your answer here...'}
+                                placeholder={placeholder}
                             />
                         </div>
                     );
                 }
             }
-            // Regular paragraphs
+            // Regular paragraphs con formato
             else if (line.trim()) {
                 elements.push(
                     <p key={`p-${i}`} className="mb-4 text-gray-700 leading-relaxed">
-                        {line}
+                        {processFormattedText(line)}
                     </p>
                 );
             }
@@ -284,14 +345,6 @@ export default function StudyRenderer({ content, language = 'es', responses, onI
     const { metadata, sections } = parsedData;
 
     // Obtener los textos según el idioma
-    const getMetadataValue = (key) => {
-        if (language === 'es') {
-            return metadata[key] || metadata[`${key}_es`] || '';
-        } else {
-            return metadata[`${key}_en`] || metadata[`${key}_english`] || metadata[key] || '';
-        }
-    };
-
     const studyTitle = language === 'es' ? metadata.titulo_estudio : metadata.study_title;
     const bibleReference = language === 'es' ? metadata.referencia_biblica : metadata.bible_reference;
     const bibleText = language === 'es' ? metadata.texto_biblico : metadata.bible_text;
@@ -301,37 +354,32 @@ export default function StudyRenderer({ content, language = 'es', responses, onI
             {/* Header estructurado */}
             {metadata && Object.keys(metadata).length > 0 && (
                 <div className="text-center mb-8 pb-6 border-b-2 border-gray-200">
-                    {/* 1. Guía de estudio bíblico */}
                     <p className="text-sm text-gray-500 uppercase tracking-wider mb-4">
                         {language === 'es' ? 'Guía de Estudio Bíblico' : 'Bible Study Guide'}
                     </p>
 
-                    {/* 2. Número de lección */}
                     {metadata.numero && (
                         <div className="text-blue-600 font-medium mb-3">
                             {language === 'es' ? 'Lección' : 'Lesson'} {metadata.numero}
                         </div>
                     )}
 
-                    {/* 3. Título del estudio */}
                     {studyTitle && (
                         <h1 className="text-2xl font-bold text-gray-900 mb-4">
                             {studyTitle}
                         </h1>
                     )}
 
-                    {/* 4. Referencia bíblica */}
                     {bibleReference && (
                         <p className="text-lg font-medium italic text-gray-800 mb-3">
                             {bibleReference}
                         </p>
                     )}
 
-                    {/* 5. Texto bíblico */}
                     {bibleText && (
                         <div className="bg-blue-50 rounded-lg px-6 py-4 inline-block max-w-3xl">
                             <p className="text-gray-700 italic">
-                                «{bibleText}»
+                                {processFormattedText(bibleText)}
                             </p>
                         </div>
                     )}
@@ -341,13 +389,8 @@ export default function StudyRenderer({ content, language = 'es', responses, onI
             {/* Secciones del estudio */}
             <div className="space-y-8">
                 {sections.map((section, idx) => {
-                    // Determinar si es sección de oración
-                    const isPrayerSection = section.id === 'prayer' ||
-                        section.title?.toUpperCase().includes('ORACIÓN') ||
-                        section.title?.toUpperCase().includes('PRAYER');
-
-                    // No mostrar título para secciones de oración
-                    if (isPrayerSection) {
+                    // Para secciones de oración (sin título de sección, solo contenido)
+                    if (section.isPrayer) {
                         return (
                             <div key={`section-${idx}`} className="section prayer-section mt-8 p-6 bg-gray-50 rounded-lg">
                                 <div className="section-content">
@@ -357,16 +400,29 @@ export default function StudyRenderer({ content, language = 'es', responses, onI
                         );
                     }
 
+                    // Para conclusión - FIX aquí
+                    if (section.isConclusion) {
+                        const conclusionTitle = language === 'es' ? 'CONCLUSIÓN' : 'CONCLUSION';
+                        return (
+                            <div key={`section-${idx}`} className="section conclusion-section">
+                                <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">
+                                    {section.title || conclusionTitle}
+                                </h2>
+                                <div className="section-content">
+                                    {renderProcessedContent(section.content)}
+                                </div>
+                            </div>
+                        );
+                    }
+
+                    // Para otras secciones normales
                     return (
                         <div key={`section-${idx}`} className="section">
-                            {/* Título de sección si existe */}
                             {section.title && (
                                 <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">
                                     {section.title}
                                 </h2>
                             )}
-
-                            {/* Contenido de la sección */}
                             <div className="section-content">
                                 {renderProcessedContent(section.content)}
                             </div>
