@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import StudyRenderer from '@/app/components/bible-studies/StudyRenderer';
+import StudyRenderer from '@/components/bible-studies/StudyRenderer';
 
 // Cliente público de Supabase
 const supabase = createClient(

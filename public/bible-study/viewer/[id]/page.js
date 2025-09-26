@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import StudyRenderer from '@/app/components/bible-studies/StudyRenderer';
+import StudyRenderer from '@/components/bible-studies/StudyRenderer';
 
 export default function PublicStudyViewer({ params }) {
     const [loading, setLoading] = useState(true);
