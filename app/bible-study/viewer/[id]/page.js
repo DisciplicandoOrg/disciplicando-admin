@@ -202,7 +202,7 @@ export default function BibleStudyViewer() {
         }
 
         const opt = {
-            margin: 1,
+            margin: [0.75, 0.75, 0.75, 0.75],
             filename: `estudio-biblico-leccion-${params.id}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
