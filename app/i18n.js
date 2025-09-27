@@ -539,7 +539,7 @@ const M = {
         study_complete: "Completo",
         study_external: "Externo",
         no_study: "Sin estudio",
-        create_study: "Crear Estudio",
+        create_study: "Crear/Editar Estudio",
         study_preview: "Vista Previa del Estudio",
 
     },
@@ -1079,7 +1079,7 @@ const M = {
         study_complete: "Complete",
         study_external: "External",
         no_study: "No study",
-        create_study: "Create Study",
+        create_study: "Create/Edit Study",
         study_preview: "Study Preview",
 
     },
