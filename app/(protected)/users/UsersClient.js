@@ -210,7 +210,7 @@ const UserProgressModal = ({ user, isOpen, onClose, supabase, t }) => {
 };
 
 // Modal de Edición de Usuario
-const EditUserModal = ({ user, isOpen, onClose, onSave, loading, t }) => {
+const EditUserModal = ({ user, isOpen, onClose, onSave, loading, t, normalizeRole }) => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -290,15 +290,17 @@ const EditUserModal = ({ user, isOpen, onClose, onSave, loading, t }) => {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             {t("role")}
                         </label>
+
                         <select
-                            value={formData.role}
+                            value={normalizeRole(formData.role)} // Normalizar el valor mostrado
                             onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                            <option value="disciple">{t("disciple")}</option>
-                            <option value="disciplicador">{t("discipler")}</option>
+                            <option value="discipulo">{t("disciple")}</option>
+                            <option value="discipulador">{t("discipler")}</option>
                             <option value="admin">{t("admin")}</option>
                         </select>
+
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4">
@@ -341,7 +343,7 @@ const Badge = ({ children, variant = "default" }) => {
 };
 
 // Tarjeta de Usuario
-function UserCard({ user, onEdit, onApprove, onReject, onViewProgress, onChangeRole, loading, t }) {
+function UserCard({ user, onEdit, onApprove, onReject, onViewProgress, onChangeRole, loading, t, normalizeRole }) {
     const [isOpen, setIsOpen] = useState(false);
     const isPending = !user.approved; // Cambio: usar approved en lugar de status
 
@@ -482,8 +484,9 @@ function UserCard({ user, onEdit, onApprove, onReject, onViewProgress, onChangeR
                         </button>
 
                         {user.role !== 'admin' && (
+
                             <select
-                                value={user.role || 'discipulo'}
+                                value={normalizeRole(user.role)} // Normalizar el valor mostrado
                                 onChange={(e) => onChangeRole(user, e.target.value)}
                                 disabled={loading}
                                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
@@ -492,6 +495,7 @@ function UserCard({ user, onEdit, onApprove, onReject, onViewProgress, onChangeR
                                 <option value="discipulador">{t("discipler")}</option>
                                 <option value="admin">{t("admin")}</option>
                             </select>
+
                         )}
                     </div>
                 </div>
@@ -566,16 +570,20 @@ function TreeView({ leaders, childrenMap, onEdit, onViewProgress, onApprove, onR
                                 ) : (
                                     <div className="p-4 space-y-2">
                                         {disciples.map((disciple) => (
+
                                             <UserCard
-                                                key={disciple.id}
-                                                user={disciple}
-                                                onEdit={onEdit}
-                                                onApprove={onApprove}
-                                                onReject={onReject}
-                                                onViewProgress={onViewProgress}
-                                                onChangeRole={onChangeRole}
-                                                loading={loading}
+                                                key={user.id}
+                                                user={user}
+                                                onEdit={handleEdit}
+                                                onApprove={handleApprove}
+                                                onReject={handleReject}
+                                                onViewProgress={handleViewProgress}
+                                                onChangeRole={handleChangeRole}
+                                                loading={actionLoading}
+                                                t={t}
+                                                normalizeRole={normalizeRole}  // Agregar esta línea
                                             />
+
                                         ))}
                                     </div>
                                 )}
@@ -600,6 +608,29 @@ export default function UsersClient() {
     const [showProgressModal, setShowProgressModal] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
+
+    // Función para normalizar roles antes de guardar en la base de datos
+    const normalizeRole = (role) => {
+        const roleLower = (role || "").toLowerCase();
+
+        // Si es alguna variante de admin
+        if (roleLower === 'admin' || roleLower === 'administrador') {
+            return 'admin';
+        }
+
+        // Si es alguna variante de disciplicador
+        if (roleLower === 'disciplicador' ||
+            roleLower === 'disciplicadora' ||
+            roleLower === 'discipulador' ||
+            roleLower === 'discipuladora' ||
+            roleLower === 'discipler' ||
+            roleLower === 'disciplyer') {
+            return 'discipulador';
+        }
+
+        // Por defecto es discípulo
+        return 'discipulo';
+    };
 
     useEffect(() => {
         let alive = true;
@@ -771,9 +802,13 @@ export default function UsersClient() {
 
     const handleChangeRole = async (user, newRole) => {
         setActionLoading(true);
+
+        // Normalizar el rol antes de guardar
+        const normalizedRole = normalizeRole(newRole);
+
         const { error } = await supabase
             .from("users")
-            .update({ role: newRole })
+            .update({ role: normalizedRole })
             .eq("id", user.id);
 
         if (error) {
@@ -790,9 +825,16 @@ export default function UsersClient() {
 
     const handleSaveEdit = async (formData) => {
         setActionLoading(true);
+
+        // Normalizar el rol antes de guardar
+        const dataToSave = {
+            ...formData,
+            role: normalizeRole(formData.role)
+        };
+
         const { error } = await supabase
             .from("users")
-            .update(formData)
+            .update(dataToSave)
             .eq("id", editingUser.id);
 
         if (error) {
@@ -801,6 +843,8 @@ export default function UsersClient() {
         } else {
             setShowEditModal(false);
             setEditingUser(null);
+            // Recargar usuarios para ver los cambios
+            window.location.reload();
         }
         setActionLoading(false);
     };
@@ -893,6 +937,7 @@ export default function UsersClient() {
                                 onChangeRole={handleChangeRole}
                                 loading={actionLoading}
                                 t={t}
+                                normalizeRole={normalizeRole}  // Agregar esta línea
                             />
 
                         ))}
@@ -911,6 +956,7 @@ export default function UsersClient() {
                 onSave={handleSaveEdit}
                 loading={actionLoading}
                 t={t}
+                normalizeRole={normalizeRole}  // Agregar esta línea
             />
 
             <UserProgressModal
