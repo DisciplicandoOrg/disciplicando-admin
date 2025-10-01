@@ -19,7 +19,8 @@
     "react-dom": "18.3.1",
     "react-native-share": "^12.2.0",
     "remark": "^15.0.1",
-    "remark-html": "^16.0.1"
+    "remark-html": "^16.0.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
