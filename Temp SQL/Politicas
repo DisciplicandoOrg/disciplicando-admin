@@ -1,0 +1,120 @@
+-- ============================================
+-- LIMPIAR POLÍTICAS ANTERIORES
+-- ============================================
+DROP POLICY IF EXISTS "admin_can_insert_users" ON public.users;
+DROP POLICY IF EXISTS "admin_can_update_users" ON public.users;
+DROP POLICY IF EXISTS "admin_can_select_users" ON public.users;
+DROP POLICY IF EXISTS "temp_admin_insert_users" ON public.users;
+DROP POLICY IF EXISTS "temp_admin_update_users" ON public.users;
+DROP POLICY IF EXISTS "temp_admin_select_users" ON public.users;
+DROP POLICY IF EXISTS "users_can_view_own_profile" ON public.users;
+DROP POLICY IF EXISTS "authenticated_admin_insert" ON public.users;
+DROP POLICY IF EXISTS "authenticated_admin_update" ON public.users;
+DROP POLICY IF EXISTS "authenticated_admin_select" ON public.users;
+
+-- ============================================
+-- POLÍTICAS DE INSERT (Crear usuarios)
+-- ============================================
+
+-- 1. Admins pueden crear cualquier usuario
+CREATE POLICY "admins_can_insert_users"
+ON public.users
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  (SELECT role FROM public.users WHERE uuid = auth.uid()) = 'admin'
+);
+
+-- 2. Disciplicadores pueden crear discípulos (para cuando implementes invitaciones)
+CREATE POLICY "disciplers_can_invite_disciples"
+ON public.users
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  (SELECT role FROM public.users WHERE uuid = auth.uid()) IN ('discipulador', 'discipler')
+  AND NEW.role IN ('discipulo', 'disciple')
+);
+
+-- 3. Permitir registro público mediante invitación (cuando tengas el sistema de tokens)
+-- Esta política la activaremos después cuando implementes el sistema de invitaciones
+-- Por ahora la dejamos comentada
+
+
+-- ============================================
+-- POLÍTICAS DE SELECT (Ver usuarios)
+-- ============================================
+
+-- 1. Admins pueden ver todos los usuarios
+CREATE POLICY "admins_can_view_all_users"
+ON public.users
+FOR SELECT
+TO authenticated
+USING (
+  (SELECT role FROM public.users WHERE uuid = auth.uid()) = 'admin'
+);
+
+-- 2. Disciplicadores pueden ver sus discípulos
+CREATE POLICY "disciplers_can_view_their_disciples"
+ON public.users
+FOR SELECT
+TO authenticated
+USING (
+  (SELECT role FROM public.users WHERE uuid = auth.uid()) IN ('discipulador', 'discipler')
+  AND (
+    discipler_id = (SELECT id FROM public.users WHERE uuid = auth.uid())
+    OR uuid = auth.uid()  -- También pueden ver su propio perfil
+  )
+);
+
+-- 3. Todos pueden ver su propio perfil
+CREATE POLICY "users_can_view_own_profile"
+ON public.users
+FOR SELECT
+TO authenticated
+USING (uuid = auth.uid());
+
+
+-- ============================================
+-- POLÍTICAS DE UPDATE (Actualizar usuarios)
+-- ============================================
+
+-- 1. Admins pueden actualizar cualquier usuario
+CREATE POLICY "admins_can_update_any_user"
+ON public.users
+FOR UPDATE
+TO authenticated
+USING (
+  (SELECT role FROM public.users WHERE uuid = auth.uid()) = 'admin'
+);
+
+-- 2. Disciplicadores pueden actualizar sus discípulos
+CREATE POLICY "disciplers_can_update_their_disciples"
+ON public.users
+FOR UPDATE
+TO authenticated
+USING (
+  (SELECT role FROM public.users WHERE uuid = auth.uid()) IN ('discipulador', 'discipler')
+  AND discipler_id = (SELECT id FROM public.users WHERE uuid = auth.uid())
+);
+
+-- 3. Todos pueden actualizar su propio perfil
+CREATE POLICY "users_can_update_own_profile"
+ON public.users
+FOR UPDATE
+TO authenticated
+USING (uuid = auth.uid())
+WITH CHECK (uuid = auth.uid());
+
+
+-- ============================================
+-- POLÍTICAS DE DELETE (Eliminar usuarios)
+-- ============================================
+
+-- Solo admins pueden eliminar (soft delete realmente)
+CREATE POLICY "admins_can_delete_users"
+ON public.users
+FOR DELETE
+TO authenticated
+USING (
+  (SELECT role FROM public.users WHERE uuid = auth.uid()) = 'admin'
+);

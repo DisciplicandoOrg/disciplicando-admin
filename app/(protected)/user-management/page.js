@@ -139,7 +139,8 @@ export default function UserManagementPage() {
         gender: "",
         discipler_id: "",
         validated_lessons: [],
-        notes: ""
+        notes: "",
+        approved: true
     });
 
     const [validation, setValidation] = useState({
@@ -918,6 +919,29 @@ export default function UserManagementPage() {
                         rows={3}
                     />
                 </div>
+
+                {/* Estado del Usuario */}
+                <Card className="p-4 bg-gray-50 border-gray-200">
+                    <h4 className="font-medium mb-3 flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4" />
+                        Estado del Usuario
+                    </h4>
+                    <label className="flex items-center gap-3">
+                        <input
+                            type="checkbox"
+                            checked={newUser.approved !== false}
+                            onChange={(e) => setNewUser({ ...newUser, approved: e.target.checked })}
+                            className="rounded"
+                        />
+                        <div>
+                            <div className="text-sm font-medium">Usuario Activo</div>
+                            <div className="text-xs text-gray-500 mt-1">
+                                Desmarca solo si necesitas desactivar al usuario temporalmente
+                            </div>
+                        </div>
+                    </label>
+                </Card>
+
 
                 {/* Método de Invitación */}
                 <Card className="p-4 bg-blue-50 border-blue-200">
