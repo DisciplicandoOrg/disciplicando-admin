@@ -14,7 +14,8 @@ import {
     FileText,
     Download,
     Eye,
-    EyeOff
+    EyeOff,
+    Layers
 } from "lucide-react";
 
 export default function BibleGuidesPage() {
@@ -33,6 +34,7 @@ export default function BibleGuidesPage() {
         descripcion: "",
         fecha_publicacion: "",
         texto_biblico: "",
+        serie: "",
         temas: "",
         idioma: "es",
         pdf_file: null,
@@ -140,6 +142,7 @@ export default function BibleGuidesPage() {
                 descripcion: formData.descripcion.trim(),
                 fecha_publicacion: formData.fecha_publicacion,
                 texto_biblico: formData.texto_biblico.trim(),
+                serie: formData.serie.trim() || null,
                 temas: temasArray,
                 idioma: formData.idioma,
                 pdf_url: pdfUrl,
@@ -185,6 +188,7 @@ export default function BibleGuidesPage() {
             descripcion: guide.descripcion || "",
             fecha_publicacion: guide.fecha_publicacion,
             texto_biblico: guide.texto_biblico,
+            serie: guide.serie || "",
             temas: guide.temas?.join(", ") || "",
             idioma: guide.idioma || "es",
             pdf_file: null,
@@ -243,6 +247,7 @@ export default function BibleGuidesPage() {
             descripcion: "",
             fecha_publicacion: "",
             texto_biblico: "",
+            serie: "",
             temas: "",
             idioma: "es",
             pdf_file: null,
@@ -255,6 +260,14 @@ export default function BibleGuidesPage() {
         resetForm();
         setShowForm(false);
     };
+
+    // Obtener lista única de series para mostrar
+    const uniqueSeries = useMemo(() => {
+        const series = guides
+            .filter(g => g.serie)
+            .map(g => g.serie);
+        return [...new Set(series)].sort();
+    }, [guides]);
 
     if (loading) {
         return (
@@ -283,6 +296,25 @@ export default function BibleGuidesPage() {
                     {t("new_guide")}
                 </button>
             </div>
+
+            {/* Información de series existentes */}
+            {uniqueSeries.length > 0 && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                        <Layers className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                            <h3 className="font-semibold text-blue-900 mb-1">Series existentes:</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {uniqueSeries.map((serie, idx) => (
+                                    <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full font-medium">
+                                        {serie}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Formulario */}
             {showForm && (
@@ -337,6 +369,32 @@ export default function BibleGuidesPage() {
                                     placeholder="Ej: Juan 3:16-21"
                                     required
                                 />
+                            </div>
+
+                            {/* Serie */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Serie
+                                </label>
+                                <input
+                                    type="text"
+                                    name="serie"
+                                    value={formData.serie}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="Ej: Estudio Cronológico de la Biblia 2025"
+                                    list="series-list"
+                                />
+                                {uniqueSeries.length > 0 && (
+                                    <datalist id="series-list">
+                                        {uniqueSeries.map((serie, idx) => (
+                                            <option key={idx} value={serie} />
+                                        ))}
+                                    </datalist>
+                                )}
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Escribe el nombre de la serie o selecciona una existente
+                                </p>
                             </div>
 
                             {/* Idioma */}
@@ -493,7 +551,13 @@ export default function BibleGuidesPage() {
                                                         <span className="w-2 h-2 bg-gray-400 rounded-full flex-shrink-0" title="Inactiva"></span>
                                                     )}
                                                 </div>
-                                                <div className="flex items-center gap-4 text-sm text-gray-600">
+                                                <div className="flex items-center gap-4 text-sm text-gray-600 flex-wrap">
+                                                    {guide.serie && (
+                                                        <span className="flex items-center gap-1">
+                                                            <Layers className="w-3.5 h-3.5" />
+                                                            <span className="font-medium">{guide.serie}</span>
+                                                        </span>
+                                                    )}
                                                     <span className="flex items-center gap-1">
                                                         <BookOpen className="w-3.5 h-3.5" />
                                                         {guide.texto_biblico}
@@ -602,6 +666,12 @@ export default function BibleGuidesPage() {
                                                             {guide.idioma === 'es' ? '🇪🇸 Español' : '🇺🇸 English'}
                                                         </p>
                                                     </div>
+                                                    {guide.serie && (
+                                                        <div>
+                                                            <span className="font-semibold text-gray-700">Serie:</span>
+                                                            <p className="text-gray-600">{guide.serie}</p>
+                                                        </div>
+                                                    )}
                                                     <div>
                                                         <span className="font-semibold text-gray-700">Texto bíblico:</span>
                                                         <p className="text-gray-600">{guide.texto_biblico}</p>

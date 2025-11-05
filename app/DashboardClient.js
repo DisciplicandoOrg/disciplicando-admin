@@ -9,7 +9,7 @@ import {
     ArrowRight, Check, X, AlertCircle, Loader2,
     User, Mail, Phone, Calendar, Shield, BookOpen,
     TreePine, UserPlus, BarChart3, BookOpenText,
-    RefreshCw, LogOut, CheckCircle, Star, Clock, Shuffle, HelpCircle
+    RefreshCw, LogOut, CheckCircle, Star, Clock, Shuffle, HelpCircle, BookMarked
 } from "lucide-react";
 
 const MetricCard = ({ title, value, subtitle, icon: Icon, color = "blue", loading = false }) => (
@@ -392,6 +392,21 @@ export default function DashboardClient() {
                             <div>
                                 <p className="font-semibold text-gray-900">{t("quizzes") || "Quizzes"}</p>
                                 <p className="text-sm text-gray-600">{t("manageQuizzes") || "Gestionar evaluaciones"}</p>
+                            </div>
+                        </a>
+
+
+                        {/* Boton de Guías De Estudio*/}
+                        <a
+                            href="/bible-guides"
+                            className="group flex items-center gap-4 p-6 border-2 border-gray-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-all duration-200 hover:shadow-md"
+                        >
+                            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                                <BookMarked className="w-6 h-6 text-purple-600" />
+                            </div>
+                            <div>
+                                <p className="font-semibold text-gray-900">{t("bible_guides")}</p>
+                                <p className="text-sm text-gray-600">{t("bible_guides_dashboard")}</p>
                             </div>
                         </a>
 

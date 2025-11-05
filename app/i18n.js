@@ -290,6 +290,12 @@ const M = {
         guide_updated: "Guía actualizada exitosamente",
         loading_guides: "Cargando guías...",
 
+        series: "Series",
+        bible_guides: "Guías de Estudio",
+        bible_guides_subtitle: "Gestiona las guías para discipuladores",
+        bible_guides_dashboard: "Material bíblico",
+        reports: "Reportes",
+
         // Página de Reportes - COMPLETO
         reports: "Reportes",
         reports_subtitle: "Análisis y métricas del discipulado",
@@ -857,6 +863,12 @@ const M = {
         guide_created: "Guide created successfully",
         guide_updated: "Guide updated successfully",
         loading_guides: "Loading guides...",
+
+        series: "Series",
+        bible_guides: "Study Guides",
+        bible_guides_subtitle: "Manage guides for disciplers",
+        bible_guides_dashboard: "Biblical material",
+        reports: "Reports",
 
         // Reports Page - COMPLETE
         reports: "Reports",
