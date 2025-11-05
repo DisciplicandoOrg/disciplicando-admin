@@ -562,14 +562,16 @@ export default function BibleGuidesPage() {
                                                         <BookOpen className="w-3.5 h-3.5" />
                                                         {guide.texto_biblico}
                                                     </span>
+
                                                     <span className="flex items-center gap-1">
                                                         <Calendar className="w-3.5 h-3.5" />
-                                                        {new Date(guide.fecha_publicacion).toLocaleDateString('es-ES', {
+                                                        {new Date(guide.fecha_publicacion + 'T12:00:00').toLocaleDateString('es-ES', {
                                                             day: 'numeric',
                                                             month: 'short',
                                                             year: 'numeric'
                                                         })}
                                                     </span>
+
                                                 </div>
                                             </div>
 
@@ -650,16 +652,18 @@ export default function BibleGuidesPage() {
 
                                                 {/* Información completa */}
                                                 <div className="grid grid-cols-2 gap-4 text-sm">
+
                                                     <div>
                                                         <span className="font-semibold text-gray-700">Fecha de publicación:</span>
                                                         <p className="text-gray-600">
-                                                            {new Date(guide.fecha_publicacion).toLocaleDateString('es-ES', {
+                                                            {new Date(guide.fecha_publicacion + 'T12:00:00').toLocaleDateString('es-ES', {
                                                                 year: 'numeric',
                                                                 month: 'long',
                                                                 day: 'numeric'
                                                             })}
                                                         </p>
                                                     </div>
+
                                                     <div>
                                                         <span className="font-semibold text-gray-700">Idioma:</span>
                                                         <p className="text-gray-600">
