@@ -1,13 +1,17 @@
-# 🎯 Disciplicando Admin
+# 🎯 Disciplicando Admin / Disciplicando Admin
 
-**Panel de administración completo para la plataforma Disciplicando**
+**Panel de administración completo para la plataforma Disciplicando**  
+**Complete administration panel for the Disciplicando platform**
 
 Un sistema integral de gestión diseñado para administrar todos los aspectos de la plataforma de discipulado cristiano, desde la gestión de usuarios hasta la creación de contenido bíblico interactivo.
 
+A comprehensive management system designed to administer all aspects of the Christian discipleship platform, from user management to interactive biblical content creation.
+
 ---
 
-## 📖 Tabla de Contenidos
+## 📖 Tabla de Contenidos / Table of Contents
 
+### Español
 - [Descripción General](#-descripción-general)
 - [Características Principales](#-características-principales)
 - [Arquitectura y Flujo](#-arquitectura-y-flujo)
@@ -19,9 +23,23 @@ Un sistema integral de gestión diseñado para administrar todos los aspectos de
 - [Tecnologías Utilizadas](#-tecnologías-utilizadas)
 - [Contribución](#-contribución)
 
+### English
+- [General Description](#-general-description)
+- [Main Features](#-main-features)
+- [Architecture and Flow](#-architecture-and-flow)
+- [Project Structure](#-project-structure)
+- [Installation Guide](#-installation-guide)
+- [Modules and Functionalities](#-modules-and-functionalities)
+- [Authentication and Security](#-authentication-and-security)
+- [Deployment](#-deployment-1)
+- [Technologies Used](#-technologies-used)
+- [Contribution](#-contribution)
+
 ---
 
-## 🎯 Descripción General
+## 🎯 Descripción General / General Description
+
+### 🇪🇸 Español
 
 **Disciplicando Admin** es el panel de control central que permite a los administradores gestionar completamente la plataforma Disciplicando. Este sistema proporciona herramientas poderosas para:
 
@@ -34,20 +52,44 @@ Un sistema integral de gestión diseñado para administrar todos los aspectos de
 
 La aplicación está construida con **Next.js 15** y utiliza **Supabase** como backend, proporcionando una experiencia de administración moderna, segura y eficiente.
 
+### 🇺🇸 English
+
+**Disciplicando Admin** is the central control panel that allows administrators to completely manage the Disciplicando platform. This system provides powerful tools for:
+
+- **Managing users** and their discipleship relationships
+- **Creating and editing interactive biblical content**
+- **Assigning studies** to specific users
+- **Monitoring the progress** of disciples
+- **Generating reports** and statistics
+- **Configuring the entire system**
+
+The application is built with **Next.js 15** and uses **Supabase** as the backend, providing a modern, secure, and efficient administration experience.
+
 ---
 
-## 🚀 Características Principales
+## 🚀 Características Principales / Main Features
 
-### 📊 Dashboard Dinámico
+### 📊 Dashboard Dinámico / Dynamic Dashboard
+
+#### 🇪🇸 Español
 - **Vista general del sistema** con métricas en tiempo real
 - Estadísticas de usuarios (total, discipuladores, discípulos, aprobados, pendientes)
 - Accesos rápidos a todas las secciones principales
 - Actualización automática de datos
 - Interfaz responsive y moderna
 
-### 👥 Gestión de Usuarios
+#### 🇺🇸 English
+- **System overview** with real-time metrics
+- User statistics (total, disciplers, disciples, approved, pending)
+- Quick access to all main sections
+- Automatic data updates
+- Responsive and modern interface
 
-#### Vista de Usuarios (`/users`)
+### 👥 Gestión de Usuarios / User Management
+
+#### Vista de Usuarios / Users View (`/users`)
+
+##### 🇪🇸 Español
 - Lista completa de todos los usuarios del sistema
 - Filtros avanzados por rol, estado de aprobación, y más
 - Búsqueda en tiempo real
@@ -58,7 +100,20 @@ La aplicación está construida con **Next.js 15** y utiliza **Supabase** como b
   - Puntuaciones de quizzes
   - Videos vistos
 
-#### Agregar y Validar Usuarios (`/user-management`)
+##### 🇺🇸 English
+- Complete list of all system users
+- Advanced filters by role, approval status, and more
+- Real-time search
+- Detailed progress visualization for each user
+- Progress modal with complete statistics:
+  - Completed lessons
+  - Completed series
+  - Quiz scores
+  - Videos watched
+
+#### Agregar y Validar Usuarios / Add and Validate Users (`/user-management`)
+
+##### 🇪🇸 Español
 - **Agregar nuevos usuarios** manualmente al sistema
 - **Validar usuarios pendientes** de aprobación
 - Asignar roles (admin, discipulador, discípulo)
@@ -67,7 +122,18 @@ La aplicación está construida con **Next.js 15** y utiliza **Supabase** como b
 - Generar tokens de invitación para nuevos usuarios
 - Gestión completa de perfiles de usuario
 
-### 🌳 Árbol de Discipulado (`/discipleship-tree`)
+##### 🇺🇸 English
+- **Add new users** manually to the system
+- **Validate pending users** awaiting approval
+- Assign roles (admin, discipler, disciple)
+- Establish discipleship relationships (assign discipler)
+- Validate lessons completed by users
+- Generate invitation tokens for new users
+- Complete user profile management
+
+### 🌳 Árbol de Discipulado / Discipleship Tree (`/discipleship-tree`)
+
+#### 🇪🇸 Español
 - **Visualización jerárquica** de todas las relaciones de discipulado
 - Vista expandible/colapsable del árbol completo
 - Indicadores de progreso por usuario
@@ -77,22 +143,51 @@ La aplicación está construida con **Next.js 15** y utiliza **Supabase** como b
   - Progreso de lecciones por usuario
   - Roles y estados de cada miembro
 
-### 🔄 Reasignación de Discípulos (`/assignments/reassign`)
+#### 🇺🇸 English
+- **Hierarchical visualization** of all discipleship relationships
+- Expandable/collapsible view of the complete tree
+- Progress indicators per user
+- Intuitive navigation with zoom and controls
+- Displays:
+  - Complete structure of disciplers and disciples
+  - Lesson progress per user
+  - Roles and status of each member
+
+### 🔄 Reasignación de Discípulos / Reassign Disciples (`/assignments/reassign`)
+
+#### 🇪🇸 Español
 - **Sistema drag-and-drop** para mover discípulos entre discipuladores
 - Interfaz visual intuitiva
 - Validación antes de confirmar cambios
 - Actualización en tiempo real de las relaciones
 
-### 📚 Gestión de Contenido
+#### 🇺🇸 English
+- **Drag-and-drop system** to move disciples between disciplers
+- Intuitive visual interface
+- Validation before confirming changes
+- Real-time relationship updates
+
+### 📚 Gestión de Contenido / Content Management
 
 #### Series (`/series`)
+
+##### 🇪🇸 Español
 - Crear y editar series de estudios bíblicos
 - Organización jerárquica: Series → Bloques → Lecciones
 - Soporte multi-idioma (Español/Inglés)
 - Activar/desactivar series
 - Ordenamiento personalizado
 
-#### Estudios Bíblicos (`/bible-studies`)
+##### 🇺🇸 English
+- Create and edit biblical study series
+- Hierarchical organization: Series → Blocks → Lessons
+- Multi-language support (Spanish/English)
+- Activate/deactivate series
+- Custom ordering
+
+#### Estudios Bíblicos / Bible Studies (`/bible-studies`)
+
+##### 🇪🇸 Español
 - **Editor completo de estudios bíblicos** interactivos
 - Formato Markdown con soporte para:
   - Secciones dinámicas
@@ -104,7 +199,21 @@ La aplicación está construida con **Next.js 15** y utiliza **Supabase** como b
 - Validación de contenido
 - Gestión de metadatos (título, referencia bíblica, etc.)
 
-#### Guías Bíblicas (`/bible-guides`)
+##### 🇺🇸 English
+- **Complete editor for interactive biblical studies**
+- Markdown format with support for:
+  - Dynamic sections
+  - Biblical texts
+  - Reflection questions
+  - Textareas for user responses
+  - Multi-language content
+- Real-time preview
+- Content validation
+- Metadata management (title, biblical reference, etc.)
+
+#### Guías Bíblicas / Bible Guides (`/bible-guides`)
+
+##### 🇪🇸 Español
 - Administración de guías en formato PDF
 - Subida y gestión de archivos PDF
 - Organización por series y temas
@@ -117,57 +226,124 @@ La aplicación está construida con **Next.js 15** y utiliza **Supabase** como b
 - Activar/desactivar guías
 - Descarga directa de PDFs
 
+##### 🇺🇸 English
+- PDF guide management
+- PDF file upload and management
+- Organization by series and topics
+- Complete metadata:
+  - Title and description
+  - Publication date
+  - Related biblical text
+  - Topics and tags
+  - Language
+- Activate/deactivate guides
+- Direct PDF downloads
+
 #### Quizzes (`/quizzes`)
+
+##### 🇪🇸 Español
 - Gestión de evaluaciones y quizzes
 - Asociación con lecciones
 - Control de puntuaciones
 
-### 📈 Reportes (`/reports`)
+##### 🇺🇸 English
+- Quiz and assessment management
+- Association with lessons
+- Score control
+
+### 📈 Reportes / Reports (`/reports`)
+
+#### 🇪🇸 Español
 - Generación de reportes del sistema
 - Estadísticas y análisis
 - Exportación de datos
 - Visualización tabular de información
 
-### ⚙️ Configuración (`/settings`)
+#### 🇺🇸 English
+- System report generation
+- Statistics and analysis
+- Data export
+- Tabular information visualization
+
+### ⚙️ Configuración / Settings (`/settings`)
+
+#### 🇪🇸 Español
 Panel completo de configuración con múltiples secciones:
 
-#### General
+**General**
 - Nombre de la aplicación
 - Zona horaria
 - Idioma por defecto
 
-#### Seguridad
+**Seguridad**
 - Políticas de contraseñas
 - Autenticación de dos factores
 - Timeout de sesión
 - Longitud mínima de contraseña
 
-#### Sesión
+**Sesión**
 - Tiempo de inactividad
 - Tiempo máximo de sesión
 - Tiempo de advertencia
 
-#### Base de Datos
+**Base de Datos**
 - Respaldos automáticos
 - Frecuencia de respaldos
 - Días de retención
 
-#### Notificaciones
+**Notificaciones**
 - Email (SendGrid)
 - SMS (Twilio)
 - WhatsApp (Twilio)
 - Push notifications
 
-#### Apariencia
+**Apariencia**
 - Color primario
 - Modo oscuro
 - Logo personalizado
 
+#### 🇺🇸 English
+Complete configuration panel with multiple sections:
+
+**General**
+- Application name
+- Timezone
+- Default language
+
+**Security**
+- Password policies
+- Two-factor authentication
+- Session timeout
+- Minimum password length
+
+**Session**
+- Inactivity time
+- Maximum session time
+- Warning time
+
+**Database**
+- Automatic backups
+- Backup frequency
+- Retention days
+
+**Notifications**
+- Email (SendGrid)
+- SMS (Twilio)
+- WhatsApp (Twilio)
+- Push notifications
+
+**Appearance**
+- Primary color
+- Dark mode
+- Custom logo
+
 ---
 
-## 🏗️ Arquitectura y Flujo
+## 🏗️ Arquitectura y Flujo / Architecture and Flow
 
-### Flujo de Autenticación
+### Flujo de Autenticación / Authentication Flow
+
+#### 🇪🇸 Español
 
 ```
 1. Usuario accede a la aplicación
@@ -187,7 +363,29 @@ Panel completo de configuración con múltiples secciones:
 5. Renderiza el componente protegido con AdminLayoutClient
 ```
 
-### Estructura de Clientes
+#### 🇺🇸 English
+
+```
+1. User accesses the application
+   ↓
+2. Middleware checks if route is public or protected
+   ↓
+3. If protected:
+   - Checks for active session (cookies)
+   - If no session → Redirects to /login
+   - If session exists → Verifies admin permissions
+   ↓
+4. Admin Verification:
+   - Calls RPC function 'me_is_admin()' in Supabase
+   - If not admin → Redirects to /403
+   - If admin → Allows access
+   ↓
+5. Renders protected component with AdminLayoutClient
+```
+
+### Estructura de Clientes / Client Structure
+
+#### 🇪🇸 Español
 
 La aplicación utiliza dos tipos de clientes de Supabase:
 
@@ -201,7 +399,23 @@ La aplicación utiliza dos tipos de clientes de Supabase:
    - Maneja cookies del request
    - Compatible con Next.js 15 (usa `await cookies()`)
 
-### Middleware de Protección
+#### 🇺🇸 English
+
+The application uses two types of Supabase clients:
+
+1. **Browser Client** (`supabaseClient.js`)
+   - For Client Components
+   - Singleton pattern for reuse
+   - Uses `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+2. **Server Client** (`supabaseServer.js`)
+   - For Server Components and API Routes
+   - Handles request cookies
+   - Compatible with Next.js 15 (uses `await cookies()`)
+
+### Middleware de Protección / Protection Middleware
+
+#### 🇪🇸 Español
 
 El middleware (`middleware.js`) protege todas las rutas excepto:
 - `/login` - Página de inicio de sesión
@@ -210,135 +424,142 @@ El middleware (`middleware.js`) protege todas las rutas excepto:
 - `/api/public/*` - APIs públicas
 - `/study/*` - Viewer público de estudios
 
-### Layout y Navegación
+#### 🇺🇸 English
 
-```
-RootLayout (app/layout.js)
-  └── ProtectedLayout (app/(protected)/layout.js)
-       └── AdminLayoutClient
-            ├── Sidebar (navegación principal)
-            ├── Header (con selector de idioma)
-            └── Children (contenido de la página)
-```
+The middleware (`middleware.js`) protects all routes except:
+- `/login` - Login page
+- `/403` - Access denied page
+- `/public/*` - Public routes
+- `/api/public/*` - Public APIs
+- `/study/*` - Public study viewer
 
 ---
 
-## 📁 Estructura del Proyecto
+## 📁 Estructura del Proyecto / Project Structure
 
 ```
 disciplicando-admin/
-├── app/                          # Aplicación Next.js 15 (App Router)
-│   ├── (protected)/              # Grupo de rutas protegidas
-│   │   ├── assignments/          # Asignaciones
-│   │   │   ├── page.js           # Lista de asignaciones
-│   │   │   └── reassign/          # Reasignación de discípulos
+├── app/                          # Next.js 15 Application (App Router)
+│   ├── (protected)/              # Protected route group
+│   │   ├── assignments/          # Assignments
+│   │   │   ├── page.js           # Assignment list
+│   │   │   └── reassign/         # Reassign disciples
 │   │   │       └── ReassignClient.js
-│   │   ├── bible-guides/         # Gestión de guías PDF
+│   │   ├── bible-guides/         # PDF guide management
 │   │   │   └── page.js
-│   │   ├── bible-studies/        # Estudios bíblicos
-│   │   │   ├── page.js           # Lista de estudios
-│   │   │   ├── StudyEditor.js    # Editor de estudios
-│   │   │   └── editor/[id]/      # Editor por ID
-│   │   ├── dashboard/            # Dashboard principal
+│   │   ├── bible-studies/         # Bible studies
+│   │   │   ├── page.js           # Study list
+│   │   │   ├── StudyEditor.js    # Study editor
+│   │   │   └── editor/[id]/     # Editor by ID
+│   │   ├── dashboard/            # Main dashboard
 │   │   │   └── page.js
-│   │   ├── discipleship-tree/   # Árbol de discipulado
+│   │   ├── discipleship-tree/   # Discipleship tree
 │   │   │   ├── page.js
 │   │   │   └── DiscipleshipTree.js
-│   │   ├── quizzes/              # Gestión de quizzes
+│   │   ├── quizzes/              # Quiz management
 │   │   │   └── page.js
-│   │   ├── reports/              # Reportes
+│   │   ├── reports/              # Reports
 │   │   │   ├── page.js
 │   │   │   └── ReportsClient.jsx
-│   │   ├── series/               # Gestión de series
+│   │   ├── series/              # Series management
 │   │   │   └── page.js
-│   │   ├── settings/             # Configuración
+│   │   ├── settings/            # Settings
 │   │   │   └── page.js
-│   │   ├── user-management/      # Agregar/Validar usuarios
+│   │   ├── user-management/     # Add/Validate users
 │   │   │   └── page.js
-│   │   ├── users/                # Vista de usuarios
+│   │   ├── users/               # User view
 │   │   │   ├── page.js
 │   │   │   ├── UsersClient.js
 │   │   │   └── userProgressModal.js
-│   │   ├── layout.js             # Layout de rutas protegidas
-│   │   └── page.js               # Redirección al dashboard
-│   ├── api/                      # API Routes
-│   │   ├── bible-study/          # APIs de estudios bíblicos
-│   │   ├── import-studies/       # Importar estudios
-│   │   ├── public/               # APIs públicas
-│   │   └── viewer/               # Viewer de estudios
-│   ├── bible-study/              # Viewer público de estudios
+│   │   ├── layout.js            # Protected routes layout
+│   │   └── page.js             # Redirect to dashboard
+│   ├── api/                     # API Routes
+│   │   ├── bible-study/         # Bible study APIs
+│   │   ├── import-studies/      # Import studies
+│   │   ├── public/              # Public APIs
+│   │   └── viewer/              # Study viewer
+│   ├── bible-study/             # Public study viewer
 │   │   └── viewer/[id]/
-│   ├── login/                    # Página de login
+│   ├── login/                   # Login page
 │   │   └── page.js
-│   ├── 403/                      # Página de acceso denegado
+│   ├── 403/                     # Access denied page
 │   │   └── page.js
-│   ├── reset-password/           # Reset de contraseña
+│   ├── reset-password/          # Password reset
 │   │   └── page.js
-│   ├── AdminLayoutClient.jsx    # Layout principal del admin
-│   ├── DashboardClient.js        # Cliente del dashboard
-│   ├── i18n.js                   # Sistema de internacionalización
-│   ├── layout.js                 # Root layout
-│   └── page.js                   # Página raíz (redirige a /dashboard)
+│   ├── AdminLayoutClient.jsx    # Main admin layout
+│   ├── DashboardClient.js       # Dashboard client
+│   ├── i18n.js                  # Internationalization system
+│   ├── layout.js                # Root layout
+│   └── page.js                  # Root page (redirects to /dashboard)
 │
-├── components/                    # Componentes reutilizables
+├── components/                   # Reusable components
 │   └── BibleStudy/
-│       └── StudyRenderer.js      # Renderizador de estudios
+│       └── StudyRenderer.js     # Study renderer
 │
-├── lib/                          # Utilidades y helpers
-│   ├── supabaseClient.js         # Cliente Supabase (navegador)
-│   ├── supabaseServer.js         # Cliente Supabase (servidor)
-│   ├── supabaseServerAuth.js     # Cliente Supabase (auth)
-│   ├── bibleStudies.js           # Utilidades de estudios
-│   └── version.js                 # Control de versiones
+├── lib/                         # Utilities and helpers
+│   ├── supabaseClient.js        # Supabase client (browser)
+│   ├── supabaseServer.js        # Supabase client (server)
+│   ├── supabaseServerAuth.js    # Supabase client (auth)
+│   ├── bibleStudies.js          # Study utilities
+│   └── version.js               # Version control
 │
-├── content/                      # Contenido estático
-│   └── bible-studies/            # Estudios en Markdown
+├── content/                     # Static content
+│   └── bible-studies/          # Studies in Markdown
 │
-├── public/                       # Archivos estáticos
+├── public/                      # Static files
 │   ├── logo-admin.png
 │   └── ...
 │
-├── middleware.js                 # Middleware de autenticación
-├── next.config.mjs              # Configuración de Next.js
-├── tailwind.config.js            # Configuración de Tailwind
-├── package.json                  # Dependencias
-├── .env.example                  # Ejemplo de variables de entorno
-├── .gitignore                    # Archivos ignorados por Git
-├── README.md                     # Este archivo
-└── SECURITY.md                   # Documentación de seguridad
+├── middleware.js                # Authentication middleware
+├── next.config.mjs             # Next.js configuration
+├── tailwind.config.js           # Tailwind configuration
+├── package.json                 # Dependencies
+├── .env.example                 # Environment variables example
+├── .gitignore                   # Git ignored files
+├── README.md                    # This file
+└── SECURITY.md                  # Security documentation
 ```
 
 ---
 
-## 🔧 Guía de Instalación
+## 🔧 Guía de Instalación / Installation Guide
 
-### Requisitos Previos
+### Requisitos Previos / Prerequisites
 
+#### 🇪🇸 Español
 - **Node.js** 18 o superior
 - **npm**, **yarn**, **pnpm** o **bun**
 - Cuenta de **Supabase** con proyecto configurado
 - Acceso de **administrador** a la base de datos
 - Las políticas **RLS (Row Level Security)** configuradas en Supabase
 
-### Paso 1: Clonar el Repositorio
+#### 🇺🇸 English
+- **Node.js** 18 or higher
+- **npm**, **yarn**, **pnpm** or **bun**
+- **Supabase** account with configured project
+- **Administrator** access to the database
+- **RLS (Row Level Security)** policies configured in Supabase
+
+### Paso 1: Clonar el Repositorio / Step 1: Clone Repository
 
 ```bash
 git clone https://github.com/DisciplicandoOrg/disciplicando-admin.git
 cd disciplicando-admin
 ```
 
-### Paso 2: Instalar Dependencias
+### Paso 2: Instalar Dependencias / Step 2: Install Dependencies
 
 ```bash
 npm install
-# o
+# or
 yarn install
-# o
+# or
 pnpm install
 ```
 
-### Paso 3: Configurar Variables de Entorno
+### Paso 3: Configurar Variables de Entorno / Step 3: Configure Environment Variables
 
+#### 🇪🇸 Español
 Crea un archivo `.env.local` en la raíz del proyecto:
 
 ```env
@@ -351,30 +572,56 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key_aqui
 - `NEXT_PUBLIC_SUPABASE_URL`: Project URL
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: anon/public key
 
-### Paso 4: Ejecutar en Desarrollo
+#### 🇺🇸 English
+Create a `.env.local` file in the project root:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
+```
+
+**Get these values from:**
+- Supabase Dashboard → Settings → API
+- `NEXT_PUBLIC_SUPABASE_URL`: Project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: anon/public key
+
+### Paso 4: Ejecutar en Desarrollo / Step 4: Run in Development
 
 ```bash
 npm run dev
-# o
+# or
 yarn dev
-# o
+# or
 pnpm dev
 ```
 
+#### 🇪🇸 Español
 La aplicación estará disponible en [http://localhost:3000](http://localhost:3000)
 
-### Paso 5: Iniciar Sesión
+#### 🇺🇸 English
+The application will be available at [http://localhost:3000](http://localhost:3000)
 
+### Paso 5: Iniciar Sesión / Step 5: Login
+
+#### 🇪🇸 Español
 1. Accede a `/login`
 2. Ingresa las credenciales de un usuario con rol `admin`
 3. El sistema verificará automáticamente los permisos
 4. Serás redirigido al dashboard
 
+#### 🇺🇸 English
+1. Navigate to `/login`
+2. Enter credentials for a user with `admin` role
+3. The system will automatically verify permissions
+4. You will be redirected to the dashboard
+
 ---
 
-## 📚 Módulos y Funcionalidades Detalladas
+## 📚 Módulos y Funcionalidades Detalladas / Detailed Modules and Functionalities
 
 ### 1. Dashboard (`/dashboard`)
+
+#### 🇪🇸 Español
 
 **Propósito**: Vista general del sistema con métricas clave.
 
@@ -392,11 +639,29 @@ La aplicación estará disponible en [http://localhost:3000](http://localhost:30
 - **Actualización manual** de datos
 - **Información del usuario** actual
 
-### 2. Gestión de Usuarios
+#### 🇺🇸 English
 
-#### Vista de Usuarios (`/users`)
+**Purpose**: System overview with key metrics.
 
-**Funcionalidades**:
+**Features**:
+- **Main metrics**:
+  - Total users
+  - Active disciplers
+  - Disciples in training
+  - Approved vs pending users
+- **System status**:
+  - Registered users
+  - Pending approval
+  - Ready to use
+- **Quick access** to all sections
+- **Manual data** refresh
+- **Current user** information
+
+### 2. Gestión de Usuarios / User Management
+
+#### Vista de Usuarios / Users View (`/users`)
+
+##### 🇪🇸 Español
 - Lista completa con paginación
 - **Filtros**:
   - Por rol (admin, discipulador, discípulo)
@@ -409,8 +674,22 @@ La aplicación estará disponible en [http://localhost:3000](http://localhost:30
   - Videos vistos
   - Progreso detallado por serie
 
-#### Agregar y Validar (`/user-management`)
+##### 🇺🇸 English
+- Complete list with pagination
+- **Filters**:
+  - By role (admin, discipler, disciple)
+  - By approval status
+  - By text search
+- **Progress modal**:
+  - Completed series
+  - Completed lessons
+  - Average quiz scores
+  - Videos watched
+  - Detailed progress by series
 
+#### Agregar y Validar / Add and Validate (`/user-management`)
+
+##### 🇪🇸 Español
 **Pestaña: Agregar Usuario**
 - Formulario completo de registro
 - Campos:
@@ -431,9 +710,30 @@ La aplicación estará disponible en [http://localhost:3000](http://localhost:30
 - Asignar series y bloques completados
 - Actualizar progreso manualmente
 
-### 3. Árbol de Discipulado (`/discipleship-tree`)
+##### 🇺🇸 English
+**Tab: Add User**
+- Complete registration form
+- Fields:
+  - Full name
+  - Email
+  - Phone
+  - Role
+  - Gender
+  - Assigned discipler
+  - Notes
+- Automatic invitation token generation
+- Unique registration link
 
-**Visualización**:
+**Tab: Validate Users**
+- List of pending users
+- Approve/Reject users
+- Validate completed lessons
+- Assign completed series and blocks
+- Manually update progress
+
+### 3. Árbol de Discipulado / Discipleship Tree (`/discipleship-tree`)
+
+#### 🇪🇸 Español
 - Estructura jerárquica completa
 - Nodos expandibles/colapsables
 - Indicadores visuales de progreso
@@ -448,8 +748,24 @@ La aplicación estará disponible en [http://localhost:3000](http://localhost:30
 - Navegación intuitiva
 - Estadísticas por usuario
 
-### 4. Reasignación (`/assignments/reassign`)
+#### 🇺🇸 English
+- Complete hierarchical structure
+- Expandable/collapsible nodes
+- Visual progress indicators
+- Colors by role:
+  - Admin: Purple
+  - Discipler: Blue
+  - Disciple: Green
 
+**Features**:
+- Expand/Collapse all
+- Zoom in/out
+- Intuitive navigation
+- Statistics per user
+
+### 4. Reasignación / Reassignment (`/assignments/reassign`)
+
+#### 🇪🇸 Español
 **Sistema Drag-and-Drop**:
 1. Selecciona un discípulo
 2. Arrástralo al nuevo discipulador
@@ -461,9 +777,21 @@ La aplicación estará disponible en [http://localhost:3000](http://localhost:30
 - Verifica que el destino sea un discipulador válido
 - Muestra confirmación antes de aplicar cambios
 
+#### 🇺🇸 English
+**Drag-and-Drop System**:
+1. Select a disciple
+2. Drag to the new discipler
+3. Confirm the change
+4. System updates the relationship in the database
+
+**Validations**:
+- Does not allow self-assignment
+- Verifies destination is a valid discipler
+- Shows confirmation before applying changes
+
 ### 5. Series (`/series`)
 
-**Gestión completa**:
+#### 🇪🇸 Español
 - Crear nuevas series
 - Editar series existentes
 - Activar/Desactivar series
@@ -479,8 +807,25 @@ Serie
        └── Lecciones
 ```
 
-### 6. Estudios Bíblicos (`/bible-studies`)
+#### 🇺🇸 English
+- Create new series
+- Edit existing series
+- Activate/Deactivate series
+- Organize by order
+- Multi-language support:
+  - Name in Spanish and English
+  - Description in both languages
 
+**Structure**:
+```
+Series
+  └── Blocks
+       └── Lessons
+```
+
+### 6. Estudios Bíblicos / Bible Studies (`/bible-studies`)
+
+#### 🇪🇸 Español
 **Editor completo** con:
 
 **Metadatos**:
@@ -520,9 +865,49 @@ Content in English...
 ::
 ```
 
-### 7. Guías Bíblicas (`/bible-guides`)
+#### 🇺🇸 English
+**Complete editor** with:
 
-**Gestión de PDFs**:
+**Metadata**:
+- Lesson title (ES/EN)
+- Lesson number
+- Study title (ES/EN)
+- Biblical reference (ES/EN)
+- Complete biblical text (ES/EN)
+
+**Dynamic sections**:
+- Introduction (required)
+- Custom sections (unlimited)
+- Conclusion (required)
+
+**Editor features**:
+- Real-time preview
+- Content validation
+- Auto-save
+- Full Markdown support
+- Textareas for user responses
+- Reflection questions
+
+**Section format**:
+```markdown
+## section1
+
+::es
+### Título en español
+Contenido en español...
+[textarea:section1]
+::
+
+::en
+### Title in English
+Content in English...
+[textarea:section1]
+::
+```
+
+### 7. Guías Bíblicas / Bible Guides (`/bible-guides`)
+
+#### 🇪🇸 Español
 - Subir archivos PDF
 - Metadatos completos:
   - Título
@@ -536,16 +921,37 @@ Content in English...
 - Descarga directa
 - Vista expandida con detalles completos
 
-### 8. Reportes (`/reports`)
+#### 🇺🇸 English
+- Upload PDF files
+- Complete metadata:
+  - Title
+  - Description
+  - Publication date
+  - Related biblical text
+  - Series (optional)
+  - Topics (comma-separated tags)
+  - Language (ES/EN)
+- Activate/Deactivate guides
+- Direct download
+- Expanded view with complete details
 
-**Generación de reportes**:
+### 8. Reportes / Reports (`/reports`)
+
+#### 🇪🇸 Español
 - Tablas dinámicas
 - Exportación de datos
 - Estadísticas del sistema
 - Filtros y búsqueda
 
-### 9. Configuración (`/settings`)
+#### 🇺🇸 English
+- Dynamic tables
+- Data export
+- System statistics
+- Filters and search
 
+### 9. Configuración / Settings (`/settings`)
+
+#### 🇪🇸 Español
 **Secciones configurables**:
 
 1. **General**
@@ -583,11 +989,51 @@ Content in English...
 
 **Nota**: La configuración se guarda en `localStorage` actualmente. Para cambios permanentes, se debe configurar en Supabase.
 
+#### 🇺🇸 English
+**Configurable sections**:
+
+1. **General**
+   - App name
+   - Timezone (USA/LATAM)
+   - Default language
+
+2. **Security**
+   - Two-factor authentication
+   - Session timeout
+   - Password policies
+   - Minimum length
+   - Special characters required
+
+3. **Session**
+   - Inactivity time (minutes)
+   - Maximum session time (hours)
+   - Warning time (minutes)
+
+4. **Database**
+   - Automatic backups
+   - Frequency (daily/weekly/monthly)
+   - Retention days
+
+5. **Notifications**
+   - Email (SendGrid)
+   - SMS (Twilio)
+   - WhatsApp (Twilio)
+   - Push notifications
+
+6. **Appearance**
+   - Primary color (picker)
+   - Dark mode
+   - Custom logo
+
+**Note**: Settings are currently saved in `localStorage`. For permanent changes, configure in Supabase.
+
 ---
 
-## 🔐 Autenticación y Seguridad
+## 🔐 Autenticación y Seguridad / Authentication and Security
 
-### Flujo de Autenticación
+### Flujo de Autenticación / Authentication Flow
+
+#### 🇪🇸 Español
 
 1. **Login** (`/login`)
    - Usuario ingresa email y contraseña
@@ -608,7 +1054,30 @@ Content in English...
      - Permisos de admin
    - Si falla → redirige a `/login` o `/403`
 
-### Medidas de Seguridad
+#### 🇺🇸 English
+
+1. **Login** (`/login`)
+   - User enters email and password
+   - Authentication with Supabase Auth
+   - Admin role verification via RPC `me_is_admin()`
+   - If not admin → logs out and shows error
+   - If admin → redirects to dashboard
+
+2. **Protection Middleware**
+   - Intercepts all routes
+   - Verifies active session
+   - Verifies admin permissions
+   - Redirects accordingly
+
+3. **Verification in Server Components**
+   - Each protected page verifies:
+     - Active session
+     - Admin permissions
+   - If fails → redirects to `/login` or `/403`
+
+### Medidas de Seguridad / Security Measures
+
+#### 🇪🇸 Español
 
 1. **Row Level Security (RLS)**
    - Todas las tablas en Supabase tienen políticas RLS
@@ -629,19 +1098,50 @@ Content in English...
    - Verifica el rol del usuario en la base de datos
    - No se puede falsificar desde el cliente
 
-### Variables de Entorno Seguras
+#### 🇺🇸 English
 
+1. **Row Level Security (RLS)**
+   - All tables in Supabase have RLS policies
+   - Users can only access their own data
+   - Admins have full access through specific policies
+
+2. **Environment Variables**
+   - All credentials are in environment variables
+   - `.env*` is in `.gitignore`
+   - No hardcoded credentials
+
+3. **Authentication Middleware**
+   - Automatically protects all routes
+   - Double verification: session + permissions
+
+4. **Admin Verification**
+   - RPC function `me_is_admin()` in Supabase
+   - Verifies user role in database
+   - Cannot be falsified from client
+
+### Variables de Entorno Seguras / Secure Environment Variables
+
+#### 🇪🇸 Español
 Las variables `NEXT_PUBLIC_*` son públicas por diseño, pero son seguras porque:
 - La `ANON_KEY` de Supabase está diseñada para ser pública
 - Las políticas RLS protegen los datos
 - Solo usuarios autenticados con permisos pueden acceder
 - El middleware verifica permisos adicionales
 
+#### 🇺🇸 English
+The `NEXT_PUBLIC_*` variables are public by design, but they are secure because:
+- Supabase's `ANON_KEY` is designed to be public
+- RLS policies protect the data
+- Only authenticated users with permissions can access
+- Middleware verifies additional permissions
+
 ---
 
 ## 🚢 Deployment
 
-### Vercel (Recomendado)
+### Vercel (Recomendado / Recommended)
+
+#### 🇪🇸 Español
 
 1. **Conectar repositorio**:
    - Ve a [Vercel](https://vercel.com)
@@ -658,7 +1158,26 @@ Las variables `NEXT_PUBLIC_*` son públicas por diseño, pero son seguras porque
    - Vercel desplegará automáticamente
    - Cada push a `main` desplegará una nueva versión
 
+#### 🇺🇸 English
+
+1. **Connect repository**:
+   - Go to [Vercel](https://vercel.com)
+   - Import GitHub repository
+   - Vercel will automatically detect Next.js
+
+2. **Configure environment variables**:
+   - In Vercel dashboard → Settings → Environment Variables
+   - Add:
+     - `NEXT_PUBLIC_SUPABASE_URL`
+     - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+3. **Deploy**:
+   - Vercel will automatically deploy
+   - Each push to `main` will deploy a new version
+
 ### Netlify
+
+#### 🇪🇸 Español
 
 1. **Conectar repositorio**:
    - Ve a [Netlify](https://netlify.com)
@@ -672,62 +1191,115 @@ Las variables `NEXT_PUBLIC_*` son públicas por diseño, pero son seguras porque
    - Site settings → Environment variables
    - Agrega las mismas variables que en Vercel
 
-### Variables de Entorno en Producción
+#### 🇺🇸 English
 
-Asegúrate de configurar:
+1. **Connect repository**:
+   - Go to [Netlify](https://netlify.com)
+   - Import repository
+
+2. **Configure build**:
+   - Build command: `npm run build`
+   - Publish directory: `.next`
+
+3. **Environment variables**:
+   - Site settings → Environment variables
+   - Add the same variables as Vercel
+
+### Variables de Entorno en Producción / Environment Variables in Production
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key_aqui
 ```
 
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
+```
+
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## 🛠️ Tecnologías Utilizadas / Technologies Used
 
 ### Frontend
+
+#### 🇪🇸 Español
 - **Next.js 15** - Framework de React con App Router
 - **React 18** - Biblioteca de UI
 - **Tailwind CSS** - Framework de estilos
 - **Lucide React** - Iconos modernos
 
+#### 🇺🇸 English
+- **Next.js 15** - React framework with App Router
+- **React 18** - UI library
+- **Tailwind CSS** - Styling framework
+- **Lucide React** - Modern icons
+
 ### Backend
+
+#### 🇪🇸 Español
 - **Supabase** - Backend como servicio (BaaS)
   - Autenticación
   - Base de datos PostgreSQL
   - Storage para archivos
   - Row Level Security (RLS)
 
-### Utilidades
+#### 🇺🇸 English
+- **Supabase** - Backend as a Service (BaaS)
+  - Authentication
+  - PostgreSQL database
+  - File storage
+  - Row Level Security (RLS)
+
+### Utilidades / Utilities
+
+#### 🇪🇸 Español
 - **@supabase/ssr** - Cliente Supabase para SSR
 - **@supabase/supabase-js** - SDK de Supabase
 - **gray-matter** - Parsing de frontmatter
 - **remark** - Procesamiento de Markdown
 - **html2pdf.js** - Generación de PDFs
 
-### Desarrollo
+#### 🇺🇸 English
+- **@supabase/ssr** - Supabase client for SSR
+- **@supabase/supabase-js** - Supabase SDK
+- **gray-matter** - Frontmatter parsing
+- **remark** - Markdown processing
+- **html2pdf.js** - PDF generation
+
+### Desarrollo / Development
+
+#### 🇪🇸 Español
 - **ESLint** - Linter de código
 - **PostCSS** - Procesamiento de CSS
 - **Autoprefixer** - Compatibilidad de CSS
 
+#### 🇺🇸 English
+- **ESLint** - Code linter
+- **PostCSS** - CSS processing
+- **Autoprefixer** - CSS compatibility
+
 ---
 
-## 📝 Scripts Disponibles
+## 📝 Scripts Disponibles / Available Scripts
 
 ```bash
-# Desarrollo
-npm run dev          # Inicia servidor de desarrollo en localhost:3000
+# Desarrollo / Development
+npm run dev          # Inicia servidor de desarrollo / Starts development server
 
-# Producción
-npm run build        # Construye la aplicación para producción
-npm run start        # Inicia servidor de producción
+# Producción / Production
+npm run build        # Construye la aplicación / Builds the application
+npm run start        # Inicia servidor de producción / Starts production server
 
-# Calidad de código
-npm run lint         # Ejecuta ESLint
+# Calidad de código / Code Quality
+npm run lint         # Ejecuta ESLint / Runs ESLint
 ```
 
 ---
 
 ## 🌍 Internacionalización (i18n)
+
+### 🇪🇸 Español
 
 La aplicación soporta **español** e **inglés** completamente.
 
@@ -755,11 +1327,41 @@ function MyComponent() {
 }
 ```
 
+### 🇺🇸 English
+
+The application fully supports **Spanish** and **English**.
+
+**Translation system**:
+- Centralized file: `app/i18n.js`
+- `useLang()` hook to access translations
+- Real-time language switching
+- Persistence in `localStorage`
+
+**Usage**:
+```javascript
+import { useLang } from "@/app/i18n";
+
+function MyComponent() {
+    const { t, lang, setLang } = useLang();
+    
+    return (
+        <div>
+            <h1>{t("dashboard")}</h1>
+            <button onClick={() => setLang(lang === 'es' ? 'en' : 'es')}>
+                Change language
+            </button>
+        </div>
+    );
+}
+```
+
 ---
 
-## 🔄 Flujo de Trabajo Típico
+## 🔄 Flujo de Trabajo Típico / Typical Workflow
 
-### Agregar un Nuevo Usuario
+### Agregar un Nuevo Usuario / Add a New User
+
+#### 🇪🇸 Español
 
 1. Ir a `/user-management`
 2. Pestaña "Agregar Usuario"
@@ -774,7 +1376,24 @@ function MyComponent() {
 8. Aprobar usuario
 9. Usuario puede acceder a la app
 
-### Crear un Estudio Bíblico
+#### 🇺🇸 English
+
+1. Go to `/user-management`
+2. "Add User" tab
+3. Complete form:
+   - Name, email, phone
+   - Select role
+   - Assign discipler
+4. Save → Invitation token is generated
+5. Send registration link to user
+6. User registers and is pending
+7. Go to "Validate Users" tab
+8. Approve user
+9. User can access the app
+
+### Crear un Estudio Bíblico / Create a Bible Study
+
+#### 🇪🇸 Español
 
 1. Ir a `/bible-studies`
 2. Click en "Nuevo Estudio" o editar existente
@@ -791,7 +1410,26 @@ function MyComponent() {
 7. Vista previa
 8. Guardar
 
-### Asignar Estudios a Usuarios
+#### 🇺🇸 English
+
+1. Go to `/bible-studies`
+2. Click "New Study" or edit existing
+3. Complete metadata:
+   - Lesson title (ES/EN)
+   - Biblical reference
+   - Biblical text
+4. Add sections:
+   - Introduction (automatic)
+   - Custom sections
+   - Conclusion (automatic)
+5. Write content in Markdown
+6. Add textareas for responses
+7. Preview
+8. Save
+
+### Asignar Estudios a Usuarios / Assign Studies to Users
+
+#### 🇪🇸 Español
 
 1. Ir a `/assignments`
 2. Seleccionar usuario
@@ -799,7 +1437,17 @@ function MyComponent() {
 4. Asignar
 5. Usuario verá el estudio en su app
 
-### Reasignar un Discípulo
+#### 🇺🇸 English
+
+1. Go to `/assignments`
+2. Select user
+3. Select series/block/lesson
+4. Assign
+5. User will see the study in their app
+
+### Reasignar un Discípulo / Reassign a Disciple
+
+#### 🇪🇸 Español
 
 1. Ir a `/assignments/reassign`
 2. Buscar discípulo actual
@@ -807,38 +1455,77 @@ function MyComponent() {
 4. Confirmar cambio
 5. Relación actualizada
 
+#### 🇺🇸 English
+
+1. Go to `/assignments/reassign`
+2. Find current disciple
+3. Drag to new discipler
+4. Confirm change
+5. Relationship updated
+
 ---
 
 ## 🐛 Troubleshooting
 
 ### Error: "Invalid login credentials"
+
+#### 🇪🇸 Español
 - Verifica que el email y contraseña sean correctos
 - Asegúrate de que el usuario existe en Supabase
 
+#### 🇺🇸 English
+- Verify email and password are correct
+- Ensure user exists in Supabase
+
 ### Error: "Not an admin"
+
+#### 🇪🇸 Español
 - El usuario debe tener rol `admin` en la tabla `users`
 - Verifica la función RPC `me_is_admin()` en Supabase
 
+#### 🇺🇸 English
+- User must have `admin` role in `users` table
+- Verify RPC function `me_is_admin()` in Supabase
+
 ### Error: "Failed to fetch"
+
+#### 🇪🇸 Español
 - Verifica las variables de entorno
 - Asegúrate de que `NEXT_PUBLIC_SUPABASE_URL` es correcta
 - Verifica la conexión a internet
 
-### Las políticas RLS bloquean el acceso
+#### 🇺🇸 English
+- Verify environment variables
+- Ensure `NEXT_PUBLIC_SUPABASE_URL` is correct
+- Check internet connection
+
+### Las políticas RLS bloquean el acceso / RLS policies block access
+
+#### 🇪🇸 Español
 - Verifica las políticas RLS en Supabase
 - Asegúrate de que hay políticas para usuarios admin
 - Revisa los logs de Supabase para más detalles
 
+#### 🇺🇸 English
+- Verify RLS policies in Supabase
+- Ensure there are policies for admin users
+- Check Supabase logs for more details
+
 ---
 
-## 📄 Licencia
+## 📄 Licencia / License
 
+#### 🇪🇸 Español
 Este proyecto es parte de la organización **DisciplicandoOrg**.
 
+#### 🇺🇸 English
+This project is part of the **DisciplicandoOrg** organization.
+
 ---
 
-## 🤝 Contribución
+## 🤝 Contribución / Contribution
 
+#### 🇪🇸 Español
 Este es un proyecto privado de la organización DisciplicandoOrg. Para contribuir:
 
 1. Contacta a los administradores del proyecto
@@ -847,18 +1534,34 @@ Este es un proyecto privado de la organización DisciplicandoOrg. Para contribui
 4. Realiza tus cambios
 5. Abre un Pull Request
 
+#### 🇺🇸 English
+This is a private project of the DisciplicandoOrg organization. To contribute:
+
+1. Contact project administrators
+2. Get repository access
+3. Create a branch for your feature
+4. Make your changes
+5. Open a Pull Request
+
 ---
 
-## 📞 Soporte
+## 📞 Soporte / Support
 
+#### 🇪🇸 Español
 Para soporte o preguntas:
 - Abre un issue en el repositorio
 - Contacta a los administradores del proyecto
 
+#### 🇺🇸 English
+For support or questions:
+- Open an issue in the repository
+- Contact project administrators
+
 ---
 
-## ✅ Checklist de Seguridad
+## ✅ Checklist de Seguridad / Security Checklist
 
+#### 🇪🇸 Español
 Antes de hacer el repositorio público, verifica:
 
 - ✅ Variables de entorno configuradas correctamente
@@ -870,6 +1573,19 @@ Antes de hacer el repositorio público, verifica:
 
 Ver más detalles en [SECURITY.md](./SECURITY.md)
 
+#### 🇺🇸 English
+Before making the repository public, verify:
+
+- ✅ Environment variables configured correctly
+- ✅ `.env*` is in `.gitignore`
+- ✅ No hardcoded credentials in code
+- ✅ RLS policies configured in Supabase
+- ✅ Middleware verifies admin permissions
+- ✅ All protected routes are correctly configured
+
+See more details in [SECURITY.md](./SECURITY.md)
+
 ---
 
-**Desarrollado con ❤️ para DisciplicandoOrg**
+**Desarrollado con ❤️ para DisciplicandoOrg**  
+**Developed with ❤️ for DisciplicandoOrg**
