@@ -3,10 +3,17 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+// Función helper para crear el cliente de Supabase dentro de las funciones del handler
+function createSupabaseClient() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error('Missing Supabase environment variables');
+    }
+
+    return createClient(supabaseUrl, supabaseAnonKey);
+}
 
 // Estudio Bíblico Lección 1 - La Autoridad Suprema de las Escrituras
 const estudio1 = `---
@@ -280,6 +287,8 @@ This should be our response:
 
 export async function POST(request) {
     try {
+        const supabase = createSupabaseClient();
+
         // Actualizar Lección 1
         const { error: error1 } = await supabase
             .from('lecciones')
